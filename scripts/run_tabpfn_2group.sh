@@ -1,7 +1,7 @@
 #!/bin/bash -l
-#SBATCH -J tabpfn_2grp_part1
-#SBATCH -o out_tabpfn_ablation_2group_part1.log
-#SBATCH -e out_tabpfn_ablation_2group_part1.err
+#SBATCH -J tabpfn_2grp
+#SBATCH -o out_tabpfn_ablation_2group.log
+#SBATCH -e out_tabpfn_ablation_2group.err
 #SBATCH -p gpu-H200
 #SBATCH --gres=gpu:1
 #SBATCH --mem=120000
@@ -29,4 +29,4 @@ unset __mamba_setup
 micromamba env list
 micromamba activate BeatAML2.0
 
-python3 tabpfn_ablation_2group_part1.py
+python3 tabpfn_ablation_2group.py

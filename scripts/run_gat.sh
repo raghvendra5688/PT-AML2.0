@@ -1,7 +1,7 @@
 #!/bin/bash -l
-#SBATCH -J gat_OnlyPC
-#SBATCH -o out_gat_OnlyPC.log
-#SBATCH -e out_gat_OnlyPC.err
+#SBATCH -J gat
+#SBATCH -o out_gat.log
+#SBATCH -e out_gat.err
 #SBATCH -p gpu-H200
 #SBATCH --gres=gpu:1
 #SBATCH --mem=140000
@@ -30,4 +30,4 @@ unset __mamba_setup
 micromamba env list
 micromamba activate BeatAML2.0
 
-python3 gat_model_optuna_OnlyPC.py
+python3 gat_model_optuna.py

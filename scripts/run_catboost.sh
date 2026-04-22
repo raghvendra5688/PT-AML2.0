@@ -1,7 +1,7 @@
 #!/bin/bash -l
-#SBATCH -J OnlyPC
-#SBATCH -o out_cb_OnlyPC.log
-#SBATCH -e out_cb_OnlyPC.err
+#SBATCH -J catboost
+#SBATCH -o out_catboost.log
+#SBATCH -e out_catboost.err
 #SBATCH -p gpu-H200
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
@@ -26,5 +26,5 @@ unset __mamba_setup
 micromamba env list
 micromamba activate BeatAML2.0
 
-python3 catboost_only_pc.py
+python3 catboost_model_refactored.py
 

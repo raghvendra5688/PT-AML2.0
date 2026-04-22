@@ -1,7 +1,7 @@
 #!/bin/bash -l
-#SBATCH -J gcn_OnlyPC
-#SBATCH -o out_gcn_OnlyPC.log
-#SBATCH -e out_gcn_OnlyPC.err
+#SBATCH -J gcn
+#SBATCH -o out_gcn.log
+#SBATCH -e out_gcn.err
 #SBATCH -p gpu-A100
 #SBATCH --gres=gpu:1
 #SBATCH -A A100
@@ -28,4 +28,4 @@ unset __mamba_setup
 micromamba env list
 micromamba activate BeatAML2.0
 
-python3 gcn_model_optuna_OnlyPC.py
+python3 gcn_model_optuna.py

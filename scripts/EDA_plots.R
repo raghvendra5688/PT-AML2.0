@@ -1,3 +1,4 @@
+setwd("/export/cse/rmall/Raghvendra/PT-AML2.0/")
 library(readr)
 library(data.table)
 library(dplyr)
@@ -10,13 +11,13 @@ library(fpc)
 library(data.table)
 library(ggplot2)
 library(gridExtra)
-data1 <- fread("Revised_Training_Set_with_Onco_Var_Expr_Clin_PA_CTS_Mut.csv",header=T)
+data1 <- fread("Data/Revised_Training_Set_with_Onco_Var_Expr_Clin_PA_CTS_Mut.csv.gz",header=T)
 #data2 <- fread("Revised_Training_Set_with_Expr_Clin_PA_CTS_P2.csv.gz",header=F)
 data1 <- as.data.frame(data1)
 data2 <- as.data.frame(data2)
 colnames(data2) <- colnames(data1)
 train_data <- data1
-data3 <- fread("Revised_Test_Set_with_Onco_Var_Expr_Clin_PA_CTS_Mut.csv",header = T)
+data3 <- fread("Data/Revised_Test_Set_with_Onco_Var_Expr_Clin_PA_CTS_Mut.csv.gz",header=T)
 data3 <- as.data.frame(data3)
 test_data <- data3
 train_data$set <- "train"
@@ -407,7 +408,7 @@ cat("Clinical EDA completed. Plots and p-values saved in", outdir, "\n")
 # -----------------------------
 # Load gene list
 # -----------------------------
-gene_file <- "genesexp_and_mutation.txt"
+gene_file <- "Data/genesexp_and_mutation.txt"
 gene_lines <- readLines(gene_file)
 
 # Split by space or tab and remove quotes

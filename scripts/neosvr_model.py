@@ -47,7 +47,7 @@ os.makedirs("logs", exist_ok=True)
 os.makedirs("../Results/neosvr/", exist_ok=True)
 os.makedirs("../Results/neosvr/optuna/", exist_ok=True)
 os.environ["OMP_NUM_THREADS"] = "60"
-os.environ["MKL_NUM_THREADS"] = "6q0"
+os.environ["MKL_NUM_THREADS"] = "60"
 
 from misc import save_model, load_model, regression_results, grid_search_cv, supervised_learning_steps, calculate_regression_metrics, get_CV_results
 #plt.rcParams["font.family"] = "Arial"
