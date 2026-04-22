@@ -1,0 +1,2 @@
+data_type,stratify_by,r2,pearson_r,spearman_r
+Embed_Feat_Var,dbgap_rnaseq_sample,0.356,0.597,0.622

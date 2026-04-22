@@ -1,0 +1,89 @@
+name: PT-AML2.0
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  # Core Python
+  - python=3.10
+  - pip
+
+  # Scientific computing
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - joblib
+  - threadpoolctl
+
+  # Visualisation
+  - matplotlib-base
+  - seaborn
+
+  # Deep learning (PyTorch + CUDA)
+  - pytorch-cuda=12.1
+  - pytorch-mutex
+  - torchtext
+
+  # Tree-based ML (conda)
+  - py-xgboost
+  - xgboost
+
+  # Graph utilities
+  - networkx
+
+  # Data formats
+  - pyreadr
+
+  # Misc system libs
+  - numpy-base
+  - mkl
+  - mkl-service
+  - openssl
+  - tqdm
+  - packaging
+
+  - pip:
+    # Tree-based ML (pip)
+    - catboost==1.2
+    - lightgbm==3.3.5
+
+    # Deep learning extras
+    - torch-geometric
+
+    # Cheminformatics
+    - rdkit==2023.3.2
+    - rdkit-pypi==2023.3.1b1
+    - pubchempy==1.0.4
+
+    # Drug / SMILES representations
+    - smilespe==0.0.3
+    - sentencepiece==0.1.99
+
+    # Transformers & embeddings
+    - transformers==4.30.2
+    - tokenizers==0.13.3
+    - safetensors==0.3.1
+    - huggingface-hub==0.16.2
+
+    # Hyperparameter optimisation
+    - optuna
+    - scikit-optimize==0.9.0
+
+    # TabPFN
+    - tabpfn
+
+    # Graph learning
+    - deepchem==2.6.0.dev20220112042427
+
+    # Utilities
+    - plotly==5.14.1
+    - pyaml==23.5.9
+    - pyyaml==6.0
+    - scipy==1.10.1
+    - gensim==4.3.1
+    - smart-open==6.3.0
+    - pyreadr==0.4.7
+    - fastprogress==1.0.3
+    - chemspipy
