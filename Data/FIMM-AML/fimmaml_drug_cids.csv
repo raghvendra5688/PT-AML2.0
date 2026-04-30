@@ -6,7 +6,7 @@ Id,FIMM_Name,BeatAML_Name,Match_Type,cid
 5,AT7519,AT7519,Exact Match,11338033
 6,Axitinib,Axitinib,Exact Match,2735853
 7,AZD1480,AZD1480,Exact Match,16659841
-8,AZD2811,AZD1152-HQPA,Alternate: AZD2811,16007391
+8,AZD1152-HQPA,AZD1152-HQPA,Alternate: AZD2811,16007391
 9,Birinapant,Birinapant,Exact Match,3068
 10,BMS-754807,BMS-754807,Exact Match,3071
 11,Bortezomib,Bortezomib,Exact Match,93860
@@ -50,7 +50,7 @@ Id,FIMM_Name,BeatAML_Name,Match_Type,cid
 49,Palbociclib,Palbociclib,Exact Match,3319
 50,Panobinostat,Panobinostat,Exact Match,3318
 51,Pazopanib,Pazopanib,Exact Match,10113978
-52,PD184352,CI-1040,Alternate: PD184352,6918454
+52,CI-1040,CI-1040,Alternate: PD184352,6918454
 53,Pelitinib,Pelitinib,Exact Match,216467
 54,PH-797804,PH-797804,Exact Match,22049997
 55,Quizartinib,Quizartinib,Exact Match,3295
@@ -65,7 +65,7 @@ Id,FIMM_Name,BeatAML_Name,Match_Type,cid
 64,Sorafenib,Sorafenib,Exact Match,7524
 65,Sunitinib,Sunitinib,Exact Match,3086686
 66,Tandutinib,Tandutinib,Exact Match,3231
-67,Tanespimycin,17-AAG,Alternate: Tanespimycin,151069
+67,17-AAG,17-AAG,Alternate: Tanespimycin,151069
 68,TG100-115,TG100-115,Exact Match,10427712
 69,Tivozanib,Tivozanib,Exact Match,9911830
 70,Tofacitinib,Tofacitinib,Exact Match,3211
