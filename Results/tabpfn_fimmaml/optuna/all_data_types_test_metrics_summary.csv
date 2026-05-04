@@ -1,0 +1,5 @@
+data_type,r2,pearson_r,spearman_r
+Embed_Feat_Var,0.311,-0.557,-0.398
+MolFormer_Feat_Var,0.291,-0.539,-0.382
+ChemBERTa_Feat_Var,0.167,-0.409,-0.316
+PC_Feat_Var,0.32,-0.559,-0.395
