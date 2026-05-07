@@ -163,7 +163,15 @@ def hyperparameter_optimization(X_train,Y_train,data_type,stratify_by,scaler,dev
     study.trials_dataframe().to_csv(f"logs/optuna_trials_tabpfn_{data_type}_{stratify_by}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", index=False)
 
     #Save the model
-    best_model = TabPFNRegressor(**study.best_params)
+    # study.best_params only carries n_estimators + softmax_temperature;
+    # device, random_state, and ignore_pretraining_limits must be added
+    # explicitly so the final fit matches the conditions used during CV.
+    best_model = TabPFNRegressor(
+        **study.best_params,
+        device=device,
+        random_state=42,
+        ignore_pretraining_limits=True,
+    )
     best_model.fit(X_train, Y_train)
 
     # Save the best model
