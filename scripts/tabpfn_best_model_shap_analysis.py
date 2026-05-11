@@ -2,21 +2,29 @@
 tabpfn_best_model_shap_analysis.py
 
 Ablation model: baseline_all_features_Drug_Embed (1561 features).
-Feature selection and scaler loading aligned with tabpfn_ablation_study.py.
+Uses shapiq.TabPFNExplainer (remove-and-contextualize) with n_estimators=1
+dedicated SHAP model for ~20× speedup vs the prediction model.
 
 Steps:
   1. Load best TabPFN ablation model + saved scaler
   2. Load BeatAML train/test pickles; build feature subset via ablation logic
   3. Mean predictions + 95 % CI (quantiles) on train and test sets
-  4. Population-level SHAP variable importance (KernelExplainer)
-  4b. Per-sample SHAP explanation (waterfall + force plot) for 3 notable samples
+  4. SHAP variable importance — test set only (TabPFNExplainer, n_estimators=1)
+  4b. Per-sample SHAP waterfall for notable samples (sensitive/resistant)
   5. Attention-proxy importance via TabPFN transformer embeddings
+     (patient features only in plots; LS_* drug features excluded)
   6. Combined importance summary (SHAP + embedding)
+
+Intermediate saves
+  - Full cache (test SHAP only) → SHAP_CACHE_PATH
+  Script resumes from checkpoint if cache file is present.
 """
 
 import os
 import sys
+import pickle
 import warnings
+from datetime import datetime
 warnings.filterwarnings("ignore")
 
 import numpy as np
@@ -26,7 +34,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import scipy
 import torch
-import shap
+import shapiq
+from shapiq import TabPFNExplainer
 
 from sklearn import preprocessing, metrics
 
@@ -53,28 +62,27 @@ TRAIN_PATH   = "../Data/Training_Set_Var_with_Drug_Embedding_Patient_Info.pkl"
 TEST_PATH    = "../Data/Test_Set_Var_with_Drug_Embedding_Patient_Info.pkl"
 ABLATION_CSV    = "../Data/ablation_feature_columns.csv"
 OUT_DIR         = "../Results/tabpfn/best_model_analysis"
-# ~120 MB (two 5000×1561 float64 arrays + DenseData background) — stored with big models.
+
+# Cache for test SHAP arrays — script resumes from here if present
 SHAP_CACHE_PATH = (
     "/export/cse/rmall/Raghvendra/tabpfn_big_models/ablation/"
     "tabpfn_baseline_all_features_Drug_Embed_shap_cache.pk"
 )
 
-# Pool of rows drawn before k-means summarisation; keep large for centroid quality.
-SHAP_BG_POOL    = 500
-# Number of k-means centroids used as KernelExplainer background.
-# coalition matrix per sample = SHAP_NSAMPLES × SHAP_BG_K = 512 × 50 = 25 600 rows
-# (vs. 512 × 1000 = 512 000 with raw background → OOM on H200 140 GiB).
-SHAP_BG_K       = 50
-SHAP_TEST_SAMPLES = 5000
-# 512 coalitions gives a good SHAP approximation at a fraction of the default cost
-SHAP_NSAMPLES = 512
-# Max rows per single TabPFN predict call inside KernelExplainer.
-# TabPFN attention is O(n_test × n_train); batching keeps each forward pass
-# well below GPU memory even when SHAP assembles large coalition matrices.
-SHAP_PREDICT_BATCH = 4096
+# ── SHAP hyper-parameters ────────────────────────────────────────────────────
+# Training rows given to TabPFNExplainer as context (80 % context, 20 % baseline).
+# Smaller context → faster coalition evaluations; n_train=33k makes the full set
+# unusable inside SHAP (every predict call would attend over 33k rows).
+SHAP_CONTEXT_SIZE = 100
+# KernelSHAP coalition budget per sample.
+# Log showed ~1300-2300s/sample at budget=128, n_estimators=20.
+# With n_estimators=1 shap_model and budget=64: ~57s/sample est.
+SHAP_BUDGET       = 64
+# Test samples to explain. Train SHAP is skipped: with 33k rows most train
+# coalitions produce constant features and fail with zero SHAP values.
+SHAP_TEST_SAMPLES = 150
 
 CI_LOW, CI_HIGH = 0.025, 0.975
-
 TOP_N = 30
 SEED  = 42
 
@@ -88,6 +96,18 @@ EXCLUDE_COLS = [
 ]
 
 
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+def _ts() -> str:
+    """Return HH:MM:SS timestamp string."""
+    return datetime.now().strftime("%H:%M:%S")
+
+
+def _log(msg: str) -> None:
+    """Print with timestamp and immediately flush to log."""
+    print(f"[{_ts()}] {msg}", flush=True)
+
+
 def ensure_dirs() -> None:
     os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -95,7 +115,7 @@ def ensure_dirs() -> None:
 def save_csv(df: pd.DataFrame, name: str) -> str:
     path = os.path.join(OUT_DIR, name)
     df.to_csv(path, index=False)
-    print(f"  [saved CSV]  {path}")
+    _log(f"  [saved CSV]  {path}")
     return path
 
 
@@ -103,9 +123,11 @@ def save_plot(fig: plt.Figure, name: str) -> str:
     path = os.path.join(OUT_DIR, name)
     fig.savefig(path, bbox_inches="tight", dpi=300)
     plt.close(fig)
-    print(f"  [saved plot] {path}")
+    _log(f"  [saved plot] {path}")
     return path
 
+
+# ── Feature selection ─────────────────────────────────────────────────────────
 
 def get_feature_subset(train_df: pd.DataFrame):
     """Replicate the exact feature selection from tabpfn_ablation_study.py."""
@@ -127,7 +149,6 @@ def get_feature_subset(train_df: pd.DataFrame):
     nan_cols = [c for c in all_columns if train_df[c].isnull().any()]
     metadata_cols = list(dict.fromkeys(metadata_cols + nan_cols + EXCLUDE_COLS + tsne_in_data))
 
-    # sorted(set(...)) matches ablation_study.py line 128 exactly
     all_feature_cols = sorted(list(set(all_columns) - set(metadata_cols) - {"auc"}))
 
     drug_embedding_cols = [c for c in feature_groups_raw.get("Drug_Embed", [])
@@ -154,80 +175,130 @@ def get_feature_subset(train_df: pd.DataFrame):
     return list(drug_embedding_cols) + all_patient_cols
 
 
+# ── Step 1: Load model ────────────────────────────────────────────────────────
+
 def load_best_model():
-    print("\n── Step 1: Loading best TabPFN ablation model ───────────────────")
-    print(f"  Model  : {MODEL_PATH}")
-    print(f"  Scaler : {SCALER_PATH}")
+    _log("\n── Step 1: Loading best TabPFN ablation model ───────────────────")
+    _log(f"  Model  : {MODEL_PATH}")
+    _log(f"  Scaler : {SCALER_PATH}")
     model  = load_model(MODEL_PATH)
     scaler = load_model(SCALER_PATH)
-    print(f"  Model type            : {type(model).__name__}")
-    print(f"  n_estimators          : {model.n_estimators}")
-    print(f"  n_features_in_        : {model.n_features_in_}")
-    print(f"  ignore_pretraining_limits: {model.ignore_pretraining_limits}")
-    print(f"  y_train_mean_         : {model.y_train_mean_:.4f}")
-    print(f"  y_train_std_          : {model.y_train_std_:.4f}")
+    _log(f"  Model type            : {type(model).__name__}")
+    _log(f"  n_estimators          : {model.n_estimators}")
+    _log(f"  n_features_in_        : {model.n_features_in_}")
+    _log(f"  ignore_pretraining_limits: {model.ignore_pretraining_limits}")
+    _log(f"  y_train_mean_         : {model.y_train_mean_:.4f}")
+    _log(f"  y_train_std_          : {model.y_train_std_:.4f}")
+    _log("  [DONE] Step 1 complete.")
     return model, scaler
 
 
+# ── Step 2: Load data ─────────────────────────────────────────────────────────
+
 def load_data(scaler):
-    print("\n── Step 2: Loading and preprocessing data ───────────────────────")
-    print(f"  Training set : {TRAIN_PATH}")
-    print(f"  Test set     : {TEST_PATH}")
+    _log("\n── Step 2: Loading and preprocessing data ───────────────────────")
+    _log(f"  Training set : {TRAIN_PATH}")
+    _log(f"  Test set     : {TEST_PATH}")
 
     train_df = pd.read_pickle(TRAIN_PATH, compression="zip")
     test_df  = pd.read_pickle(TEST_PATH,  compression="zip")
-    print(f"  Train raw shape : {train_df.shape}")
-    print(f"  Test  raw shape : {test_df.shape}")
+    _log(f"  Train raw shape : {train_df.shape}")
+    _log(f"  Test  raw shape : {test_df.shape}")
 
     feature_subset = get_feature_subset(train_df)
-    print(f"  Feature subset  : {len(feature_subset)}")
+    _log(f"  Feature subset  : {len(feature_subset)}")
 
     meta_cols = [c for c in train_df.columns if c not in feature_subset and c != "auc"]
     meta_train = train_df[meta_cols].copy()
     meta_test  = test_df[[c for c in meta_cols if c in test_df.columns]].copy()
 
-    # Use the saved scaler (fit during ablation training) — do not refit
     X_train = pd.DataFrame(scaler.transform(train_df[feature_subset]), columns=feature_subset)
     X_test  = pd.DataFrame(scaler.transform(test_df[feature_subset]),  columns=feature_subset)
     y_train = train_df["auc"].to_numpy().flatten()
     y_test  = test_df["auc"].to_numpy().flatten()
 
-    print(f"  Train feature matrix : {X_train.shape}")
-    print(f"  Test  feature matrix : {X_test.shape}")
-    print(f"  Train label range    : [{y_train.min():.1f}, {y_train.max():.1f}]"
-          f"  mean={y_train.mean():.2f}")
-    print(f"  Test  label range    : [{y_test.min():.1f}, {y_test.max():.1f}]"
-          f"  mean={y_test.mean():.2f}")
+    _log(f"  Train feature matrix : {X_train.shape}")
+    _log(f"  Test  feature matrix : {X_test.shape}")
+    _log(f"  Train label range    : [{y_train.min():.1f}, {y_train.max():.1f}]"
+         f"  mean={y_train.mean():.2f}")
+    _log(f"  Test  label range    : [{y_test.min():.1f}, {y_test.max():.1f}]"
+         f"  mean={y_test.mean():.2f}")
 
+    feat_subset_df = pd.DataFrame({"feature": feature_subset})
+    feat_subset_path = os.path.join(OUT_DIR, "feature_subset.csv")
+    feat_subset_df.to_csv(feat_subset_path, index=False)
+    _log(f"  Feature subset saved → {feat_subset_path}")
+
+    _log("  [DONE] Step 2 complete.")
     return X_train, y_train, X_test, y_test, meta_train, meta_test, feature_subset
 
 
-def predict_with_confidence(model, X_train, y_train, X_test, y_test, meta_test):
-    print("\n── Step 3: Predictions + 95 % confidence intervals ──────────────")
+# ── Sanity check ──────────────────────────────────────────────────────────────
 
-    print(f"  [3a] Predicting on training set ({len(X_train)} samples) …")
+REF_CSV = "../Results/tabpfn/ablation/baseline_all_features_Drug_Embed_predictions.csv"
+
+def sanity_check_predictions(model, X_test: pd.DataFrame, y_test: np.ndarray, n: int = 10) -> None:
+    _log("\n── Sanity check: compare first-N predictions to reference ────────")
+
+    if not os.path.exists(REF_CSV):
+        _log(f"  [SKIP] Reference file not found: {REF_CSV}")
+        return
+
+    ref = pd.read_csv(REF_CSV, sep="\t")
+    ref_preds  = ref["predictions"].values[:n]
+    ref_labels = ref["labels"].values[:n]
+
+    label_diffs = np.abs(y_test[:n] - ref_labels)
+    if label_diffs.max() > 1e-3:
+        _log(f"  [ERROR] True-label mismatch (max diff={label_diffs.max():.4f}) — row ordering drifted.")
+        return
+    _log(f"  Row-order check PASSED (max label diff = {label_diffs.max():.2e})")
+
+    _log(f"  Predicting first {n} test samples (mean) for comparison …")
+    y_pred_n = model.predict(X_test.iloc[:n])
+
+    _log(f"\n  {'idx':>4}  {'true_AUC':>9}  {'ref_pred':>9}  {'new_pred':>9}  {'diff':>8}")
+    _log("  " + "-" * 50)
+    diffs = []
+    for i in range(n):
+        diff = y_pred_n[i] - ref_preds[i]
+        diffs.append(abs(diff))
+        flag = "  ✓" if abs(diff) < 1.0 else "  ✗ MISMATCH"
+        _log(f"  {i:4d}  {y_test[i]:9.2f}  {ref_preds[i]:9.4f}  {y_pred_n[i]:9.4f}  {diff:+8.4f}{flag}")
+
+    max_diff = max(diffs)
+    if max_diff < 1.0:
+        _log(f"\n  PASS – max |diff| = {max_diff:.5f} AUC  (all within 1.0 tolerance)")
+    else:
+        _log(f"\n  WARNING – max |diff| = {max_diff:.4f} AUC  (check preprocessing)")
+
+
+# ── Step 3: Predictions + CI ──────────────────────────────────────────────────
+
+def predict_with_confidence(model, X_train, y_train, X_test, y_test, meta_test):
+    _log("\n── Step 3: Predictions + 95 % confidence intervals ──────────────")
+
+    _log(f"  [3a] Predicting on training set ({len(X_train)} samples) …")
     y_train_pred  = model.predict(X_train)
     train_metrics = calculate_regression_metrics(y_train, y_train_pred)
-    print(f"  Train | MAE={train_metrics[0]}  RMSE={train_metrics[1]}"
-          f"  R²={train_metrics[2]}  Pearson r={train_metrics[3]}")
+    _log(f"  Train | MAE={train_metrics[0]}  RMSE={train_metrics[1]}"
+         f"  R²={train_metrics[2]}  Pearson r={train_metrics[3]}")
 
-    print(f"  [3b] Predicting on test set ({len(X_test)} samples) – mean …")
+    _log(f"  [3b] Predicting on test set ({len(X_test)} samples) – mean …")
     y_test_pred  = model.predict(X_test)
     test_metrics = calculate_regression_metrics(y_test, y_test_pred)
-    print(f"  Test  | MAE={test_metrics[0]}  RMSE={test_metrics[1]}"
-          f"  R²={test_metrics[2]}  Pearson r={test_metrics[3]}")
+    _log(f"  Test  | MAE={test_metrics[0]}  RMSE={test_metrics[1]}"
+         f"  R²={test_metrics[2]}  Pearson r={test_metrics[3]}")
 
-    # Quantiles are fetched in a separate call; the point prediction is always
-    # the mean, never the median (AUC is right-skewed so median ≈ +20-40 units).
-    print(f"  [3c] Computing 95 % CI on test set (quantiles {CI_LOW}/{CI_HIGH}) …")
+    _log(f"  [3c] Computing 95 % CI on test set (quantiles {CI_LOW}/{CI_HIGH}) …")
     ci_preds  = model.predict(X_test, output_type="quantiles", quantiles=[CI_LOW, CI_HIGH])
     y_ci_low  = ci_preds[0]
     y_ci_high = ci_preds[1]
     ci_width  = y_ci_high - y_ci_low
 
-    print(f"  CI width | median={np.median(ci_width):.2f}  "
-          f"mean={np.mean(ci_width):.2f}  "
-          f"range=[{ci_width.min():.2f}, {ci_width.max():.2f}]")
+    _log(f"  CI width | median={np.median(ci_width):.2f}  "
+         f"mean={np.mean(ci_width):.2f}  "
+         f"range=[{ci_width.min():.2f}, {ci_width.max():.2f}]")
 
     pred_df = meta_test.copy().reset_index(drop=True)
     pred_df["label"]     = y_test
@@ -240,7 +311,7 @@ def predict_with_confidence(model, X_train, y_train, X_test, y_test, meta_test):
     ci_out  = pred_df[[c for c in ci_cols if c in pred_df.columns]]
     save_csv(ci_out, "test_predictions_with_CI.csv")
 
-    print("  [3e] Saving prediction scatter plots …")
+    _log("  [3e] Saving prediction scatter plots …")
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     plt.style.use("classic")
 
@@ -281,158 +352,142 @@ def predict_with_confidence(model, X_train, y_train, X_test, y_test, meta_test):
     fig2.tight_layout()
     save_plot(fig2, "CI_width_distribution.pdf")
 
+    _log("  [DONE] Step 3 complete.")
     return y_train_pred, y_test_pred, y_ci_low, y_ci_high
 
 
-REF_CSV = "../Results/tabpfn/ablation/baseline_all_features_Drug_Embed_predictions.csv"
+# ── SHAP helpers ──────────────────────────────────────────────────────────────
 
-def sanity_check_predictions(model, X_test: pd.DataFrame, y_test: np.ndarray, n: int = 10) -> None:
-    print("\n── Sanity check: compare first-N predictions to reference ────────")
-
-    if not os.path.exists(REF_CSV):
-        print(f"  [SKIP] Reference file not found: {REF_CSV}")
-        return
-
-    ref = pd.read_csv(REF_CSV, sep="\t")
-    ref_preds  = ref["predictions"].values[:n]
-    ref_labels = ref["labels"].values[:n]
-
-    label_diffs = np.abs(y_test[:n] - ref_labels)
-    if label_diffs.max() > 1e-3:
-        print(f"  [ERROR] True-label mismatch (max diff={label_diffs.max():.4f}) — row ordering drifted.")
-        return
-    print(f"  Row-order check PASSED (max label diff = {label_diffs.max():.2e})")
-
-    print(f"  Predicting first {n} test samples (mean) for comparison …")
-    y_pred_n = model.predict(X_test.iloc[:n])
-
-    print(f"\n  {'idx':>4}  {'true_AUC':>9}  {'ref_pred':>9}  {'new_pred':>9}  {'diff':>8}")
-    print("  " + "-" * 50)
-    diffs = []
-    for i in range(n):
-        diff = y_pred_n[i] - ref_preds[i]
-        diffs.append(abs(diff))
-        flag = "  ✓" if abs(diff) < 1.0 else "  ✗ MISMATCH"
-        print(f"  {i:4d}  {y_test[i]:9.2f}  {ref_preds[i]:9.4f}  {y_pred_n[i]:9.4f}  {diff:+8.4f}{flag}")
-
-    max_diff = max(diffs)
-    if max_diff < 1.0:
-        print(f"\n  PASS – max |diff| = {max_diff:.5f} AUC  (all within 1.0 tolerance)")
-    else:
-        print(f"\n  WARNING – max |diff| = {max_diff:.4f} AUC  (check preprocessing)")
+def _iv_to_shap_array(iv, n_features: int) -> np.ndarray:
+    """Extract first-order Shapley values as 1-D numpy array from InteractionValues."""
+    return np.array([iv[(i,)] for i in range(n_features)])
 
 
-def _predict_fn(X_array: np.ndarray, model: TabPFNRegressor) -> np.ndarray:
-    # KernelExplainer passes large coalition matrices in one shot; TabPFN's
-    # cross-attention is O(n_test × n_train) so a single 512k-row call OOMs.
-    # Batching keeps each forward pass within GPU memory budget.
-    chunks = [
-        model.predict(pd.DataFrame(
-            X_array[i:i + SHAP_PREDICT_BATCH],
-            columns=model._shap_feature_names_,
-        ))
-        for i in range(0, len(X_array), SHAP_PREDICT_BATCH)
-    ]
-    return np.concatenate(chunks)
+def _build_tabpfn_explainer(shap_model, X_ctx: np.ndarray, y_ctx: np.ndarray) -> TabPFNExplainer:
+    """Build a TabPFNExplainer using SHAP_CONTEXT_SIZE rows as context.
+
+    Uses a dedicated n_estimators=1 model so each coalition evaluation runs
+    a single forward pass instead of 20, giving ~20× speedup vs the prediction
+    model (n_estimators=20).  TabPFNExplainer splits data 80/20: ~80 rows for
+    remove-and-contextualize and ~20 for the empty-coalition baseline.
+    """
+    return TabPFNExplainer(
+        model=shap_model,
+        data=X_ctx,
+        labels=y_ctx,
+        index="SV",
+        max_order=1,
+        approximator="auto",
+    )
 
 
-def _save_shap_cache(X_bg, expected_value, shap_train, shap_test, train_idx, test_idx) -> None:
-    import pickle
+def _save_shap_cache(X_ctx, y_ctx, expected_value, shap_test, test_idx) -> None:
     cache = {
-        "X_bg":          X_bg,
+        "X_ctx":          X_ctx,
+        "y_ctx":          y_ctx,
         "expected_value": expected_value,
-        "shap_train":    shap_train,
-        "shap_test":     shap_test,
-        "train_idx":     train_idx,
-        "test_idx":      test_idx,
+        "shap_test":      shap_test,
+        "test_idx":       test_idx,
     }
     with open(SHAP_CACHE_PATH, "wb") as f:
         pickle.dump(cache, f)
-    print(f"  [cache] Saved SHAP cache ({os.path.getsize(SHAP_CACHE_PATH)/1024**2:.1f} MB) → {SHAP_CACHE_PATH}")
+    _log(f"  [cache] Saved SHAP cache ({os.path.getsize(SHAP_CACHE_PATH)/1024**2:.1f} MB)"
+         f" → {SHAP_CACHE_PATH}")
 
 
-def _load_shap_cache(model):
-    import pickle
-    print(f"  [cache] Loading SHAP cache from {SHAP_CACHE_PATH} …")
-    with open(SHAP_CACHE_PATH, "rb") as f:
-        cache = pickle.load(f)
-    X_bg          = cache["X_bg"]
-    expected_value = cache["expected_value"]
-    shap_train    = cache["shap_train"]
-    shap_test     = cache["shap_test"]
-    train_idx     = cache["train_idx"]
-    test_idx      = cache["test_idx"]
-    # Rebuild explainer from saved background (calls model.predict on 50 rows — fast).
-    explainer = shap.KernelExplainer(lambda x: _predict_fn(x, model), X_bg, link="identity")
-    # Override with the cached base value so results are identical to the original run.
-    explainer.expected_value = expected_value
-    print(f"  [cache] Loaded  shap_train={shap_train.shape}  shap_test={shap_test.shape}"
-          f"  base={expected_value:.4f}")
-    return explainer, shap_train, shap_test, train_idx, test_idx
+def _explain_loop(explainer: TabPFNExplainer, X_sub: np.ndarray, label: str) -> np.ndarray:
+    """Run TabPFNExplainer on X_sub row-by-row with tqdm progress bar.
+
+    Returns shap_matrix of shape (n_samples, n_features).
+    """
+    from tqdm import tqdm
+    n_samples, n_features = X_sub.shape
+    shap_matrix = np.zeros((n_samples, n_features), dtype=np.float32)
+
+    for i, x_i in enumerate(tqdm(X_sub, desc=f"SHAP [{label}]", unit="sample")):
+        try:
+            iv = explainer.explain(x_i, budget=SHAP_BUDGET)
+            shap_matrix[i] = _iv_to_shap_array(iv, n_features)
+        except Exception as exc:
+            _log(f"  [WARN] {label} sample {i}: explain failed ({exc}); row set to zero.")
+
+    return shap_matrix
 
 
-def compute_shap(model, X_train: pd.DataFrame, X_test: pd.DataFrame):
-    print("\n── Step 4: SHAP variable importance ─────────────────────────────")
+# ── Step 4: SHAP ─────────────────────────────────────────────────────────────
+
+def compute_shap(model, X_train: pd.DataFrame, y_train: np.ndarray,
+                 X_test: pd.DataFrame):
+    _log("\n── Step 4: SHAP variable importance (TabPFNExplainer) ───────────")
+    _log(f"  Explainer  : TabPFNExplainer (remove-and-contextualize, n_estimators=1)")
+    _log(f"  Context    : {SHAP_CONTEXT_SIZE} rows → ~{int(0.8*SHAP_CONTEXT_SIZE)} training"
+         f" + ~{int(0.2*SHAP_CONTEXT_SIZE)} baseline")
+    _log(f"  Budget     : {SHAP_BUDGET} coalitions/sample  |  Samples: {SHAP_TEST_SAMPLES} test only")
 
     feat_names = X_train.columns.tolist()
-    model._shap_feature_names_ = feat_names
+    n_features = len(feat_names)
 
+    # Dedicated 1-estimator model for SHAP: ~20× faster per coalition than the
+    # prediction model (n_estimators=20).  TabPFNExplainer re-fits it per coalition
+    # so the original fitted weights are irrelevant here.
+    shap_model = TabPFNRegressor(n_estimators=1,
+                                  ignore_pretraining_limits=True)
+
+    # ── Resume from cache ─────────────────────────────────────────────────────
     if os.path.exists(SHAP_CACHE_PATH):
-        print(f"  [cache] Cache found — skipping k-means, KernelExplainer build, and shap_values().")
-        explainer, shap_train, shap_test, train_idx, test_idx = _load_shap_cache(model)
-        X_train_sub = X_train.iloc[train_idx].values
-        X_test_sub  = X_test.iloc[test_idx].values
-    else:
-        np.random.seed(SEED)
-        bg_idx   = np.random.choice(len(X_train), min(SHAP_BG_POOL, len(X_train)), replace=False)
-        X_bg_raw = X_train.iloc[bg_idx].values
-        print(f"  [4a] Summarising {len(X_bg_raw)} background samples → {SHAP_BG_K} k-means centroids …")
-        X_bg = shap.kmeans(X_bg_raw, SHAP_BG_K)
-        print(f"  [4a] Background: {X_bg.data.shape[0]} centroids × {X_bg.data.shape[1]} features  "
-              f"(coalition matrix per sample = {SHAP_NSAMPLES} × {SHAP_BG_K} = "
-              f"{SHAP_NSAMPLES * SHAP_BG_K:,} rows)")
+        _log(f"  [cache] Cache found — skipping SHAP computation.")
+        with open(SHAP_CACHE_PATH, "rb") as f:
+            cache = pickle.load(f)
+        X_ctx          = cache["X_ctx"]
+        y_ctx          = cache["y_ctx"]
+        expected_value = cache["expected_value"]
+        shap_test      = cache["shap_test"]
+        test_idx       = cache["test_idx"]
+        explainer = _build_tabpfn_explainer(shap_model, X_ctx, y_ctx)
+        _log(f"  [cache] shap_test={shap_test.shape}  base={expected_value:.4f}")
+        _log("  [DONE] Step 4 (from cache).")
+        return shap_test, feat_names, None, explainer
 
-        print(f"  [4b] Building KernelExplainer …")
-        explainer = shap.KernelExplainer(lambda x: _predict_fn(x, model), X_bg, link="identity")
-        print(f"  [4b] KernelExplainer expected value (base): {explainer.expected_value:.4f}")
+    # ── Compute from scratch ──────────────────────────────────────────────────
+    np.random.seed(SEED)
+    ctx_idx = np.random.choice(len(X_train), min(SHAP_CONTEXT_SIZE, len(X_train)), replace=False)
+    X_ctx   = X_train.iloc[ctx_idx].values
+    y_ctx   = y_train[ctx_idx]
+    _log(f"  [4a] Context data: {X_ctx.shape[0]} rows × {X_ctx.shape[1]} features")
 
-        train_idx   = np.random.choice(len(X_train), min(SHAP_TEST_SAMPLES, len(X_train)), replace=False)
-        X_train_sub = X_train.iloc[train_idx].values
-        print(f"  [4c] Computing SHAP on {len(X_train_sub)} training samples"
-              f"  (nsamples={SHAP_NSAMPLES}) …")
-        shap_train = explainer.shap_values(X_train_sub, nsamples=SHAP_NSAMPLES, silent=True)
+    _log(f"  [4b] Building TabPFNExplainer …")
+    explainer = _build_tabpfn_explainer(shap_model, X_ctx, y_ctx)
+    expected_value = float(explainer.baseline_value)
+    _log(f"  [4b] Baseline (empty coalition) prediction: {expected_value:.4f}")
 
-        test_idx   = np.random.choice(len(X_test), min(SHAP_TEST_SAMPLES, len(X_test)), replace=False)
-        X_test_sub = X_test.iloc[test_idx].values
-        print(f"  [4d] Computing SHAP on {len(X_test_sub)} test samples"
-              f"  (nsamples={SHAP_NSAMPLES}) …")
-        shap_test = explainer.shap_values(X_test_sub, nsamples=SHAP_NSAMPLES, silent=True)
+    np.random.seed(SEED + 1)
+    test_idx   = np.random.choice(len(X_test), min(SHAP_TEST_SAMPLES, len(X_test)), replace=False)
+    X_test_sub = X_test.iloc[test_idx].values
+    _log(f"  [4c] Computing SHAP on {len(X_test_sub)} test samples (budget={SHAP_BUDGET}) …")
+    shap_test = _explain_loop(explainer, X_test_sub, "test")
+    _save_shap_cache(X_ctx, y_ctx, expected_value, shap_test, test_idx)
 
-        _save_shap_cache(X_bg, explainer.expected_value, shap_train, shap_test, train_idx, test_idx)
+    # ── Save CSVs and plots ───────────────────────────────────────────────────
+    save_csv(pd.DataFrame(shap_test.astype(np.float32), columns=feat_names),
+             "shap_values_test_subset.csv")
 
-    save_csv(pd.DataFrame(shap_train, columns=feat_names), "shap_values_train_subset.csv")
-    save_csv(pd.DataFrame(shap_test,  columns=feat_names), "shap_values_test_subset.csv")
-
-    shap_imp_train = np.abs(shap_train).mean(axis=0)
-    shap_imp_test  = np.abs(shap_test).mean(axis=0)
+    shap_imp_test = np.abs(shap_test).mean(axis=0)
 
     imp_df = pd.DataFrame({
-        "feature":             feat_names,
-        "shap_mean_abs_train": shap_imp_train,
-        "shap_mean_abs_test":  shap_imp_test,
+        "feature":            feat_names,
+        "shap_mean_abs_test": shap_imp_test,
     }).sort_values("shap_mean_abs_test", ascending=False)
     save_csv(imp_df, "shap_feature_importance.csv")
 
-    _plot_shap_bar(shap_imp_test,  feat_names, "Test",  "shap_importance_bar_test.pdf")
-    _plot_shap_bar(shap_imp_train, feat_names, "Train", "shap_importance_bar_train.pdf")
-    _plot_shap_beeswarm(shap_test,  X_test_sub,  feat_names, "shap_beeswarm_test.pdf")
-    _plot_shap_beeswarm(shap_train, X_train_sub, feat_names, "shap_beeswarm_train.pdf")
+    _plot_shap_bar(shap_imp_test, feat_names, "Test", "shap_importance_bar_test.pdf")
+    _plot_shap_beeswarm(shap_test, X_test_sub, feat_names, "shap_beeswarm_test.pdf")
 
-    print(f"  [4h] Top 5 features by mean |SHAP| (test):")
+    _log(f"  [4d] Top 5 features by mean |SHAP| (test):")
     for row in imp_df.head(5).itertuples():
-        print(f"        {row.feature:<40s}  {row.shap_mean_abs_test:.4f}")
+        _log(f"        {row.feature:<40s}  {row.shap_mean_abs_test:.4f}")
 
-    return shap_imp_train, shap_imp_test, feat_names, imp_df, explainer
+    _log("  [DONE] Step 4 complete.")
+    return shap_test, feat_names, imp_df, explainer
 
 
 def _plot_shap_bar(shap_imp, feat_names, split, filename):
@@ -472,25 +527,31 @@ def _plot_shap_beeswarm(shap_vals, X_sub, feat_names, filename):
     save_plot(fig, filename)
 
 
+# ── Step 4b: Single-sample explanations ──────────────────────────────────────
+
 def explain_single_test_sample(
     explainer, X_test, feat_names, y_test, y_pred, y_ci_low, y_ci_high, sample_idx=0
 ):
-    print(f"\n  [4b] Explaining sample index={sample_idx} …")
+    _log(f"\n  [4b] Explaining sample index={sample_idx} …")
+    n_features = len(feat_names)
 
-    # iloc[[idx]] keeps 2-D shape (1, n_features); iloc[idx] would give a 1-D Series.
-    X_single   = X_test.iloc[[sample_idx]].values
-    x_values   = X_single[0]
-    shap_2d    = explainer.shap_values(X_single, nsamples=SHAP_NSAMPLES, silent=True)
-    shap_1d    = shap_2d[0]
-    base_value = float(explainer.expected_value)
+    x_values   = X_test.iloc[sample_idx].values
+    base_value = float(explainer.baseline_value)
     predicted  = float(y_pred[sample_idx])
     true_label = float(y_test[sample_idx])
     ci_lo      = float(y_ci_low[sample_idx])
     ci_hi      = float(y_ci_high[sample_idx])
 
-    print(f"  [4b] base={base_value:.2f}  pred_mean={predicted:.2f}"
-          f"  true={true_label:.2f}  CI=[{ci_lo:.2f}, {ci_hi:.2f}]"
-          f"  error={abs(predicted - true_label):.2f}")
+    try:
+        iv = explainer.explain(x_values, budget=SHAP_BUDGET)
+        shap_1d = _iv_to_shap_array(iv, n_features)
+    except Exception as exc:
+        _log(f"  [WARN] explain() failed for sample {sample_idx}: {exc} — skipping plots.")
+        return None
+
+    _log(f"  [4b] base={base_value:.2f}  pred_mean={predicted:.2f}"
+         f"  true={true_label:.2f}  CI=[{ci_lo:.2f}, {ci_hi:.2f}]"
+         f"  error={abs(predicted - true_label):.2f}")
 
     single_df = pd.DataFrame({
         "feature":       feat_names,
@@ -505,44 +566,33 @@ def explain_single_test_sample(
     single_df["base_value"] = base_value
     save_csv(single_df, f"shap_single_sample_idx{sample_idx}.csv")
 
-    explanation = shap.Explanation(
-        values=shap_1d, base_values=base_value, data=x_values, feature_names=feat_names,
-    )
-    fig, ax = plt.subplots(figsize=(9, 10))
-    plt.sca(ax)
-    shap.plots.waterfall(explanation, max_display=TOP_N, show=False)
-    ax.set_title(
-        f"SHAP Waterfall – test sample #{sample_idx}\n"
-        f"true={true_label:.1f}  pred_mean={predicted:.1f}  "
-        f"95 % CI=[{ci_lo:.1f}, {ci_hi:.1f}]",
-        fontsize=11,
-    )
-    fig.tight_layout()
-    save_plot(fig, f"shap_waterfall_sample_idx{sample_idx}.pdf")
-
-    shap.initjs()
-    shap.force_plot(
-        base_value, shap_1d, x_values,
-        feature_names=feat_names,
-        matplotlib=True, show=False,
-        contribution_threshold=0.05,
-    )
-    plt.title(
-        f"SHAP Force Plot – test sample #{sample_idx}  "
-        f"(pred_mean={predicted:.1f}, true={true_label:.1f})",
-        fontsize=10, pad=14,
-    )
-    plt.tight_layout()
-    save_plot(plt.gcf(), f"shap_force_plot_sample_idx{sample_idx}.pdf")
+    # Waterfall plot via shapiq (no shap.initjs(), no headless crash)
+    try:
+        ax = shapiq.waterfall_plot(
+            iv,
+            feature_names=feat_names,
+            max_display=TOP_N,
+            show=False,
+        )
+        fig = ax.get_figure()
+        fig.suptitle(
+            f"SHAP Waterfall – test sample #{sample_idx}\n"
+            f"true={true_label:.1f}  pred_mean={predicted:.1f}  "
+            f"95 % CI=[{ci_lo:.1f}, {ci_hi:.1f}]",
+            fontsize=11,
+        )
+        fig.tight_layout()
+        save_plot(fig, f"shap_waterfall_sample_idx{sample_idx}.pdf")
+    except Exception as exc:
+        _log(f"  [WARN] waterfall_plot failed for sample {sample_idx}: {exc}")
 
     return shap_1d
 
 
 def _top_k_accurate(mask: np.ndarray, abs_error: np.ndarray, k: int, label: str):
-    """Return indices of the k most accurately predicted samples within mask."""
     idxs = np.where(mask)[0]
     if len(idxs) == 0:
-        print(f"  [WARN] No candidates found for '{label}' — skipping.")
+        _log(f"  [WARN] No candidates found for '{label}' — skipping.")
         return []
     return idxs[np.argsort(abs_error[idxs])][:k].tolist()
 
@@ -550,23 +600,21 @@ def _top_k_accurate(mask: np.ndarray, abs_error: np.ndarray, k: int, label: str)
 def explain_notable_samples(
     explainer, X_test, feat_names, y_test, y_pred, y_ci_low, y_ci_high
 ):
-    print("\n── Step 4b: Single-sample SHAP explanations ─────────────────────")
+    _log("\n── Step 4b: Single-sample SHAP explanations ─────────────────────")
     ci_width  = y_ci_high - y_ci_low
     abs_error = np.abs(y_pred - y_test)
 
-    # Thresholds: bottom 25 % = sensitive (high drug response), top 25 % = resistant.
-    # Prediction alignment ensures the model is correctly calling the phenotype.
     q25 = np.percentile(y_test, 25)
     q75 = np.percentile(y_test, 75)
     median_pred = np.median(y_pred)
 
-    sens_mask = (y_test <= q25) & (y_pred <= median_pred)   # true sensitive, pred sensitive
-    res_mask  = (y_test >= q75) & (y_pred >= median_pred)   # true resistant, pred resistant
+    sens_mask = (y_test <= q25) & (y_pred <= median_pred)
+    res_mask  = (y_test >= q75) & (y_pred >= median_pred)
 
-    print(f"  Sensitive candidates (AUC ≤ {q25:.1f} & pred ≤ {median_pred:.1f}): "
-          f"{sens_mask.sum()} samples")
-    print(f"  Resistant candidates (AUC ≥ {q75:.1f} & pred ≥ {median_pred:.1f}): "
-          f"{res_mask.sum()} samples")
+    _log(f"  Sensitive candidates (AUC ≤ {q25:.1f} & pred ≤ {median_pred:.1f}): "
+         f"{sens_mask.sum()} samples")
+    _log(f"  Resistant candidates (AUC ≥ {q75:.1f} & pred ≥ {median_pred:.1f}): "
+         f"{res_mask.sum()} samples")
 
     samples = {
         "first":       0,
@@ -579,35 +627,62 @@ def explain_notable_samples(
         samples[f"resistant_accurate_{i}"] = idx
 
     for label, idx in samples.items():
-        print(f"\n  -- {label} (index {idx}  true={y_test[idx]:.1f}  pred={y_pred[idx]:.1f}) --")
+        _log(f"\n  -- {label} (index {idx}  true={y_test[idx]:.1f}  pred={y_pred[idx]:.1f}) --")
         explain_single_test_sample(
             explainer, X_test, feat_names, y_test, y_pred, y_ci_low, y_ci_high,
             sample_idx=idx,
         )
 
+    _log("  [DONE] Step 4b complete.")
+
+
+# ── Step 5: Embedding importance ──────────────────────────────────────────────
 
 def compute_embedding_importance(model, X_train, X_test, feat_names):
-    """Importance proxy: |Pearson r| between each feature and the L2 norm of
-    the sample's average transformer embedding across estimators."""
-    print("\n── Step 5: Embedding-based (attention-proxy) importance ──────────")
+    _log("\n── Step 5: Embedding-based (attention-proxy) importance ──────────")
+
+    if not hasattr(model, "get_embeddings"):
+        _log("  [SKIP] model.get_embeddings() not available in this TabPFN version.")
+        _log("  [SKIP] Returning zero-filled importance arrays.")
+        n_features = len(feat_names)
+        dummy = np.zeros(n_features)
+        return dummy, dummy, pd.DataFrame({
+            "feature": feat_names,
+            "embed_corr_train": dummy,
+            "embed_corr_test":  dummy,
+        })
 
     def _embedding_importance(X, split_label):
-        print(f"  [5] Getting transformer embeddings for {split_label} set ({len(X)} samples) …")
-        emb      = model.get_embeddings(X, data_source="test")
-        emb_avg  = emb.mean(axis=0) if emb.ndim == 3 else emb
-        emb_norm = np.linalg.norm(emb_avg, axis=1)
-        print(f"  [5] Embedding shape: {emb_avg.shape}"
-              f"  |norm| range=[{emb_norm.min():.3f}, {emb_norm.max():.3f}]")
-        X_arr = X.values
-        corr = np.array([
-            abs(scipy.stats.pearsonr(X_arr[:, j], emb_norm)[0])
-            if np.std(X_arr[:, j]) > 1e-9 else 0.0
-            for j in range(X_arr.shape[1])
-        ])
-        return corr, emb_norm
+        _log(f"  [5] Getting transformer embeddings for {split_label} set ({len(X)} samples) …")
+        try:
+            emb      = model.get_embeddings(X, data_source="test")
+            emb_avg  = emb.mean(axis=0) if emb.ndim == 3 else emb
+            emb_norm = np.linalg.norm(emb_avg, axis=1)
+            _log(f"  [5] Embedding shape: {emb_avg.shape}"
+                 f"  |norm| range=[{emb_norm.min():.3f}, {emb_norm.max():.3f}]")
+            X_arr = X.values
+            # Vectorised Pearson: replaces per-column scipy loop (~1500 calls)
+            std_X = X_arr.std(axis=0)
+            std_e = emb_norm.std()
+            X_c   = X_arr - X_arr.mean(axis=0)
+            e_c   = emb_norm - emb_norm.mean()
+            cov   = (X_c * e_c[:, None]).mean(axis=0)
+            with np.errstate(invalid="ignore", divide="ignore"):
+                corr = np.where(std_X > 1e-9, np.abs(cov / (std_X * std_e + 1e-30)), 0.0)
+            return corr, emb_norm
+        except Exception as exc:
+            _log(f"  [WARN] get_embeddings failed for {split_label}: {exc}")
+            return np.zeros(X.shape[1]), np.zeros(len(X))
 
     train_corr, train_emb_norm = _embedding_importance(X_train, "train")
     test_corr,  test_emb_norm  = _embedding_importance(X_test,  "test")
+
+    feat_arr = np.array(feat_names)
+    # Patient features only for plots/reports — exclude LS_* drug-embedding dimensions
+    patient_mask        = np.array([not f.startswith("LS_") for f in feat_names])
+    patient_feats       = feat_arr[patient_mask].tolist()
+    train_corr_patient  = train_corr[patient_mask]
+    test_corr_patient   = test_corr[patient_mask]
 
     emb_imp_df = pd.DataFrame({
         "feature":          feat_names,
@@ -616,12 +691,19 @@ def compute_embedding_importance(model, X_train, X_test, feat_names):
     }).sort_values("embed_corr_test", ascending=False)
     save_csv(emb_imp_df, "embedding_attention_importance.csv")
 
-    print(f"  [5] Top 5 features by embedding correlation (test):")
-    for row in emb_imp_df.head(5).itertuples():
-        print(f"        {row.feature:<40s}  r={row.embed_corr_test:.4f}")
+    emb_imp_patient_df = pd.DataFrame({
+        "feature":          patient_feats,
+        "embed_corr_train": train_corr_patient,
+        "embed_corr_test":  test_corr_patient,
+    }).sort_values("embed_corr_test", ascending=False)
+    save_csv(emb_imp_patient_df, "embedding_attention_importance_patient.csv")
 
-    _plot_embed_bar(test_corr,  feat_names, "Test",  "embedding_importance_bar_test.pdf")
-    _plot_embed_bar(train_corr, feat_names, "Train", "embedding_importance_bar_train.pdf")
+    _log(f"  [5] Top 5 patient features by embedding correlation (test):")
+    for row in emb_imp_patient_df.head(5).itertuples():
+        _log(f"        {row.feature:<40s}  r={row.embed_corr_test:.4f}")
+
+    _plot_embed_bar(test_corr_patient,  patient_feats, "Test (Patient Features)",  "embedding_importance_bar_test.pdf")
+    _plot_embed_bar(train_corr_patient, patient_feats, "Train (Patient Features)", "embedding_importance_bar_train.pdf")
 
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     for ax, norms, label in [(axes[0], train_emb_norm, "Train"), (axes[1], test_emb_norm, "Test")]:
@@ -632,6 +714,7 @@ def compute_embedding_importance(model, X_train, X_test, feat_names):
     fig.tight_layout()
     save_plot(fig, "embedding_norm_distribution.pdf")
 
+    _log("  [DONE] Step 5 complete.")
     return train_corr, test_corr, emb_imp_df
 
 
@@ -647,8 +730,10 @@ def _plot_embed_bar(corr, feat_names, split, filename):
     save_plot(fig, filename)
 
 
+# ── Step 6: Combined summary ──────────────────────────────────────────────────
+
 def combined_importance_summary(shap_imp_test, embed_corr_test, feat_names):
-    print("\n── Step 6: Combined importance summary ───────────────────────────")
+    _log("\n── Step 6: Combined importance summary ───────────────────────────")
 
     def _minmax(v):
         rng = v.max() - v.min()
@@ -683,20 +768,23 @@ def combined_importance_summary(shap_imp_test, embed_corr_test, feat_names):
     fig.tight_layout()
     save_plot(fig, "combined_importance_comparison.pdf")
 
-    print(f"  Top 10 features by combined score:")
-    print(
+    _log(f"  Top 10 features by combined score:")
+    _log(
         summary_df[["feature", "shap_score", "embedding_score", "combined_score"]]
         .head(10).to_string(index=False)
     )
+    _log("  [DONE] Step 6 complete.")
     return summary_df
 
 
+# ── Main ──────────────────────────────────────────────────────────────────────
+
 def main():
     ensure_dirs()
-    print("=" * 70)
-    print("  TabPFN Ablation – SHAP + Attention Importance + CI Analysis")
-    print("  Experiment: baseline_all_features_Drug_Embed")
-    print("=" * 70)
+    _log("=" * 70)
+    _log("  TabPFN Ablation – SHAP (shapiq) + Attention Importance + CI Analysis")
+    _log("  Experiment: baseline_all_features_Drug_Embed")
+    _log("=" * 70)
 
     model, scaler = load_best_model()
 
@@ -707,17 +795,35 @@ def main():
         f"Feature count mismatch: data has {X_train.shape[1]}, "
         f"model expects {model.n_features_in_}"
     )
-    print(f"\n  Feature count check PASSED ({X_train.shape[1]} == model.n_features_in_)")
+    _log(f"\n  Feature count check PASSED ({X_train.shape[1]} == model.n_features_in_)")
 
-    # Run before SHAP so any preprocessing mismatch surfaces early (SHAP takes hours).
     sanity_check_predictions(model, X_test, y_test, n=10)
 
     y_train_pred, y_test_pred, y_ci_low, y_ci_high = predict_with_confidence(
         model, X_train, y_train, X_test, y_test, meta_test
     )
 
-    shap_imp_train, shap_imp_test, feat_names, shap_df, explainer = \
-        compute_shap(model, X_train, X_test)
+    shap_test, feat_names, imp_df, explainer = \
+        compute_shap(model, X_train, y_train, X_test)
+
+    shap_imp_test = np.abs(shap_test).mean(axis=0)
+
+    # Save CSVs + plots if compute_shap loaded from cache (imp_df is None)
+    if imp_df is None:
+        imp_df = pd.DataFrame({
+            "feature":            feat_names,
+            "shap_mean_abs_test": shap_imp_test,
+        }).sort_values("shap_mean_abs_test", ascending=False)
+        save_csv(imp_df, "shap_feature_importance.csv")
+
+        with open(SHAP_CACHE_PATH, "rb") as f:
+            _c = pickle.load(f)
+        X_test_sub = X_test.iloc[_c["test_idx"]].values
+
+        save_csv(pd.DataFrame(shap_test.astype(np.float32), columns=feat_names),
+                 "shap_values_test_subset.csv")
+        _plot_shap_bar(shap_imp_test, feat_names, "Test", "shap_importance_bar_test.pdf")
+        _plot_shap_beeswarm(shap_test, X_test_sub, feat_names, "shap_beeswarm_test.pdf")
 
     explain_notable_samples(
         explainer, X_test, feat_names, y_test, y_test_pred, y_ci_low, y_ci_high,
@@ -728,9 +834,9 @@ def main():
 
     summary_df = combined_importance_summary(shap_imp_test, test_emb_corr, feat_names)
 
-    print("\n" + "=" * 70)
-    print(f"  Analysis complete.  Outputs: {os.path.abspath(OUT_DIR)}")
-    print("=" * 70)
+    _log("\n" + "=" * 70)
+    _log(f"  Analysis complete.  Outputs: {os.path.abspath(OUT_DIR)}")
+    _log("=" * 70)
 
 
 if __name__ == "__main__":

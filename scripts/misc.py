@@ -1,3 +1,4 @@
+import io
 import os
 import pickle
 import numpy as np
@@ -6,9 +7,18 @@ from sklearn import utils
 from sklearn import model_selection
 from sklearn.model_selection import KFold
 import scipy
+import torch
 #import xgboost as xgb
 import matplotlib.pyplot as plt
 from sklearn.metrics import make_scorer, get_scorer
+
+
+class _CpuUnpickler(pickle.Unpickler):
+    """Remap CUDA tensors to CPU for models serialised on a GPU node."""
+    def find_class(self, module, name):
+        if module == "torch.storage" and name == "_load_from_bytes":
+            return lambda b: torch.load(io.BytesIO(b), map_location="cpu", weights_only=False)
+        return super().find_class(module, name)
 
 
 try:
@@ -43,7 +53,16 @@ def load_model(path):
         pass
 
     with open(path, "rb") as f:
-        model = pickle.load(f)
+        try:
+            model = pickle.load(f)
+        except RuntimeError as exc:
+            if "CUDA" not in str(exc):
+                raise
+            # Model was saved on a GPU node; remap tensors to CPU on reload.
+            # TabPFN will move them back to GPU automatically at predict time
+            # if CUDA becomes available in the process.
+            f.seek(0)
+            model = _CpuUnpickler(f).load()
     return model
 
 

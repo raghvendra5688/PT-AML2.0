@@ -9,7 +9,7 @@
 #SBATCH -A H200
 #SBATCH -q h200_qos
 #SBATCH -x crirdchpxd005
-#SBATCH -w crirdchpxd002
+#SBATCH -w crirdchpxd001
 
 # ─── Resource justification ──────────────────────────────────────────────────
 #
@@ -43,11 +43,12 @@
 #              Single-sample waterfall plots    :  ~3 min
 #      Step 5  embedding importance (fwd pass)  :  ~15 min
 #      Step 6  summary plots / CSVs             :  ~2 min
-#    Total estimated: 18–26 h → 48 h gives a safe 2× buffer.
+#    Total estimated: ~5.5–6 h → 48 h gives a safe 8× buffer.
+#    (SHAP_TEST_SAMPLES=1000 reduced from 5000; uses shapiq KernelSHAP)
 #
-#    To run faster, reduce SHAP_TEST_SAMPLES or SHAP_NSAMPLES in the script:
-#      SHAP_TEST_SAMPLES = 500   → ~2–3 h total
-#      SHAP_NSAMPLES     = 256   → halves coalition cost at slight accuracy cost
+#    To run faster further, reduce SHAP_TEST_SAMPLES or SHAP_BUDGET in the script:
+#      SHAP_TEST_SAMPLES = 500   → ~3 h total
+#      SHAP_BUDGET       = 256   → halves coalition cost at slight accuracy cost
 # ────────────────────────────────────────────────────────────────────────────
 
 module load cuda12.6/toolkit/12.6.2
@@ -67,6 +68,9 @@ unset __mamba_setup
 
 micromamba activate BeatAML2.0
 
+# Verify that PyTorch can see the GPU
+python3 -c "import torch; print(f'PyTorch {torch.__version__}  CUDA available: {torch.cuda.is_available()}  device_count: {torch.cuda.device_count()}')"
+
 echo "============================================================"
 echo "  TabPFN SHAP + Attention Importance + CI Analysis"
 echo "  Start  : $(date)"
@@ -77,6 +81,10 @@ echo "  RAM MB : ${SLURM_MEM_PER_NODE}"
 echo "============================================================"
 
 cd /export/cse/rmall/Raghvendra/PT-AML2.0/scripts
+
+# Force Python stdout/stderr to be line-buffered so all progress prints
+# appear in the SLURM log even if the process is killed by a signal.
+export PYTHONUNBUFFERED=1
 
 python3 tabpfn_best_model_shap_analysis.py
 
