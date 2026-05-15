@@ -25,7 +25,7 @@
 
 \title{PREDICT-AML: Personalized REsponse via Drug Interaction and Cellular Traits for Acute Myeloid Leukemia\\[1ex]
 \large Supplementary Information}
-\author{Siddhi P. Jani, Halima Bensmail, Raghvendra Mall}
+\author{Mohammed Al-Ani, Siddhi P. Jani, Halima Bensmail, Raghvendra Mall}
 \date{}
 \maketitle
 
@@ -36,17 +36,17 @@
 
 %% ──────────────────────────────────────────────────────────────────────────
 \section*{Supplementary Figures}
-
+\vspace{-5mm}
 %% Fig S1 ─ RNA-seq QC
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=0.92\textwidth]{jtrm_images/Supp_Fig1.pdf}
+    \includegraphics[width=0.88\textwidth]{figures/Supp_Fig1.pdf}
     \caption{\textbf{Transcriptomic quality control and unsupervised clustering of BeatAML patient samples.}
     \textbf{A.}~t-SNE visualization of RNA-seq expression profiles showing a uniform, unsegregated distribution
     of training (Waves~1+2) and test (Waves~3+4) samples, confirming effective normalization and quality control.
-    \textbf{B.}~Silhouette scores for unsupervised clustering using 100--1{,}000 most variable genes, with peak
+    \textbf{B.}~Silhouette scores for unsupervised clustering using 100-1{,}000 most variable genes, with peak
     performance at 150 genes.
-    \textbf{C.}~Cluster stability across $k = 2$--$10$ revealing an optimal partition of $k = 3$ transcriptional
+    \textbf{C.}~Cluster stability across $k = 2$-$10$ revealing an optimal partition of $k = 3$ transcriptional
     subgroups.
     \textbf{D.}~PCA visualization of patient samples colored by the three identified transcriptional subgroups.}
     \label{fig:suppfig1}
@@ -215,7 +215,88 @@
 \clearpage
 \section*{Supplementary Tables}
 
-%% Table S1 ─ Full ML/DL benchmark
+%% Table S1 ─ Only_PC drug feature enumeration (referenced from Section 2.5)
+\begin{table}[!ht]
+\centering
+\caption{Complete enumeration of engineered drug features comprising the
+\texttt{PC} representation. Features are derived from RDKit molecular
+descriptors, NetworkX graph-theoretic properties, Morgan circular fingerprints
+(radius~3, 128~bits), and MACCS structural keys (167~bits). Total: 473 features.}
+\label{tab:drug_features_supp}
+\scriptsize
+\begin{tabular}{lrr}
+\toprule
+\textbf{Feature Name} & \textbf{Count} & \textbf{Type} \\
+\midrule
+MaxAbsEStateIndex        & 1   & Descriptor \\
+MinAbsEStateIndex        & 1   & Descriptor \\
+MinEStateIndex           & 1   & Descriptor \\
+qed                      & 1   & Descriptor \\
+SPS                      & 1   & Descriptor \\
+MolWt                    & 1   & Physico-chemical \\
+FpDensityMorgan1         & 1   & Descriptor \\
+AvgIpc                   & 1   & Descriptor \\
+BalabanJ                 & 1   & Descriptor \\
+Ipc                      & 1   & Descriptor \\
+Kappa2                   & 1   & Descriptor \\
+PEOE\_VSA                & 14  & Descriptor \\
+SMR\_VSA                 & 10  & Descriptor \\
+SlogP\_VSA               & 12  & Descriptor \\
+TPSA                     & 1   & Descriptor \\
+EState\_VSA              & 11  & Descriptor \\
+VSA\_EState              & 10  & Descriptor \\
+NHOHCount                & 1   & Physico-chemical \\
+NumAliphaticCarbocycles  & 1   & Physico-chemical \\
+NumAliphaticHeterocycles & 1   & Physico-chemical \\
+NumAliphaticRings        & 1   & Physico-chemical \\
+NumAmideBonds            & 1   & Physico-chemical \\
+NumAromaticHeterocycles  & 1   & Physico-chemical \\
+NumAtomStereoCenters     & 1   & Physico-chemical \\
+NumBridgeheadAtoms       & 1   & Physico-chemical \\
+NumHAcceptors            & 1   & Physico-chemical \\
+NumHeteroatoms           & 1   & Physico-chemical \\
+NumHeterocycles          & 1   & Physico-chemical \\
+NumRotatableBonds        & 1   & Physico-chemical \\
+NumSaturatedCarbocycles  & 1   & Physico-chemical \\
+NumSaturatedHeterocycles & 1   & Physico-chemical \\
+NumSaturatedRings        & 1   & Physico-chemical \\
+NumSpiroAtoms            & 1   & Physico-chemical \\
+NumUnspecifiedAtomStereoCenters & 1 & Physico-chemical \\
+RingCount                & 1   & Physico-chemical \\
+MolLogP                  & 1   & Physico-chemical \\
+Fraction of Functional Groups & 62 & Physico-chemical \\
+graph\_diameter          & 1   & Graphical \\
+avg\_shortest\_path      & 1   & Graphical \\
+num\_cycles              & 1   & Graphical \\
+num\_chains              & 1   & Graphical \\
+clustering\_coefficients & 1   & Graphical \\
+avg\_degree\_centrality  & 1   & Graphical \\
+avg\_eigen\_centrality   & 1   & Graphical \\
+avg\_betweenness\_centrality & 1 & Graphical \\
+avg\_load\_centrality    & 1   & Graphical \\
+wiener\_index            & 1   & Graphical \\
+max\_degree              & 1   & Graphical \\
+closeness\_mean          & 1   & Graphical \\
+katz\_centrality\_std    & 1   & Graphical \\
+betweenness\_mean        & 1   & Graphical \\
+betweenness\_std         & 1   & Graphical \\
+eigenvector\_mean        & 1   & Graphical \\
+rings                    & 5   & Graphical \\
+heteroatom\_ratio        & 1   & Graphical \\
+num\_aromatic\_rings     & 1   & Graphical \\
+num\_non\_aromatic\_rings & 1  & Graphical \\
+average\_atoms (C, O, S, N) & 4 & Graphical \\
+num\_single\_bonds       & 1   & Graphical \\
+num\_double\_bonds       & 1   & Graphical \\
+Morgan (radius=3, nBits=128) & 128 & Fingerprint \\
+MACCS (nBits=167)        & 167 & Fingerprint \\
+\midrule
+\textbf{Total}           & \textbf{473} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%% Table S2 ─ Full ML/DL benchmark
 \begin{table}[!ht]
 \centering
 \caption{\textbf{Full benchmark of machine learning and deep learning models on the BeatAML held-out test set
@@ -230,7 +311,7 @@ BeatAML training set (the clinically meaningful benchmark; see main text).}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{llccccc}
 \toprule
-\textbf{Model} & \textbf{Class} & \textbf{CV MAE} & \textbf{Test MAE} & \textbf{Test RMSE} & \textbf{Test $r_{pc}$} & \textbf{Test R$^2$}\\
+\textbf{Model} & \textbf{Class} & \textbf{CV MAE} & \textbf{Test MAE} & \textbf{Test RMSE} & \textbf{Test r} & \textbf{Test R$^2$}\\
 \midrule
 GLR & Linear & -- & $\approx\!44.8$ & -- & $\approx\!0.55$ & -- \\
 SVR & Linear & -- & $\approx\!43.1$ & -- & $\approx\!0.58$ & -- \\
@@ -278,7 +359,7 @@ representations is available in the accompanying dataset.}
 \multirow{2}{*}{\textbf{Feature Group(s)}} & \multirow{2}{*}{\textbf{Drug Rep.}} &
 \multicolumn{2}{c}{\textbf{PS-CV (primary benchmark)}} & \multicolumn{2}{c}{\textbf{DS-CV}} \\
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}
-& & \textbf{MAE} & $r_{pc}$ & \textbf{MAE} & $r_{pc}$ \\
+& & \textbf{MAE} & \textbf{r} & \textbf{MAE} & \textbf{r} \\
 \midrule
 \textbf{Baseline (all groups)} & Only\_PC  & $31.465 \pm 1.273$ & $0.719 \pm 0.015$ & $45.804 \pm 4.371$ & $0.342 \pm 0.069$ \\
 \textbf{Baseline (all groups)} & Embed     & $31.054 \pm 0.742$ & $0.724 \pm 0.015$ & $46.344 \pm 4.898$ & $0.312 \pm 0.059$ \\

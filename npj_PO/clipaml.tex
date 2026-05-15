@@ -1,0 +1,728 @@
+%%
+%% This is file `sample-sigconf-authordraft.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `all,proceedings,bibtex,authordraft')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-sigconf-authordraft.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%% The first command in your LaTeX source must be the \documentclass
+%% command.
+%%
+%% For submission and review of your manuscript please change the
+%% command to \documentclass[manuscript, screen, review]{acmart}.
+%%
+%% When submitting camera ready or to TAPS, please change the command
+%% to \documentclass[sigconf]{acmart} or whichever template is required
+%% for your publication.
+%%
+%%
+\documentclass[sigconf,authordraft]{acmart}
+
+\usepackage{adjustbox}
+\usepackage{multirow}
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+\setcopyright{acmlicensed}
+\copyrightyear{2018}
+\acmYear{2018}
+\acmDOI{XXXXXXX.XXXXXXX}
+%% These commands are for a PROCEEDINGS abstract or paper.
+\acmConference[ACM-BCB]{The $17^{\text{th}}$ Conference on Bioinformatics, Computational Biology, and Health Informatics}{June 30--July 03, 2026}{Rende (Cosenza), Italy}
+%%
+%%  Uncomment \acmBooktitle if the title of the proceedings is different
+%%  from ``Proceedings of ...''!
+%%
+%%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+%%  June 03--05, 2018, Woodstock, NY}
+\acmISBN{978-1-4503-XXXX-X/2018/06}
+
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% For managing citations, it is recommended to use bibliography
+%% files in BibTeX format.
+%%
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-*-biblatex.tex files for templates showcasing
+%% the biblatex styles.
+%%
+
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{CLIP-AML: Contrastive Learning Framework for AML treatment response prediction}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+
+
+% \author{Mohammed Al-Ani}
+% \email{moal34112@hbku.edu.qa}
+% \affiliation{%
+%   \institution{Hamad Bin Khalifa University}
+%   \city{Doha}
+%   \country{Qatar}
+% }
+
+% \author{Siddhi P. Jani}
+% \email{siddhijani17@gmail.com}
+% \affiliation{%
+%   \institution{Centre of Brain Research, Indian Institute of Sciences}
+%   \city{Bangalore}
+%   \state{Karnataka}
+%   \country{India}}
+
+% \author{Halima Bensmail}
+% \authornotemark[1]
+% \email{hbensmail@hbku.edu.qa}
+% \affiliation{
+%   \institution{Qatar Computing Research Institute, Hamad Bin Khalifa University}
+%   \city{Doha}
+%   \country{Qatar}
+% }
+
+% \author{Raghvendra Mall}
+% \authornotemark[1]
+% %\authornote{Both authors are corresponding authors}
+% \email{ramall@hbku.edu.qa}
+% \affiliation{%
+%  \institution{Qatar Computing Research Institute, Hamad Bin Khalifa University}
+%  \city{Doha}
+%  \country{Qatar}
+% }
+
+% \authornote{Both authors are corresponding authors}
+
+% %%
+% %% By default, the full list of authors will be used in the page
+% %% headers. Often, this list is too long, and will overlap
+% %% other information printed in the page headers. This command allows
+% %% the author to define a more concise list
+% %% of authors' names for this purpose.
+% \renewcommand{\shortauthors}{Ani et al.}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+\begin{abstract}
+\textbf{Background}:  Acute myeloid leukemia (AML) is a biologically heterogeneous cancer of myeloid cells in which patients exhibit widely varying responses, making reliable treatment selection a persistent challenge. Predictive models that can leverage multi-omic patient profiles to guide individualized therapy selection are therefore urgently needed. The BeatAML cohort collected and characterized patient samples over 10 years, integrating ex-vivo drug sensitivity, clinical annotations, DNA and RNA sequencing.
+
+\noindent \textbf{Methods}: We propose CLIP-AML which leverages the BeatAML cohort to devise a contrastive learning-based deep learning framework for predicting ex vivo drug response in AML patients. Our framework engineers vector representations for drugs, patient genomic profiles, cell state, and pathway activities. The novel contrastive learning (CLIP)-based objective jointly learns to align embeddings between patient multi-omic profiles with drug representations bringing drugs with higher sensitivity closer to patient profiles while pushing away resistant drugs in the embedding space.
+
+\noindent \textbf{Results}: The optimal CLIP-AML model achieves a validation mean absolute error (MAE) of $34.11 \pm 1.36$ and Pearson correlation ($r_{\text{pc}}$) of $0.679 \pm 0.028$, with an MAE of $39.170$ and $r_{\text{pc}}$ of $0.657$ on unseen test set, competitive against end-to-end deep learning models by $2$-$5\%$ across multiple evaluation metrics. This demonstrates the generalization capability of CLIP-AML for out-of-box patient drug sensitivity prediction.
+\end{abstract}
+
+%%
+%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
+%% Please copy and paste the code instead of the example below.
+%%
+\begin{CCSXML}
+<ccs2012>
+   <concept>
+       <concept_id>10010405.10010444.10010087</concept_id>
+       <concept_desc>Applied computing~Computational biology</concept_desc>
+       <concept_significance>500</concept_significance>
+       </concept>
+</ccs2012>
+<ccs2012>
+    <concept>
+        <concept_id>10010147.10010257.10010293.10010294</concept_id>
+        <concept_desc>Computing methodologies~Neural networks</concept_desc>
+        <concept_significance>500</concept_significance>
+    </concept>
+ </ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Applied computing~Computational biology}
+\ccsdesc[500]{Computing methodologies~Neural networks}
+
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+\keywords{Acute Myeloid Leukemia, Drug Response, Multi-omics Integration, Contrastive Learning, Precision Oncology, Deep Learning}
+%% A "teaser" image appears between the author and affiliation
+%% information and the body of the document, and typically spans the
+%% page.
+
+%\received{03 February 2007}
+%\received[revised]{12 March 2009}
+%\received[accepted]{5 June 2009}
+
+%%
+%% This command processes the author and affiliation and title
+%% information and builds the first part of the formatted document.
+\maketitle
+
+\section{Introduction}
+Acute Myeloid Leukemia (AML) is a biologically heterogeneous hematologic malignancy driven by diverse genetic mutations, genomic alterations, and molecular subtypes \cite{cancer2013genomic,papaemmanuil2016genomic,kurzer2023updates}. The SEER program estimates approximately 22,010 new AML cases and 11,090 deaths in the United States in 2025, reflecting a disproportionately high mortality burden relative to incidence. This underscores the urgent need for improved therapeutic strategies, as patients exhibit widely varying responses to standard chemotherapies and targeted agents, making optimal treatment selection a formidable challenge in AML \cite{tyner2018functional, yu2020advances, shafiei2025omics}.
+
+In response to this challenge, precision medicine initiatives have gained momentum as a means of tailoring treatment to individual molecular profiles \cite{lohse2018precision}. The BeatAML project, a large-scale initiative led by the Leukemia \& Lymphoma Society, emerged from the recognition that one-size-fits-all treatment paradigms are insufficient for such a biologically diverse disease \cite{bottomly2022integrative}. By integrating multi-omics data with ex vivo drug sensitivity profiling across $942$ specimens from $805$ patients, the project revealed that drug sensitivity is governed not only by genetic mutations but also by transcriptional state and cellular differentiation trajectories \cite{bottomly2022integrative,mo2023integrative}. However, its reliance on retrospective association analysis, absence of predictive modeling capability for unseen patients or novel drugs represented critical limitations that need to be addressed. 
+
+Recently, Karathanasis et al. \cite{karathanasis2024combining} employed ElasticNet models on the BeatAML dataset to predict ex vivo drug sensitivity across 122 drugs, achieving a Pearson correlation ($r$) of $0.36$ when combining clinical and RNA sequencing data. Similarly, the MDREAM method \cite{trac2023prediction} used an ensemble-based multi-omics model integrating mutation and gene expression data, to achieve a Spearman correlation of $0.68$ on a filtered BeatAML test set across 122 drugs. A drawback of MDREAM is that it constructs an independent ensemble model for each individual drug, fundamentally limiting its ability to generalize predictions to novel therapeutics.
+
+To address the aforementioned challenges, we reformulate the drug response prediction in AML as a semantic search problem, where the goal is to identify the most therapeutically compatible drug for a given patient by measuring similarity between multi-omics driven molecular patient profile and the physico-chemical characteristics of candidate compounds in a shared latent space. Drawing inspiration from Contrastive Language-Image Pretraining (CLIP) \cite{radford2021learning}, a cross-modal alignment strategy is adopted to jointly train two separate encoders, one for patient multi-omics data and one for drug physico-chemical features, optimizing a contrastive objective that maximizes similarity between patient-drug pairs with high observed sensitivity while minimizing it for resistant pairs. Critically, this formulation naturally extends to unseen drugs, as any novel compound can be encoded and ranked against a patient's embedding without retraining, directly addressing the generalization limitations of per-drug models such as MDREAM.
+
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[width=0.44\textwidth]{Images/Patient_Fig1a.pdf}
+    \includegraphics[width=0.50\textwidth]{Images/Patient_Fig1b.pdf}
+    \caption{We highlight the different characteristics utilized to construct patient multi-omic profile. This includes clinical traits, mutated gene frequency, cell state and module enrichments as highlighted in Figure \ref{fig:fig1}A. Additionally, we include oncogenic gene expression, pathway activities and mutation frequency type as illustrated in Figure \ref{fig:fig1}B. Columns represent patients.}
+    \label{fig:fig1}
+\end{figure*}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+Our key contributions include:
+\begin{itemize}
+    \item Propose a novel contrastive learning framework (CLIP-AML) that jointly encodes patient multi-omics profiles and drug features into a shared latent space.
+    %\item Systematic ablation experiments rigorously validate the individual contribution of each component of the loss function, demonstrating their cumulative necessity in optimizing the CLIP-AML framework.
+    \item The full contrastive objective provides modest aggregate gains and stronger per-drug/unseen-drug trends, while its benefit over simpler CLIP-AML variants is not always uniform across all metrics and drugs.
+    \item CLIP-AML achieves MAE of $39.170$ and Pearson correlation of $r_{\text{pc}}$=$0.657$, outperforming linear ML and competitive against end-to-end deep learning models by $2$-$5\%$ across multiple metrics. 
+    \item A unified embedding space that enables possible ranking of known drugs against novel patients, supporting personalized drug response and patient stratification.
+    %\item \textbf{Availability}:
+\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{-3mm}
+\section{Materials \& Methods}
+\subsection{Data Collection and Processing}
+Data were drawn from the BeatAML cohort \cite{bottomly2022integrative} and were divided into two primary groups: (a) Waves 1+2 comprising $649$ specimens from $526$ patients; (b) Waves 3+4 consisting of $293$ specimens from $279$ patients, totaling 942 samples from 805 patients. Of these, $520$ samples were consistently available with mutation, bulk transcriptomic, drug response, and clinical data. Hence, these samples were retained for analysis and split such that $337$ samples from Waves 1+2 were used as the training set and $183$ samples from Waves 3+4 comprised the test set. Clinical data included features such as age, sex ($215$ female, $305$ male), survival status, and disease characteristics such as relapse, de novo AML, transformed AML, and prior malignancies. A description of the external validation set i.e. LeeAML cohort \cite{Lee_Celik_2018} is provided in Supp. Section 1.
+
+\subsection{RNA-Seq and DNA-Seq Analysis}
+We follow similar procedures as in MDREAM \cite{trac2023prediction} and PT-AML \cite{jani2024pt} methodologies to obtain multi-omic patient profile representation. Here we briefly describe the steps followed.
+
+The bulk RNA-seq data \cite{tyner2018functional} from Waves 1+2 and Waves 3+4 were processed as training and test sets, respectively. The data was quantile normalized and t-SNE with default perplexity of 30 \cite{van2008visualizing} was applied. There was no significant segregation between the two sets (see Appendix Figure A1), indicating successful normalization and no significant batch effects. To test for batch effects, we applied three complementary multivariate distributional tests on the resulting 2-dimensional t-SNE embeddings: (i) symmetric KL-divergence estimated via Gaussian KDE, (ii) the energy distance statistic, a the multivariate generalization of the Kolmogorov–Smirnov test \cite{szekely2004testing} and (iii) Maximum Mean Discrepancy \cite{gretton2012optimal}. For each test, the observed statistic is compared against a null distribution generated by 5,000 permutations (1,000 for MMD) of the train/test labels and p-value estimated as fraction of null statistics $\ge$ observed, then corrected across all comparisons via Benjamini-Hochberg FDR \cite{benjamini1995controlling} (see Supp. Section 2 for detailed analysis on no batch effects). 
+
+The top $150$ most variable genes along with known oncogenes \cite{jani2024pt} were included as gene expression features. 
+We obtained the marker genes for cell state representation i.e. cDC-like, GMP-like, HSC-like, Monocyte-like, Progenitor-like, and Promono-like as well as gene sets considered as modules from the original BeatAML study \cite{bottomly2022integrative}. 
+Similarly, hallmark oncogenic pathway gene sets were obtained from \cite{roelands2020oncogenic}. 
+Using the GSVA package (v2.4.1) \cite{hanzelmann2013gsva} in R (v4.5.1), we estimated the cell state, module and pathway enrichment scores, with normalized scores in the range $[-0.5, 0.5]$ for pathway and module enrichment, and unnormalized scores ($[0,1]$) for cell states. 
+Somatic variant calls from DNA-Seq were incorporated to capture mutation frequencies and types across the top mutated genes as genomic features. Figure \ref{fig:fig1} highlights the patient profile characteristics.
+\vspace{-2.5mm}
+\subsection{Drug Representation}
+Drug response data included 161 unique compounds ($147$ in training, $150$ in test), with $14$ drugs exclusive to the test set. Appendix Figure A2 highlights the total number of unique patients (including training and test set) for each drug including the $14$ drugs exclusive to the test set. To obtain drug physico-chemical feature representation, we utilize $148$ non-redundant and non-correlated RDKit-based descriptors, 30 graph-based (using ‘networkx’ v3.5), 128-Morgan and 167-MACCS fingerprints from RDKit v2025.09.1. The MACCS fingerprints are made of 166 bits with first bit set to 0 and hence doesn't play a role in the model's training. A detailed list of features used for drug representation is provided in Appendix Table A1. These features were recently identified to be optimal for predicting multiple molecular properties \cite{harod2025effichem}. %Appendix Table A1 provides details about the domain-specific features used for drug representation.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\subsection{Drug Pathway Distance Estimation}
+%Drug-target information was retrieved from DrugBank \cite{knox2024drugbank}, and the STRING protein–protein interaction (PPI) database was used to construct the human protein interaction network, retaining only interactions with strong experimental evidence (score $\ge$ 700). Network propagation was performed using a random-walk with restart approach \cite{sherif2022immune} to generate a propagation vector for each drug. Patient-specific propagation vectors were derived by multiplying propagation scores with individual RNA-seq gene expression values. Proximity between a drug and a given oncogenic pathway was then estimated using the AUCell package (v1.24.0) \cite{aibar2017scenic} in R, where a higher AUC value indicates closer proximity and a lower AUC indicates greater distance.
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Images/CLIP-AML.pdf}
+    \caption{\textbf{Overview of the CLIP-AML framework for drug response prediction}. Drug and patient features are preprocessed and encoded into a shared embedding space via separate drug and patient encoders. The model is trained with a dual-branch objective: a prediction branch minimizes MAE between predicted and true AUC values, while a contrastive branch applies an InfoNCE-inspired loss to align high-response (low AUC) drug-patient pairs and separate low-response (high AUC) pairs in embedding space. CLIP-AML model performance is evaluated using metrics like MAE, RMSE, $\text{R}^{2}$, and Pearson correlation $r$.}
+    \label{fig:fig2}
+\end{figure*}
+\vspace{-2mm}
+\subsection{Training and Test Data Preparation}
+Patient profiles were represented using mutation profiles (frequency and types), gene expression profiles (most variable and oncogenes), enrichment scores (pathway, module, and cell state), and clinical annotations. Drug representations used molecular descriptors, graph-based features and Morgan and MACCS fingerprints. We processed the features and removed those features containing majority missing values (`NA') across patients. This led to removal of features predominantly from the clinical characteristics.
+
+Finally, the drug response data, indexed by patient ID and compound ID, was merged with processed patient and drug tables via inner joins using the `pandas' library in Python. The resulting training and test sets comprised 33,803 and 18,826 patient–drug records, respectively, with 1,780 numeric features used for modeling.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \subsection{Model training with CatBoost}
+% We trained CatBoost \cite{xgboost} to predict patient-specific drug responses by integrating molecular, genomic, clinical, and drug-related features. Additionally, we explored deep learning architectures convolutional neural networks \cite{cnn}, LSTMs \cite{lstm}, and graph attention networks \cite{gat}—using SMILES-based drug representations combined with patient data. CatBoost was trained via 5-fold cross-validation on Waves 1+2 and evaluated on the held-out Waves 3+4 test set. Performance was assessed using a weighted loss using MAE and contrastive-bases loss function, RMSE, Pearson correlation ($r$), Spearman correlation ($\rho$), and $R^2$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{-3mm}
+\subsection{Problem Formulation}
+Let $\mathcal{D} = \{x_d^{(i)}\}_{i=1}^{N_D}$ and $\mathcal{P} = \{x_p^{(j)}\}_{j=1}^{N_P}$ denote the feature sets for $N_{D}$ drugs and $N_{P}$ patients, respectively. Here $x_d^{(i)} \in \mathbb{R}^{d}$ and $x_p^{(j)} \in \mathbb{R}^{p}$ represents the $d$-dimensional drug features and the $p$-dimensional multi-omics patient profile respectively.  The observed dataset consists of labeled drug–patient pairs $\mathcal{O} = \{(i, j, y_{ij})\}$, where $y_{ij} \in [0.0, 286.0]$ is the AUC response of patient $j$ to drug $i$. An AUC value of $0$ indicates high response and an AUC value of $286$ indicates maximum resistance as defined in \cite{tyner2018functional}. A dual-encoder model maps each entity into a shared embedding space of dimension $E$ via two encoder networks followed by a shared projection head, yielding $z_d^{(i)} = \tilde{f}_d(x_d^{(i)}) \in \mathbb{R}^E$ and $z_p^{(j)} = \tilde{f}_p(x_p^{(j)}) \in \mathbb{R}^E$, with the full population embedding matrices denoted by $Z_d \in \mathbb{R}^{N_D \times E}$
+and $Z_p \in \mathbb{R}^{N_P \times E}$ respectively. 
+
+The observed pairs are partitioned into two disjoint subsets into $80$:$20$ ratio using the unique patient identifier for splitting $\mathcal{O}$ into training and validation sets. By using non-overlapping patients in training and validation set, the modeling framework avoids bias, an issue observed via significant drop in the generalization performance of the PT-AML model which utilizes random splits \cite{jani2024pt}. 
+Mathematically, $\mathcal{O} = \mathcal{O}_{\text{train}} \cup \mathcal{O}_{\text{val}}$, where $\mathcal{O}_{\text{train}}$ is used exclusively for cross-validation based hyperparameter optimization. After obtaining optimal hyperparameters, final model training is performed using all of $\mathcal{O}_{\text{train}}$ and $\mathcal{O}_{\text{val}}$ is used to govern early stopping. We represent $\mathcal{O}_{\text{test}}$ as the fully held-out independent test set used only for final performance reporting. The scalar prediction for a drug–patient pair is obtained as $\hat{y}_{ij} = g(x_d^{(i)}, x_p^{(j)};\,\theta)$, where $\theta$ denotes all learnable parameters of our proposed CLIP-AML model.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{-2mm}
+\subsection{CLIP-AML: Contrastive-based Loss Function}
+Contrastive learning offers distinct advantages over standard mean absolute error (MAE) loss for drug response prediction. Firstly, the task is inherently comparative-ranking effective drugs for each patient, which contrastive loss directly optimizes by pulling low AUC pairs together and pushing high AUC pairs apart. Secondly, it enables zero-shot prediction for novel drugs by learning a shared embedding space. 
+Finally, a bi-directional alignment ensures symmetric drug-patient representations.%, facilitating both response prediction and drug repurposing.
+
+The CLIP-AML model is trained by minimizing a composite loss that is a proper convex combination of a regression term and a contrastive term, defined as:
+\vspace{-2mm}
+\begin{equation*}
+\mathcal{L} = (1 - \lambda_{\text{CL}})\,\mathcal{L}_{\text{MAE}} + \lambda_{\text{CL}}\,(\mathcal{L}_{\text{attract}} + \mathcal{L}_{\text{repel}}), \quad \lambda_{\text{CL}} \in [0,1]
+\end{equation*}
+
+Here the regression component is defined as \\
+$\mathcal{L}_{\text{MAE}} = \frac{1}{|\mathcal{O}_{\text{train}}|}\sum_{(i,j)\in\mathcal{O}_{\text{train}}}|\hat{y}_{ij} - y_{ij}|$. $\mathcal{L}_{\text{attract}}$ is an AUC-weighted bidirectional InfoNCE \cite{rusak2024infonce} contrastive loss distinct from standard binary InfoNCE contrastive loss \cite{rusak2024infonce}. It shapes the shared embedding space globally using the full matrices $Z_{d}$ and $Z_{p}$.  $\mathcal{L}_{\text{repel}}$ is a repulsion term that explicitly pushes apart high-AUC pairs. %To isolate the contribution of each loss component, three ablation configurations are considered.
+
+The contrastive loss operates on $\ell_2$-normalized embeddings $\bar{z}_d^{(i)} = z_d^{(i)} / \|z_d^{(i)}\|$
+and $\bar{z}_p^{(j)} = z_p^{(j)} / \|z_p^{(j)}\|$, with pairwise cosine similarities forming the logit matrix $\Theta \in \mathbb{R}^{N_D \times N_P}$, where $\Theta_{ij} = \bar{z}_d^{(i)\top}\bar{z}_p^{(j)}$. The AUC-weighted logits are then transformed to $\mathcal{A}_{ij} = \Theta_{ij} \cdot (1-y^{n}_{ij}) / \tau$, where $y^{n}_{ij}$ is normalized AUC scores (divided by $286.0$) and $\tau > 0$ is a temperature hyperparameter. Here $1-y^{n}_{ij}$ serves as a continuous weight that amplifies the logit for low-AUC pairs. 
+
+The attraction term pulls low-AUC drug–patient pairs together in the shared space via a bidirectional cross-entropy objective,
+\begin{equation*}
+    \mathcal{L}_{\text{attract}} = \frac{1}{N_D}\sum_{i=1}^{N_D}\left(-\frac{1}{N_P}\sum_{j=1}^{N_P} m_{ij}\,\ell_{ij}^{d\to p}\right) + \frac{1}{N_P}\sum_{j=1}^{N_P}\left(-\frac{1}{N_D}\sum_{i=1}^{N_D} m_{ij}\,\ell_{ij}^{p\to d}\right),
+\end{equation*}
+
+\noindent where $m_{ij} \in \{0,1\}$ is an observation mask indicating whether pair $(i,j)$ is present in the dataset, and $\ell_{ij}^{d\to p} = \mathcal{A}_{ij} - \log\sum_{k=1}^{N_P}\exp(\mathcal{A}_{ik})$ and $\ell_{ij}^{p\to d} = \mathcal{A}_{ij} - \log\sum_{k=1}^{N_D}\exp(\mathcal{A}_{kj})$ are the log-softmax scores in the drug-to-patient and patient-to-drug directions, respectively. 
+%We define a contrastive learning objective that operates bidirectionally—matching drugs to patients and patients to drugs—where the similarity score $\Theta(\mathbf{x}_{di}, \mathbf{x}_{pj})$ is weighted by the corresponding drug sensitivity $\mathbf{AUC}_{ij}$ scaled by temperature $\tau$.
+%\paragraph{Drug-to-Patient Loss}
+%\[
+%\mathcal{L}_{di2p} = -\frac{1}{n} \sum_{j=1}^{n} \log \left[ \frac{\exp(\Theta(\mathbf{x}_{di}, \mathbf{x}_{pj}) \times \frac{\mathbf{AUC}_{ij}}{\tau}}{\sum_{k=1}^{n} \exp(\Theta(\mathbf{x}_{di}, \mathbf{x}_{pk})) \times \frac{\mathbf{AUC}_{ik}}{\tau}} \right] \times \delta_{\{\mathbf{AUC}_{ij} \ne 0\}}
+%\]
+
+%\paragraph{Patient-to-Drug Loss}
+%\[
+%\mathcal{L}_{pj2d} = -\frac{1}{m} \sum_{i=1}^{m} \log \left[ \frac{\exp(\Theta(\mathbf{x}_{di}, \mathbf{x}_{pj})) \times \frac{\mathbf{AUC}_{ij}}{\tau}}{\sum_{k=1}^{m} \exp(\Theta(\mathbf{x}_{dk}, \mathbf{x}_{pj})) \times \frac{\mathbf{AUC}_{kj}}{\tau}} \right] \times \delta_{\{\mathbf{AUC}_{ij} \ne 0\}}
+%\]
+
+%\paragraph{Contrastive Loss $\mathcal{CL}$}
+%\[
+%\mathcal{CL}(\mathbf{x}_d, \mathbf{x}_p) = \frac{1}{m} \sum_{i=1}^{m} \mathcal{L}_{di2p} + \frac{1}{n} %\sum_{j=1}^{n} \mathcal{L}_{pj2d}
+%\]
+
+%\paragraph{Final Loss}
+%\[
+%\textbf{Loss} = (1-\lambda)\textbf{MAE}(\textbf{AUC}) + \lambda \mathcal{CL}(\mathbf{x}_d, \mathbf{x}_p)
+%\]
+The repulsion term explicitly pushes high-AUC pairs apart by penalizing their cosine similarity directly and is defined as:
+\begin{equation*}
+%\mathcal{L}_{\text{repel}} = \frac{1}{|\mathcal{O}_{\text{train}}|}\sum_{(i,j)\in\mathcal{O}_{\text{train}}} (1 - y^{n}_{ij})\cdot\max\!\left(0,\, \Theta_{ij} - \delta\right),
+\mathcal{L}_{\text{repel}} = \frac{1}{W}\sum_{i,j \in \mathcal{O}_{\text{train}}}y^{n}_{ij}\cdot m_{ij} \cdot \hat{\Theta}_{ij},
+\end{equation*}
+\noindent where $\hat{\Theta}_{ij} = \frac{1 + \Theta_{ij}}{2} \in [0, 1]$, $W = \sum_{i,j} y^{n}_{ij} \cdot m_{ij}$ and $\frac{\partial \mathcal{L}_{\text{repel}}}{\partial \Theta_{ij}} = \frac{\text{y}^{n}_{ij} \cdot m_{ij}}{2W}$. The direct per-pair gradient is $\propto$ to $y^{n}_{ij}$ ensuring that only high-AUC pairs contribute meaningfully and the gradient pushes its corresponding $\Theta_{ij} \rightarrow$ -$1$. %Here $y^{n}_{ij}$ is normalized AUC scores (divided by $286.0$) such that it takes value in the range $[0,1]$.
+
+Additionally, our attraction logit is $\mathcal{A}_{ij} = \Theta_{ij} \cdot (1 - y^{n}_{ij}) / \tau$. For high-AUC (resistant) pairs where $y^{n}_{ij} \rightarrow 1$, the logit $\rightarrow 0$ regardless of cosine similarity $\Theta_{ij}$, making its contribution to log-softmax score nearly constant. The resulting gradient $\frac{\partial \mathcal{L}_{\text{attract}}}{\partial \Theta_{ij}} \propto (1-y^{n}_{ij}) \rightarrow 0$ for high-AUC pairs receive no contrastive signal from $L_{\text{attract}}$ alone. The two terms i.e. $\mathcal{L}_{\text{attract}}$ and $\mathcal{L}_{\text{repel}}$ are therefore gradient-complementary across the full AUC spectrum.
+
+
+To isolate the contribution of each loss component, three ablation configurations are considered: (A1) $\lambda_{\text{CL}} = 0$, reducing the loss to MAE only; (A2) optimal $\lambda_{\text{CL}} = 0.3$ with attraction only; and (A3) optimal $\lambda_{\text{CL}} = 0.3$ with both attraction and repulsion terms. The full contrastive loss used in the configuration A2 is 
+$\mathcal{L}_{\text{CL}} = \mathcal{L}_{\text{attract}}$ with no explicit repulsion term, while the configuration A3 utilizes both $\mathcal{L}_{\text{attract}} + \mathcal{L}_{\text{repel}}$. The $\lambda_{\text{CL}}$ parameter was treated as a hyper-parameter, where $\lambda_{\text{CL}} =\{0.1,0.2,0.3,\cdots, 0.9,1.0\}$. The optimal $\lambda$ parameter was obtained via hyperparameter optimization.
+%To stabilize early training, $\lambda_{\text{CL}}$ is linearly warmed up over the first $T_{\text{warm}}$ epochs as $\lambda_{\text{CL}}^{(t)} = \lambda_{\text{CL}} \cdot t / T_{\text{warm}}$ for $t \leq T_{\text{warm}}$, before being held constant thereafter.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Hyperparameter Optimization}
+To identify the optimal configuration of the CLIP-AML model, a hyperparameter optimization (HPO) study is conducted using Optuna \cite{akiba2019optuna} on $\mathcal{O}_{\text{train}}$ with a median pruner, which eliminates unpromising trials early by comparing intermediate cross-validation MAE values against the median of completed trials. The search is carried out over $50$ trials, with each trial minimizing the MAE objective. 
+
+The hyperparameters subject to optimization span three broad categories. First, the optimization dynamics are controlled by the learning rate $\eta$, sampled log-uniformly from $[10^{-5}, 10^{-2}]$, similarly, the weight decay $\lambda_w \in [10^{-6}, 10^{-3}]$, and the batch size chosen from $\{1024, 2048, 4096\}$. Second, the encoder and decoder architectures are controlled by the shared embedding dimension $E \in \{128, 256, 512\}$, the encoder hidden layer configurations chosen from $\{[512, 256],\ [256, 128],\ [512, 256, 128],\ [256, 256]\}$, the decoder hidden layer configurations chosen from $\{[256, 128],\ [128, 64]$, $\ [256, 128, 64]\}$, and the dropout rate $p_{\text{drop}} \in \{0.0, 0.05, \ldots, 0.25\}$. Third, the contrastive loss components introduced above are governed by the weighting coefficient $\lambda_{\text{CL}} \in \{0.1, 0.2, \ldots, 1.0\}$, the temperature $\tau \in \{0.10, 0.15, \ldots, 1.0\}$, which directly controls sharpness of the attraction and repulsion terms in objective function.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison Methods \& Evaluation Metrics}
+We performed comprehensive comparison by training multiple standard machine learning models and end-to-end deep learning to predict drug response. The designed models included generalized linear regression (GLR) \cite{nelder1972generalized}, least squares support vector regression (SVR) \cite{suykens1999least,mall2015very}, Random Forests
+(RF) \cite{breiman2001random} and XGBoost \cite{chen2016xgboost}. We also trained several end-to-end deep learning models using the SMILES representation of drugs as input to convolutional
+neural networks \cite{lecun2015deep}, LSTM \cite{gers2000learning} and graph attention/convolutional neural networks \cite{velivckovic2017graph} combined with physico-chemical features and patient information via feedforward neural network (FFNN) layers to build predictors for drug response prediction.
+
+As stated earlier, we used Optuna for hyperparameter optimization via $5$-fold cross-validation on $\mathcal{O}_{\text{train}}$. After obtaining the optimal hyperparameters for both standard ML and end-to-end deep learning models, we perform $10$-randomizations of training using $\mathcal{O}_{\text{train}}$ and $\mathcal{O}_{\text{val}}$. Early stopping is applied during training of deep learning models, halting optimization when the validation MAE fails to improve over a predefined number of consecutive epochs. The model randomization, with optimal CV hyperparameters, yielding lowest validation MAE is selected as best model to generate predictions on the test set $\mathcal{O}_{\text{test}}$. The mean and standard error of performance across $10$ randomizations on the test set was also estimated. We evaluate the models on standard regression metrics including MAE, Root Mean Squared Error (RMSE), coefficient of determination ($R^2$), Spearman correlation ($r_{\text{sc}}$) and Pearson correlation ($r_{\text{pc}}$).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Experimental Results}
+\subsection{Ablation Experiments}
+To evaluate the contribution of the CLIP-AML contrastive approach, we conducted three ablation studies to examine the effects of the loss terms on drug response prediction. All the ablation studies used the same hyperparameters when evaluated across different runs. The three configurations are A1, A2 and A3 as described earlier.
+%The three conditions are: (A1) MAE-only requires a full regression approach to calculate drug loss. (A2) MAE+ InfoNCE attract a loss function that adds AUC weighted terms that pull high AUC drug-patient pairs together. Lastly (A3) MAE + InfoNCE attract + repel, the full CLIP-AML methodology, which additionally includes repulsion terms toward drug-patient low-AUC pairs.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Images/nf_scatter_grid.pdf}
+    \includegraphics[width=0.9\textwidth]{Images/nf_metrics_comparison.pdf}
+    \caption{\textbf{Ablation study evaluating the contribution of contrastive loss components to CLIP-AML's predictive performance}. (A) Scatter plots of predicted versus ground truth AUC values on the test set for three model configurations: MAE-only, MAE + InfoNCE attract, and MAE + InfoNCE attract + repel. The dashed line indicates ideal predictions. (B) Bar plots summarizing test-set performance across all four metrics (MAE $\downarrow$, RMSE $\downarrow$, $R^{2}$ $\uparrow$, Pearson $r_{\text{pc}}$ $\uparrow$). Progressive improvement across most metrics is observed as contrastive loss components are added, with the full objective (MAE + InfoNCE attract + repel) achieving the best performance (MAE$=39.17$, RMSE$=53.19$, $R^{2}=0.403$, Pearson $r_{\text{pc}}=0.657$).}
+    \label{fig:fig3}
+\end{figure*}
+
+Figure \ref{fig:fig3}A represents the test set scatter plots of the different ablations of predicted versus grounded truth AUC. The MAE-only plot shows the greatest spread in predictions around the ideal line among the ablations, reflecting the drug response's weak alignment. Comparing it to InfoNCE attraction + repel, it shows a visibly closer point to the ideal than the traditional MAE-only method. In Figure \ref{fig:fig3}B, the barplot confirms improvements in all metrics. From Figure \ref{fig:fig3}B, we observe reduction in RMSE metric from 53.708 to 53.193 and an overall increase in $R^{2}$ from 0.391 (A1) to 0.403 (A3).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table*}[!ht]
+\centering
+\caption{Training and test-set performance of all methods. \textbf{Bold} = best test value per metric.  $\downarrow$ lower is better; $\uparrow$ higher is better. The numbers in brackets represent mean $\pm$ standard error across $10$ randomizations for deep learning methods on test set after obtaining optimized hyper-parameters. Individual test values correspond to randomization with lowest validation MAE.}
+%
+%Hyperparameter optimized training performance measured across $5$ randomizations via mean $\pm$ standard deviation.}
+\label{tab:main_results}
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{|ll| c| rr| rr| rr| rr| rr|}
+\toprule
+\textbf{Method} &
+\textbf{Data Options / Loss} &
+\textbf{Features} &
+\multicolumn{2}{c}{\textbf{MAE} $\downarrow$} &
+\multicolumn{2}{c}{\textbf{RMSE} $\downarrow$} &
+\multicolumn{2}{c}{$R^2$ $\uparrow$} &
+\multicolumn{2}{c}{\textbf{Pearson} $r_{\text{pc}}$ $\uparrow$} &
+\multicolumn{2}{c}{\textbf{Spearman} $r_{\text{sc}}$ $\uparrow$} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}\cmidrule(lr){12-13}
+& & & \textit{CV-Train} & \textit{Test} & \textit{CV-Train} & \textit{Test} & \textit{CV-Train} & \textit{Test} & \textit{CV-Train} & \textit{Test} & \textit{CV-Train} & \textit{Test} \\
+\midrule
+GLR      & PC + Patient Feat.              & 1780 & $35.39{\pm}1.24$ & 42.244 & $46.26{\pm}1.73$ & 55.599 & $0.436{\pm}0.019$ & 0.359 & $0.660{\pm}0.015$ & 0.599 & $0.657{\pm}0.014$ & 0.599 \\
+LSSVR    & PC + Patient Feat.              & 1780 & $35.74{\pm}1.19$ & 42.783 & $46.75{\pm}1.58$ & 56.398 & $0.429{\pm}0.017$ & 0.346 & $0.655{\pm}0.013$ & 0.588 & $0.652{\pm}0.013$ & 0.588 \\
+RF       & PC + Patient Feat.              & 1780 & $34.19{\pm}1.55$ & 40.740 & $45.76{\pm}2.98$ & 54.172 & $0.454{\pm}0.040$ & 0.413 & $0.673{\pm}0.029$ & 0.643 & $0.669{\pm}0.019$ & 0.633 \\
+XGB & PC + Patient Features                & 1780 & $32.65{\pm}1.63$ & $39.539$ & $43.73{\pm}2.02$ & \textbf{53.183} & $0.485{\pm}0.028$ & \textbf{0.418} & $0.703{\pm}0.020$ & 0.650 & $0.697{\pm}0.015$ & 0.647 \\
+\midrule
+CNN + FFNN     & SMILES + PC + Patient Feat.     & 1780 & $32.17{\pm}0.76$ & 40.175 [$40.18{\pm}0.20$]& \textbf{$42.89{\pm}1.20$} & 54.336 [$54.21{\pm}0.29$]& \textbf{$0.500{\pm}0.017$} & 0.409 [$0.410{\pm}0.004$]& \textbf{$0.707{\pm}0.012$} & 0.639 [$0.640{\pm}0.003$]& \textbf{$0.704{\pm}0.011$} & 0.636 [$0.635{\pm}0.002$]\\
+LSTM + FFNN    & SMILES + PC + Patient Feat.     & 1780 & $33.37{\pm}0.58$ & 40.859 [$40.86{\pm}0.19]$& $44.84{\pm}0.85$ & 54.846 [$54.91{\pm}0.28$] & $0.460{\pm}0.011$ & 0.390 [$0.390{\pm}0.003$] & $0.678{\pm}0.008$ & 0.624 $[0.623{\pm}0.003]$ & $0.678{\pm}0.011$ & 0.617 $[0.615{\pm}0.003$]\\
+GCN + FFNN  & SMILES + PC + Patient Feat.     & 1780 & $33.31{\pm}0.70$ & 40.528 [$40.53{\pm}0.18$] & $44.69{\pm}1.27$ & 55.083 [$55.15{\pm}0.27$]& $0.468{\pm}0.018$ & 0.393 [$0.392{\pm}0.003]$ & $0.684{\pm}0.013$ & 0.627 [$0.625{\pm}0.002$]& $0.672{\pm}0.011$ & 0.633 [$0.633{\pm}0.002$] \\
+GAT + FFNN & SMILES + PC + Patient Feat.     & 1780 & $36.85{\pm}0.63$ & 41.114 [$41.11{\pm}0.18]$ & $48.76{\pm}1.00$ & 55.313 [$55.68{\pm}0.27$] & $0.370{\pm}0.016$ & 0.373 [$0.371{\pm}0.005$]& $0.608{\pm}0.013$ & 0.611 [$0.611{\pm}0.003$] & $0.593{\pm}0.011$ & 0.603 [$0.602{\pm}0.004$]\\
+\midrule
+CLIP-AML & (A1) $\mathcal{L}_{\text{MAE}}$                        & 1780 & $33.84{\pm}1.46$ &	$39.523$ [$39.92{\pm}0.23]$ & 	$46.36{\pm}2.31$	& $53.708$ [$53.99{\pm}0.33$]& $0.435{\pm} 0.044$ & $0.391$ [$0.390{\pm}0.002$] & $0.681{\pm}0.029$ & $0.650$ [$0.648{\pm}0.004$] & $0.677{\pm}0.029$ & $0.644$ [$0.642{\pm}0.003$] \\
+CLIP-AML & (A2) $\mathcal{L}_{\text{MAE}}$ + $\mathcal{L}_{\text{attract}}$         & 1780 & $33.98{\pm}1.57$ & $39.672$ [$39.79{\pm}0.16$] & $46.38{\pm}2.60$	& $53.428$ [$53.67{\pm}0.29$] & $0.434{\pm}0.049$  & $0.397$ [$0.395{\pm}0.003$]& $0.679{\pm}0.032$ & $0.650$ [$0.648{\pm}0.003$]& $0.673{\pm}0.032$ & $0.650$ [$0.649{\pm}0.002$]\\
+CLIP-AML & (A3) $\mathcal{L}_{\text{MAE}}$ + $\mathcal{L}_{\text{attract}}$ + $\mathcal{L}_{\text{repel}}$  & 1780 & $34.11{\pm}1.36$	& \textbf{39.170} [$39.33{\pm}0.19$] &	$46.31{\pm}2.29$	& \textbf{53.193} [$53.49{\pm}0.38$]& $0.436{\pm}0.044$ & $0.403$ [$0.401{\pm}0.003$] & $0.679{\pm} 0.028$  & \textbf{0.657} [$0.655{\pm}0.003$] & $0.676{\pm}0.026$ & \textbf{0.653} [$0.649{\pm}0.005$]\\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\vspace{-2mm}
+\subsection{Comprehensive Model Comparison}
+The performance improvement becomes more pronounced when we benchmark the proposed methodology against a broader set of competing methods, as depicted in Table \ref{tab:main_results}. Among the classical ML models, XGBoost (XGB) achieved the highest training $R^{2}=0.485 \pm 0.028$ and attained the best $R^{2}=0.418$ on the held-out test set among all methods. Similarly for the end-to-end deep learning models, CNN-based model achieved the highest training $R^{2}=0.500 \pm 0.017$ and the third best $R^{2}=0.409$ on the independent test set. From Table \ref{tab:main_results}, we observed that deep learning models including CNN, LSTM, GCN, GAT, combined with FFNN outperform purely feature-based linear models (GLR and LSSVR) both in training as well as on test set. 
+% \begin{figure*}[!ht]
+%     \centering
+%     %\includegraphics[width=0.8\textwidth]{Images/ablation_training_curves.pdf}
+%     \includegraphics[width=0.9\textwidth]{Images/nf_umap_top_drugs_full.pdf}
+%     \caption{\textbf{Validation learning curves and shared embedding space visualization across loss-component ablations}. (a) Validation MAE ($\downarrow$) and $R^{2}$ ($\uparrow$) over training epochs for the three model configurations (MAE Only, MAE + InfoNCE attract, MAE + InfoNCE attract + repel), demonstrating stable convergence across all variants with marginal improvements from contrastive components. (b) UMAP projections of the difference embeddings $|z_d - z_p|$ colored by AUC, illustrating the progressive structural organization of the embedding space as contrastive loss components are introduced. The full contrastive objective (InfoNCE attract + repel) yields the most distinct clustering of drug-patient pairs by response magnitude.}
+%     \label{fig:fig4}
+% \end{figure*}
+However, we observe from Table \ref{tab:main_results}, the largest difference in training vs test performance i.e. $0.06-0.1$ absolute points across metrics like MAE, $R^{2}$, $r_{\text{pc}}$ and $r_{\text{sc}}$ for deep learning models. This highlights a potential issue of overfitting with these CNN, LSTM, GCN, GAT + FFNN models.  
+
+Moreover, from Table \ref{tab:main_results}, we observe that CLIP-AML framework, in particular, configurations (A2) and (A3) achieve low RMSE$=53.428$ and RMSE$=53.193$ respectively, across all compared methods on the test set. Similarly, CLIP-AML framework with configurations (A2) and (A3) attain the highest $r_{\text{pc}}=0.650$ and $r_{\text{pc}}=0.657$, $r_{\text{sc}}=0.650$ and $r_{\text{sc}}=0.653$ respectively, across all compared methods on the test set. The CLIP-AML configurations achieve on average $2$-$5\%$ improvements for different metrics when compared to other standard ML as well as deep learning models (see Table \ref{tab:main_results}). Notably, the CLIP-AML framework achieves much better generalization performance $<0.05$ absolute points between training and test set, across key metrics like $r_{\text{pc}}$ and $r_{\text{sc}}$ when compared to other methods. This performance of CLIP-AML method is driven by the inherent strength of the dual-encoder architecture, with well-formulated contrastive loss leading to progressive gain across the ablation. We compared different training strategies for CLIP-AML including pretraining with constrative learning followed by finetuning MAE. Supp. Section 3 showcases detailed comparison and insights to why such strategy tend to perform worse than CLIP-AML A3 configuration.
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Images/nf_drug_pearson_barplot.pdf}
+    \caption{Pearson Correlation Across Three Model Configurations for 120 Drugs. Pearson correlation ($r_{\text{pc}}$) for models trained with MAE only (A1), MAE + InfoNCE attract (A2), and MAE + attract + repel (A3). A3 configuration achieves best performance for 54/120 drugs, suggesting that both contrastive learning components are essential to drive improved individual drug response.}
+    \label{fig:fig_drug_test}
+\end{figure*}
+
+Furthermore, we perform an approximate comparison of the different configurations (A1, A2, A3) of CLIP-AML with MDREAM \cite{radford2021learning} and Karathanasis et al \cite{karathanasis2024machine}. Both CLIP-AML and MDREAM methods significantly outperformed Karathanasis et al, which achieved a $r_{\text{pc}}=0.36$. Out of $122$ drugs for which MDREAM method was tested, $118$ were common with the our test cohort (comprising BeatAML Waves 3+4). As a result the $r_{\text{sc}}$ for MDREAM method reduced to $0.67$, while on the same set CLIP-AML with MAE (A1), MAE + $\mathcal{L}_{\text{attract}}$ (A2) and MAE + $\mathcal{L}_{\text{attract}}$ + $\mathcal{L}_{\text{repel}}$ (A3) achieved $r_{\text{sc}}$ of $0.65$, $0.67$ and $0.68$ respectively. Thus, CLIP-AML configurations A2 and A3 are competitive with the MDREAM approach.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\vspace{-2mm}
+% \subsection{Training \& Embedding Visualization}
+% Beyond the metric comparison, the validation learning curve across the ablation in Figure \ref{fig:fig4}A shows smooth convergence with no instability from the contrastive terms. The curve diverges slightly after $30$ epochs, with the full objective converging to a slightly lower validation MAE and a higher $R^{2}$. InfoNCE terms regularize the embedding space without convergence. 
+
+% By using UMAP projections on $|z_{d}-z_{p}|$, we can visualize the difference in the embeddings of drug ($z_{d}$) and patient ($z_{p}$), as shown in Figure \ref{fig:fig4}B. Under MAE-only training, the embedding space is diffuse (random) with AUC values distributed without a clear distinction. Introducing the InfoNCE attract term to the loss function begins to form local clusters of similar AUC values, pushing low AUC values toward the center. However, the separation between high- and low-response regions remains moderate. With the full InfoNCE attract + repel objective, the embedding space shows clear, structured convex clusters for low-AUC pairs and relatively less diffuse spherical clusters for high-AUC pairs (owing to the repel term), with cleaner boundaries between drug-patient ($|z_{d}-z_{p}|$) embeddings. This confirms that the bi-directional InfoNCE loss successfully shapes the joint drug–patient embedding space to reflect drug response similarity providing a geometric interpretation of the CLIP-AML model behavior.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Test Set Drugs Performance}
+\subsubsection{Per Drug Performance}
+Per-drug predictive performance is evaluated using Pearson correlation ($r_{\text{pc}}$) on the test set. %Only drugs with response scores for more than $40$ patients were included, reducing the drug set from $150$ to $120$. 
+As shown in Figure \ref{fig:fig_drug_test}, CLIP-AML configurations A1, A2, and A3 perform best for 40, 26, and 54 drugs, respectively. Interestingly, A2 (attract-only) achieves the best per-drug $r_{\text{pc}}$ for only 26/120 drugs, fewer than A1's 40 drugs, suggesting the attract term alone can be insufficient or even counterproductive for certain drugs. However A3 recovers and performs best for 54/120 drugs reflecting the benefit of incorporating both attract and repel objectives. The mean $r_{\text{pc}}$ values follow the same trend: A1 achieves $0.265$ $[0.215-0.295]$, A2 achieves $0.253$ $[0.215-0.278]$, and A3 achieves $0.282$ $[0.247-0.305]$. Overall, the full contrastive objective in A3 yields the strongest individual drug response predictions.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Unseen Drugs \& Patients}
+We further evaluate generalization performance on $14$ drugs exclusive to the test set, involving $803$ entirely unseen drug-patient combinations. The performance of CLIP-AML configurations A1, A2, and A3 are highlighted in Figure \ref{fig:fig_unseen}A. From Figure \ref{fig:fig_unseen}A, we observe that in this most challenging scenario, a consistent improvement in performance across key metrics for the proposed CLIP-AML configurations. The $r_{\text{pc}}$ improves from 0.04 (A1) to 0.13 (A2) to 0.22 (A3), and MAE reduces from $60.3$ to $54.4$ as illustrated in Figure \ref{fig:fig_unseen}A. This $5.5$x improvement in $r_{\text{pc}}$ in out-of-distribution drugs and patients precisely highlights the ability of the CLIP-AML framework with composite contrastive terms.
+
+Of these, $5$ drugs with at least one statistically significant correlation ($r_{\text{pc}}$) for at least one CLIP-AML configuration are highlighted in Figure \ref{fig:fig_unseen}B. As expected for a strictly out-of-distribution setting, both metrics reflect a notable performance degradation relative to the overall test results reported in Table \ref{tab:main_results}, underscoring the inherent challenge of generalizing to novel drugs and patients simultaneously. MAE only loss (A1) leads to best results (MAE $\downarrow$ and $r_{\text{pc}}$ $\uparrow$) for 2 drugs including Ralimetinib, NVP-AEW541, while the full contrastive loss (A3) is better than A2 and A1 for Metformin, XMD 8-87 and BLZ945 particularly w.r.t. $r_{\text{pc}}$ (see Figure \ref{fig:fig_unseen}B).
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Images/nf_nonoverlap_scatter.pdf}
+    \includegraphics[width=0.45\textwidth]{Images/nf_nonoverlap_metrics.pdf}
+    \caption{\textbf{Prediction performance on novel drugs}. A) Scatter plots of predicted vs true AUC for $803$ drug-patient pairs across 14 unseen drugs for three model configurations (A1–A3). Performance improves from A1 to A3, with increasing correlation $r_{\text{sc}}$ = (0.05, 0.12, 0.24); $r_{\text{pc}}$ = (0.04, 0.13, 0.22) and decreasing MAE = ($60.3$, $56.9$, $54.4$) respectively, indicating improved generalization to unseen drugs and patients. B) MAE and $r_{\text{pc}}$ across three ablations (A1–A3) for $5$ out-of-distribution drugs, illustrating per-drug generalization performance in the hard fully unseen drug-patient setting.}
+    \label{fig:fig_unseen}
+\end{figure*}
+
+\begin{table}[!ht]
+    \centering
+    \caption{Per-drug performance metrics for the top 10 drugs in the test set. MAE, RMSE, $r_{\text{pc}}$ and $r_{\text{sc}}$ are reported across CLIP-AML configurations A1, A2, and A3 respectively.}
+    \label{tab:tab_top10}
+    \scriptsize
+    \begin{adjustbox}{max width=0.99\linewidth}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+        \textbf{Drug} & \textbf{\#No Patients} & \textbf{Loss} & \textbf{MAE} & \textbf{RMSE} & \textbf{$R^{2}$} &  $r_{\text{pc}}$ & $r_{\text{sc}}$ \\
+         \hline
+ & & A1 & 47.43 & 59.64 & 0.50 & 0.74 & 0.73 \\
+Venetoclax & 172 & A2 & 43.68 & 58.12 & 0.52 & 0.73 & 0.73  \\
+&  & A3 & 44.58 & 56.96 & 0.54 & 0.74 & 0.74 \\ \hline
+& & A1 & 41.14 & 53.67 & 0.29 & 0.56 & 0.55 \\
+Dasatinib & 176 & A2 & 42.92 & 55.8 & 0.23 & 0.51 & 0.52 \\
+& & A3 & 41.2 & 54.34 & 0.27 & 0.55 & 0.56 \\ \hline
+& & A1 & 51.47 & 63.56 & 0.16 & 0.55 & 0.53 \\
+Trametinib & 176 & A2 & 46.38 & 56.52 & 0.34 & 0.58 & 0.54 \\
+ & & A3 & 47.56 & 59.28 & 0.27 & 0.55 & 0.53 \\ \hline
+ & & A1 & 42.84 & 52.25 & 0.27 & 0.55 & 0.56 \\
+Tivozanib  & 156 & A2 & 43.59 & 53.49 & 0.24 & 0.51 & 0.52 \\
+& & A3 & 43.87 & 53.45 & 0.24 & 0.52 & 0.52 \\ \hline
+ & & A1 & 42.77 & 54.85 & 0.15 & 0.48 & 0.51 \\ 
+Rapamycin & 153 & A2 & 43.57 & 55.21 & 0.14 & 0.47 & 0.50 \\
+ & & A3 & 44.43 & 57.92 & 0.05 & 0.49 & 0.51 \\ \hline
+&  & A1 & 24.77 & 36.19 & 0.03 & 0.31 & 0.44 \\
+Cediranib & 159 & A2 & 27.27 & 35.50 & 0.07 & 0.28 & 0.37 \\
+& & A3 & 23.89 & 33.84 & 0.15 & 0.41 & 0.50 \\ \hline
+ & & A1 & 57.44 & 73.48 & 0.11 & 0.45 & 0.46 \\
+Selumetinib  & 160 & A2 & 51.64 & 66.46 & 0.28 & 0.54 & 0.56 \\
+ & & A3 & 56.46 & 72.38 & 0.14 & 0.49 & 0.50 \\ \hline
+ & & A1 & 35.13 & 46.18 & 0.14 & 0.38 & 0.44 \\
+Saracatinib  & 159 & A2 & 36.29 & 47.81 & 0.08 & 0.34 & 0.41 \\
+ & & A3 & 34.22 & 44.77 & 0.19 & 0.44 & 0.49 \\ \hline
+ & & A1 & 31.5 & 42.09 & 0.27 & 0.57 & 0.54 \\
+Sorafenib  & 171 & A2 & 34.39 & 44.93 & 0.16 & 0.52 & 0.45 \\
+ & & A3 & 32.27 & 42.39 & 0.26 & 0.54 & 0.48 \\ \hline
+ & & A1 & 27.73 & 35.43 & 0.13 & 0.38 & 0.40 \\
+LY-333531 & 115 & A2 & 27.95 & 36.00 & 0.10 & 0.41 & 0.42 \\
+& & A3 & 26.94 & 34.19 & 0.19 & 0.45 & 0.47 \\ \hline
+    \end{tabular}
+    \end{adjustbox}
+\end{table}
+
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Images/nf_umap_top_drugs_full.pdf}
+    \caption{UMAP visualization of difference embeddings ($|z_{d} - z_{p}|$) across ablation configurations for test pairs highlighting top $3$ drugs. Across all three configurations, Venetoclax, Dasatinib, and Trametinib exhibit distinct spatial distributions. In A1 (MAE only), points are broadly scattered with considerable overlap between drugs. In A2 (MAE + InfoNCE attract), clusters become more compact and better separated. In A3 (MAE + InfoNCE attract + repel), the three drugs form well-separated, tighter clusters with clearer topological boundaries, reflecting improved embedding discrimination driven by the full contrastive objective.}
+    \label{fig:fig_umap_top3}
+\end{figure*}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{-2mm}
+\subsubsection{Top 10 Drugs Performance}
+Table \ref{tab:tab_top10} highlights the per-drug metrics for the top 10 drugs in the test set. Across all drugs, full CLIP-AML model (A3) consistently achieves the lowest MAE and RMSE, and the highest $r_{\text{pc}}$. Venetoclax shows the strongest overall performance, with A3 configuration reaching an $r_{\text{pc}}=0.74$ as observed from Table \ref{tab:tab_top10}. Cediranib ($r_{\text{pc}}: 0.44 \rightarrow 0.50$), Saractinib ($r_{\text{pc}}: 0.44 \rightarrow 0.49$) and LY-3333531 ($r_{\text{pc}}: 0.40 \rightarrow 0.47$) also demonstrate strong improvements from A1 to A3, suggesting these drugs have more learnable response patterns. In contrast, Dasatinib and Rapamycin show modest gains across configurations, indicating greater prediction difficulty. Noteably, drugs such as Trametinib and Selumetinib achieve best $r_{\text{pc}}=0.58$ and $r_{\text{pc}}=0.54$ respectively for A2 configuration using just the InfoNCE attract loss function (see Table \ref{tab:tab_top10}). The progressive improvement from A1 to A3 across majority of the drugs confirms that adding contrastive objectives enhances drug-specific predictions.
+
+In Figure \ref{fig:fig_umap_top3}, the UMAP projections of difference embeddings ($|z_{d} - z_{p}|$) reveal structural organization across configurations. In A1, the two out of the top 3 drugs (see Table \ref{tab:tab_top10}) i.e. Venetoclax and Trametinib are heavily intermixed with no clear separation. In A2, the intermixing is more pronounced with no distinct clusters for each of the top 3 drugs. A3 shows the most defined structure, where each drug forms tight, spatially separated clusters. Notably, from Figure \ref{fig:fig_umap_top3}, we observe that Venetoclax and Trametinib embeddings cluster in distinct elongated structures. This suggests a more uniform patient response profile. For Dasatinib, we observe distinct sensitive and resistant sub-populations as illustrated in Figure \ref{fig:fig_umap_top3}. Overall, the repulsive contrastive term in A3 plays a key role in separating drug-specific response patterns in the embedding space.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{-3mm}
+\subsection{Patient Features Driving Top Drugs' Sensitivity}
+For each of the three top-performing drugs (Venetoclax, Dasatinib, Trametinib), $r_{\text{pc}}$ was computed between each patient characteristic feature and the model-predicted AUC under the full contrastive configuration (A3) of CLIP-AML model. The patient characteristics were drawn from five feature categories including clinical, celltype, gene expression, mutation, and pathway activities. For each feature, the $r_{\text{pc}}$ and associated p-value were computed against the predicted AUC. Multiple testing correction was applied using the Benjamini-Hochberg (BH) \cite{haynes2013benjamini} procedure. Features with p-adj $< 0.01$ were deemed statistically significant. This yielded $469$, $146$, and $287$ significant features via linear associations for Venetoclax, Dasatinib, and Trametinib, respectively as shown in Figure \ref{fig:fig_volcano_top3}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.45\textwidth]{Images/nf_volcano_top3_drugs.pdf}
+    \caption{Volcano plot of feature-response correlations for the three top-performing drugs. Pearson correlation versus $-\log_{10}$(adjusted p-value) for patient characteristic features correlated with CLIP-AML predicted AUC (A3) in Venetoclax (`*', grey), Dasatinib (square, blue), and Trametinib (`x', green). Light grey points are non-significant (p-adj $\ge 0.01$). Coloured points are drug-specific significant features. Enlarged markers denote $91$ features significant across top 3 drugs.}
+    \label{fig:fig_volcano_top3}
+\end{figure}
+
+We identified a total of $91$ significant common patient features (see Figure \ref{fig:fig_volcano_top3}) across the top three drugs correlating with predicted AUC. We highlight the top 25 of these features along with strength and significance of correlation per drug in Table \ref{tab:top25_top3_drugs}. A positive $r_{\text{pc}}$ reflects resistance, while a negative $r_{\text{pc}}$ reflects sensitivity. Interestingly, $24$ out of the 25 shared significant features display a consistent tripartite pattern: resistance to Venetoclax alongside sensitivity to both Dasatinib and Trametinib (see Table \ref{tab:top25_top3_drugs}). This is entirely consistent with a monocytic AML differentiation axis, wherein BCL2 dependence is lost in favour of MCL1 and downstream kinase signalling. CDK6 is the sole exception, displaying the inverse pattern and representing a distinct, more primitive leukemic cell state.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[!ht]
+    \centering
+    \caption{Top 25 common significant patient features across Venetoclax, Dasatinib, and Trametinib.}
+    \label{tab:top25_top3_drugs}
+    \scriptsize
+    \begin{adjustbox}{max width=0.99\linewidth}
+    \begin{tabular}{|l|c|c|c|c|c|c|c|}
+        \hline
+        \textbf{Drugs} & & \multicolumn{2}{|c|}{\textbf{Venetoclax}} & \multicolumn{2}{|c|}{\textbf{Dasatinib}} & \multicolumn{2}{|c|}{\textbf{Trametinib}} \\ \hline
+        \textbf{Patient Features} & \textbf{Type} & $r_{\text{pc}}$ & p-adj & $r_{\text{pc}}$ & p-adj & $r_{\text{pc}}$ & p-adj \\ \hline
+        \textit{CD300E} & Gene Expr & 0.716 & 0 & -0.513 & 0 & -0.672 & 0 \\ 
+        \textit{LGALS2} & Gene Expr & 0.628 & 0 & -0.566 & 0 & -0.659 & 0 \\
+        \textit{VCAN} & Gene Expr & 0.748 & 0 & -0.418 & 0 & -0.643 & 0 \\
+        \textit{MAFB} & Gene Expr & 0.787 & 0 & -0.411 & 0 & -0.589 & 0 \\
+        Monocyte-like & CellType & 0.818 & 0 & -0.352 & 0 & -0.591 & 0 \\
+        cDC-like & CellType & 0.693 & 0 & -0.446 & 0 & -0.612 & 0 \\
+        Immunogenic Cell Death (ICD) & Pathway & 0.798 & 0 & -0.365 & 0 & -0.555 & 0 \\
+        \textit{ARHGEF10L} & Gene Expr & 0.747 & 0 & -0.359 & 0 & -0.569 & 0 \\
+        Apoptosis & Pathway & 0.664 & 0 & -0.454 & 0 & -0.543 & 0 \\
+        \textit{MYCL} & Gene Expr & 0.697 & 0 & -0.376 & 0 & -0.571 & 0 \\
+        \textit{PRKACA} & Gene Expr & 0.8 & 0 & -0.268 & 0.003 & -0.546 & 0 \\
+        KRAS signaling up & Pathway & 0.707 & 0 & -0.364 & 0 & -0.495 & 0 \\
+        HMGB1 Signaling & Pathway & 0.706 & 0 & -0.344 & 0 & -0.481 & 0 \\
+        \textit{ARHGAP26} & Gene Expr & 0.762 & 0 & -0.319 & 0 & -0.449 & 0 \\
+        ErbB2 ErbB3 Signaling & Pathway & 0.616 & 0 & -0.355 & 0 & -0.558 & 0 \\
+        \textit{FCGR2B} & Gene Expr & 0.605 & 0 & -0.365 & 0 & -0.553 & 0 \\
+        \textit{JAZF1} & Gene Expr & 0.749 & 0 & -0.314 & 0 & -0.459 & 0 \\
+        TP53 pathway & Pathway & 0.742 & 0 & -0.343 & 0 & -0.431 & 0 \\
+        \textit{RARA}  & Gene Expr & 0.699 & 0 & -0.325 & 0 & -0.49 & 0 \\
+        TNFR1 Signaling & Pathway & 0.567 & 0 & -0.469 & 0 & -0.476 & 0 \\
+        \textit{KLF4}  & Gene Expr & 0.708 & 0 & -0.327 & 0 & -0.475 & 0 \\
+        SHC1/pSTAT3 Signature & Pathway & 0.709 & 0 & -0.334 & 0 & -0.431 & 0 \\
+        Notch Signaling & Pathway & 0.698 & 0 & -0.318 & 0 & -0.457 & 0 \\
+        \textit{CDK6} & Gene Expr & -0.771 & 0 & 0.265 & 0.003 & 0.432 & 0 \\
+        \textit{BCL6} & Gene Expr & 0.765 & 0 & -0.292 & 0.001 & -0.411 & 0 \\ \hline
+    \end{tabular}
+    \end{adjustbox}
+\end{table}
+
+% The positive correlation of Monocyte-like celltype with Venetoclax resistance ($r_{\text{pc}}=0.834$) and positive \textit{KRAS} Signaling with Venetoclax resistance ($r_{\text{pc}}=0.761$) observed in Table \ref{tab:top20_top3_drugs} are firmly established \cite{pei2020monocytic,zhang2020integrated}. Monocytic AML loses BCL2 expression and relies on MCL1-driven oxidative phosphorylation, with monocytic subclones conferring intrinsic resistance to Venetoclax-Azacitidine as observed in \cite{pei2020monocytic}. Similarly, \textit{KRAS} and \textit{PTPN11} mutations confer resistance to Venetoclax and multiple Venetoclax combinations in the BeatAML cohort \cite{bottomly2022integrative}, associated with high BCL2A1 expression mediating BCL2-independent survival. 
+
+% The positive \textit{VEGF} Signaling association with Sorafenib resistance ($r_{\text{pc}}=0.392$) as observed in Table \ref{tab:top20_top3_drugs} is mechanistically grounded, as \textit{VEGF/VEGFR-2} signalling promotes AML proliferation and engraftment, and Sorafenib targets \textit{VEGFR-2} among multiple kinases \cite{song2012role} . This means AML samples with the highest \textit{VEGF} pathway activity likely harbor downstream bypass mechanisms that limit Sorafenib's efficacy despite it being a direct \textit{VEGFR} inhibitor \cite{wilhelm2008preclinical}.
+%In Table \ref{tab:top20_top3_drugs}, the positive association of \textit{VEGF} Signaling with Sorafenib sensitivity ($r_{\text{pc}}=0.392$) directly reflects on-target pharmacology. Sorafenib is a multi-kinase inhibitor with preclinical efficacy against \textit{VEGF} receptor, \textit{PDGF} receptor, \textit{RAS/RAF}, \textit{c-KIT}, and \textit{FLT3} kinases \cite{rollig2021sorafenib}. This means AML samples with higher \textit{VEGF} pathway activity harbor direct therapeutic vulnerabilities exploited by Sorafenib \cite{rollig2021sorafenib}. The negative \textit{CDK6} association with Venetoclax ($r_{\text{pc}}=$-$0.736$), indicating that higher \textit{CDK6} expression predicts resistance, is supported by \textit{CDK6}'s established role in driving myeloid differentiation away from a \textit{BCL2}-dependent primitive state \cite{hwang2024impact}.
+
+%The positive \textit{p53} pathway association with Sorafenib sensitivity ($r_{\text{pc}}=0.205$, p-adj$=0.019$) is notable because \textit{p53} pathway activity is typically a marker of genomic stress and poor prognosis in AML, yet TP53 mutation was shown to increase Sorafenib resistance via \textit{STAT3} activation, while wild-type \textit{p53} suppresses \textit{STAT3} and \textit{STAT5} phosphorylation \cite{shao2023impact}. This suggests that intact, transcriptionally active \textit{p53} pathway signalling, rather than mutant \textit{p53} loss-of-function, may preserve sensitivity to Sorafenib by keeping \textit{STAT3}-driven bypass mechanisms suppressed \cite{shao2023impact}. 
+
+% Finally, in Table \ref{tab:top20_top3_drugs}, we observe that the cDC-like celltype is positively associating with Venetoclax resistance ($r_{\text{pc}}=0.691$) while negatively associating with Dasatinib sensitivity ($r_{\text{pc}}=$-$0.426$) and is an entirely novel observation. This is because conventional dendritic cell-like AML blasts have not been characterized in pharmacogenomic studies, and the contrasting directionality across these two mechanistically distinct drugs suggests a unique signalling circuitry of DC-like differentiation states that represents a compelling avenue for precision oncology investigation.
+\subsubsection{Alignment with Established Biological Findings}
+From Table \ref{tab:top25_top3_drugs}, we observe that monocytic and cDC-like cell enrichment were the strongest predictors of Venetoclax resistance ($r_{\text{pc}}=0.818$ and $0.693$ respectively), with reciprocal sensitivity to Trametinib and Dasatinib, consistent with the well-established loss of \textit{BCL2} and gain of \textit{MCL1} dependence in monocytic AML \cite{pei2020monocytic,lachowiez2025genetic}. KRAS signalling upregulation ($r_{\text{pc}}=0.707$ for Venetoclax, $r_{\text{pc}}=-0.495$ for Trametinib) further corroborates this axis: RAS-mutant leukemia stem cells carry a low \textit{BCL2/MCL1} ratio and are inherently Venetoclax-resistant, while \textit{MEK-ERK}-mediated \textit{MCL1} stabilization is directly reversed by Trametinib \cite{sango2024ras, desikan2022phase}. The monocytic identity markers \textit{MAFB} ($r_{\text{pc}}=0.787$ for Venetoclax), \textit{CD300E} ($r_{\text{pc}}=-0.672$ for Trametinib), and \textit{LGALS2} ($r_{\text{pc}}=-0.659$ for Trametinib) collectively define the transcriptional state of the resistant patients, with \textit{MAFB} serving as the master regulator of monocyte commitment and its targets marking cells that are \textit{BCL2}-low and selectively vulnerable to kinase inhibition \cite{pei2020monocytic,kelly2000mafb}.
+%%%%%%%%%%%%%%%%%%%%%%
+\vspace{-2mm}
+\subsubsection{Putative Biological Discoveries Requiring Validation}
+From Table \ref{tab:top25_top3_drugs}, we observe that \textit{PRKACA} emerged as the strongest individual gene predictor of Venetoclax resistance ($r_{\text{pc}}=0.800$), implicating the \textit{cAMP-PKA-CREB} axis as a candidate survival mechanism: \textit{CREB} is overexpressed in the majority of AML patients and drives transcription of \textit{MCL1} and \textit{BCL-XL}, providing \textit{BCL2}-independent survival that Venetoclax cannot overcome \cite{shankar2005role}. \textit{BCL6} represents a second compelling novel finding, as this transcriptional repressor silences the pro-apoptotic executors \textit{BIM} and \textit{PUMA}; if \textit{BCL6} exerts analogous function in AML, it would directly blunt the cell death response Venetoclax depends upon, and existing inhibitors such as BI-3802 represent immediately testable combination partners \cite{kawabata2021bcl6}. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{-2mm}
+\section{Discussion}
+AML remains one of the most clinically challenging hematologic malignancies, with over 10k reported deaths in the U.S. last year. Its profound biological heterogeneity, spanning diverse mutational landscapes, transcriptional states, and cellular differentiation trajectories, renders standard treatment paradigms insufficient and underscores the urgent need for robust predictive models capable of guiding individualized therapy selection.
+
+Leveraging the BeatAML cohort across, we enforced a rigorous non-overlapping patient split between training (Waves 1+2) and the fully held-out test set (Waves 3+4), avoiding the data leakage that inflated generalization estimates in prior random-split approaches such as PT-AML \cite{jani2024pt}. The inclusion of drugs present exclusively in the test set further constitutes an implicit zero-shot evaluation, directly probing the model's capacity to generalize to novel therapeutic compounds without retraining. However, while CLIP-AML demonstrates strong predictive performance within the BeatAML cohort, it needs validation on an independent cohort to avoid limiting conclusions on broad generalizability.
+%the model has not been validated on an independent patient cohort beyond BeatAML Waves 3+4, limiting conclusions about broader generalizability. 
+In Supp. Section 1, we showcase CLIP-AML's performance on the external LeeAML dataset highlighting it's generalization capability.
+
+CLIP-AML introduces a dual-encoder contrastive learning architecture that jointly maps patient multi-omic profiles and drug physico-chemical representations into a shared latent space, where therapeutic compatibility is expressed as geometric proximity. It has composite training objective i.e. combining MAE with an AUC-weighted bidirectional InfoNCE attraction loss and a repulsion term. It directly operationalizes the comparative nature of drug ranking while enabling zero-shot generalization to unseen patients and drugs. This capability makes CLIP-AML fundamentally different from per-drug ensemble methods like MDREAM \cite{radford2021learning}. 
+However, as evidenced by the performance degradation on 14 fully unseen drugs (Section 3.3.2), zero-shot generalization to structurally novel compounds remains challenging, particularly for drugs with limited pharmacological similarity to the training set. Moreover, ex vivo drug sensitivity is used as a proxy for in vivo sensitivity. Accordingly, CLIP-AML should be interpreted as a research framework for hypothesis generation rather than a clinical decision support tool.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Key Results \& Insights}
+The ablation study quantitatively validates each contrastive component: progressing from MAE-only ($R^{2} = 0.391$, MAE$ = 39.523$) to MAE + InfoNCE attract ($R^{2} = 0.397$, MAE$ = 39.672$) to the full objective with repulsion ($R^{2} = 0.403$, MAE$ = 39.170$) demonstrating consistent improvement across multiple evaluation metrics. In comprehensive benchmarking, CLIP-AML outperforms all classical and is competitive with end-to-end deep learning baselines by $2-5\%$, while exhibiting a training-to-test performance gap of less than $0.05$ absolute points in $r_{\text{pc}}$. This %is substantially smaller than the $0.06-0.10$ gap observed for CNN, LSTM, GCN, and GAT-based models, 
+is an evidence of the regularizing effect that the contrastive objective has on embedding geometry. UMAP projections corroborate this interpretation, revealing a progressive transition from a diffuse, unstructured embedding space under MAE-only training to clearly separated, AUC-stratified drug-patient clusters (see Figure \ref{fig:fig_umap_top3}) under the full contrastive objective, confirming that CLIP-AML learns a geometrically meaningful joint representation of drug–patient response compatibility.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Future Work}
+An important and natural extension of CLIP-AML is its application to large-scale pan-cancer pharmacogenomic resources such as the Cancer Cell Line Encyclopedia (CCLE) \cite{bouhaddou2016drug} and the Genomic of Drug Sensitivity in Cancer (GDSC) databases \cite{yang2012genomics}. These datasets encompass hundreds of cancer cell lines spanning diverse tumor types, profiled against libraries of thousands of compounds, offering an order-of-magnitude increase in drug–cell line interaction pairs relative to the BeatAML cohort. Adapting the CLIP-AML dual-encoder framework to this setting would require encoding cancer cell line multi-omic profiles with the addition of copy number variation, methylation, and proteomics to the existing gene expression and mutation data. This alongside expanded drug representations can be incorporated within the same contrastive learning objective. The inherent scalability of the shared embedding space, where any novel compound or cell line can be encoded and ranked without retraining, makes CLIP-AML particularly well-suited to this pan-cancer regime. Critically, training across diverse cancer contexts would expose the patient encoder to a substantially broader range of oncogenic states, potentially yielding more generalizable molecular representations that transfer across tumor lineages. 
+
+%Cross-dataset transfer experiments, for example, pretraining on CCLE/GDSC and fine-tuning on patient-derived AML cohorts such as BeatAML represent a particularly compelling direction.
+%This can potentially bridge the gap between the large-scale statistical power of cell line pharmacogenomics and the clinical relevance of patient-derived ex vivo sensitivity data, ultimately advancing the framework toward broader applicability in precision oncology.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+We presented CLIP-AML, a dual-encoder contrastive learning framework that maps patient multi-omic profiles and drug physico-chemical features into a shared latent space, trained with a composite MAE and bidirectional InfoNCE attract and repel objective. On BeatAML, the model achieves a test MAE of $39.170$, Pearson correlation of $0.657$, and Spearman correlation of $0.653$, competitive against majority classical and deep learning baselines. Generalization is notably strong, with a training-to-test gap below $0.05$ absolute points. The unified embedding further enables zero-shot ranking of novel patients without retraining, establishing a scalable foundation for ex vivo drug response in AML and beyond.
+%\section{Discussion}
+%We consistently observed improved performance using our contrastive learning (CL) framework compared to other deep learning architectures. Across multiple evaluation metrics, models incorporating the bidirectional contrastive loss achieved lower prediction errors and higher correlations between predicted and actual drug responses. Tree-based models such as CatBoost performed competitively; however, the contrastive learning approach yielded superior alignment between drug and patient embeddings, translating into more accurate personalized recommendations.
+
+%To assess the contribution of individual terms in our loss function, we conducted systematic ablation experiments. As shown in Figure ?, progressively adding each component—drug-to-patient loss, patient-to-drug loss, and the final contrastive objective—resulted in incremental performance gains. The full model, incorporating both bidirectional contrastive terms alongside MAE, achieved the lowest test error and highest correlation, confirming that each term plays a complementary role in learning meaningful drug–patient representations.
+
+%Visualizing the learned embeddings using UMAP (Figure ?) reveals that our contrastive framework successfully organizes drugs and patients in a shared space. Responsive drug–patient pairs cluster together, while non-responsive pairs remain separated. This structured embedding space not only facilitates accurate response prediction but also enables interpretable downstream analyses, such as identifying patient subgroups with similar therapeutic profiles and discovering novel drug repurposing opportunities. The clear separation and clustering observed in the UMAP plots underscore the effectiveness of our contrastive objective in capturing clinically relevant relationships.
+
+\scriptsize{
+\bibliographystyle{acm}
+\bibliography{sample-base}
+}
+
+%%
+%% If your work has an appendix, this is the place to put it.
+\clearpage
+\appendix
+\section*{Appendix}
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{figure}{0}
+
+\renewcommand{\thetable}{A\arabic{table}}
+\setcounter{table}{0}
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{Images/tsne_batch_test_train_p30.pdf}
+    \caption{ t-SNE projection (perplexity = 30) of the joint patient gene expression matrix  features; 337 training, 183 test patients). Train (blue) and test (red) patients are interleaved throughout the embedding space without cohort-specific clustering. All three multivariate distributional tests i.e. symmetric KL divergence, energy distance, and MMD yield BH FDR-adjusted p-values of 0.170, confirming that the train and test cohorts are statistically indistinguishable ($\alpha=0.05$).}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{Images/patients_per_inhibitor.pdf}
+    \caption{Cumulative number of patients in train and test set per inhibitor for which drug response scores are available.}
+    %\label{fig:appendix_fig1}
+\end{figure}
+
+\begin{table}[!ht]
+\centering
+\caption{RDKit-derived molecular descriptors, `networkx' based graphical features, Morgan and MACCS fingerprints obtained from RDKit, together represent the set of engineered features comprising the drug representation.}
+\label{tab:drug_features}
+\scriptsize
+\begin{adjustbox}{max width=0.9\linewidth}
+\begin{tabular}{|l|c|r|}
+\toprule
+\textbf{Feature Name} & \textbf{Feature Count} & \textbf{Feature Type} \\
+\midrule
+MaxAbsEStateIndex & 1 & Descriptor \\
+MinAbsEStateIndex & 1 & Descriptor \\
+MinEStateIndex & 1 & Descriptor \\
+qed & 1 & Descriptor \\
+SPS & 1 & Descriptor \\
+MolWt & 1 & Physico-chemical \\
+FpDensityMorgan1 & 1 & Descriptor \\
+AvgIpc & 1 & Descriptor \\
+BalabanJ & 1 & Descriptor \\
+Ipc & 1 & Descriptor \\
+Kappa2 & 1 & Descriptor \\
+PEOE\_VSA & 14 & Descriptor \\
+SMR\_VSA & 10 & Descriptor \\
+SlogP\_VSA & 12 & Descriptor \\
+TPSA & 1 & Descriptor \\
+EState\_VSA & 11 & Descriptor \\
+VSA\_Estate & 10 & Descriptor \\
+NHOHCount & 1 & Physico-chemical \\
+NumAliphaticCarbocycles & 1 & Physico-chemical \\
+NumAliphaticHeterocycles & 1 & Physico-chemical \\
+NumAliphaticRings & 1 & Physico-chemical \\
+NumAmideBonds & 1 & Physico-chemical \\
+NumAromaticHeterocycles & 1 & Physico-chemical \\
+NumAtomStereoCenters & 1 & Physico-chemical \\
+NumBridgeheadAtoms & 1 & Physico-chemical \\
+NumHAcceptors & 1 & Physico-chemical \\
+NumHeteroatoms & 1 & Physico-chemical \\
+NumHeterocycles & 1 & Physico-chemical \\
+NumRotatableBonds & 1 & Physico-chemical \\
+NumSaturatedCarbocycles & 1 & Physico-chemical \\
+NumSaturatedHeterocycles & 1 & Physico-chemical \\
+NumSaturatedRings & 1 & Physico-chemical \\
+NumSpiroAtoms & 1 & Physico-chemical \\
+NumUnspecifiedAtomStereoCenters & 1 & Physico-chemical \\
+RingCount & 1 & Physico-chemical \\
+MolLogP & 1 & Physico-chemical \\
+Fraction of Functional Groups & 62 & Physico-chemical \\
+graph\_diameter & 1 & Graphical \\
+avg\_shortest\_path & 1 & Graphical \\
+num\_cycles & 1 & Graphical \\
+num\_chains & 1 & Graphical \\
+clustering\_coefficients & 1 & Graphical \\
+avg\_degree\_centrality & 1 & Graphical \\
+avg\_eigen\_centrality & 1 & Graphical \\
+avg\_betweenness\_centrality & 1 & Graphical \\
+avg\_load\_centrality & 1 & Graphical \\
+wiener\_index & 1 & Graphical \\
+max\_degree & 1 & Graphical \\
+closeness\_mean & 1 & Graphical \\
+katz\_centrality\_std & 1 & Graphical \\
+betweenness\_mean & 1 & Graphical \\
+betweenness\_std & 1 & Graphical \\
+eigenvector\_mean & 1 & Graphical \\
+rings & 5 & Graphical \\
+heteroatom\_ratio & 1 & Graphical \\
+num\_aromatic\_rings & 1 & Graphical \\
+num\_non\_aromatic\_rings & 1 & Graphical \\
+average\_atoms (C, O, S, N) & 4 & Graphical \\
+num\_single\_bonds & 1 & Graphical \\
+num\_double\_bonds & 1 & Graphical \\
+Morgan (radius=3, nBits=128) & 128 & Fingerprint \\
+MACCS (nBits=167) & 167 & Fingerprint \\ \hline
+Total & 473 & Combined \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\end{document}
+\endinput
+%%
+%% End of file `sample-sigconf-authordraft.tex'.

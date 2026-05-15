@@ -1,30 +1,30 @@
 #!/bin/bash -l
-#SBATCH -J tabpfn_shap_fast
-#SBATCH -o out_tabpfn_shap_analysis_fast.log
-#SBATCH -e out_tabpfn_shap_analysis_fast.err
+#SBATCH -J tabpfn_pred_embed
+#SBATCH -o out_tabpfn_predict_embed.log
+#SBATCH -e out_tabpfn_predict_embed.err
 #SBATCH -p gpu-H200
 #SBATCH --gres=gpu:1
 #SBATCH --mem=120000
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=36
 #SBATCH -A H200
 #SBATCH -q h200_qos
 #SBATCH -x crirdchpxd005
-#SBATCH -w crirdchpxd001
-#SBATCH --time=12:00:00
+#SBATCH -w crirdchpxd003
 
 # ─── Resource justification ──────────────────────────────────────────────────
 #
-#  GPU  1× H200 (141 GB HBM3e)
-#    TabPFNExplainer calls model.fit()+predict() for each coalition — all GPU.
+#  Steps 1–4 only (no SHAP).
 #
-#  Time  12 h  (was 48 h)
-#    TabPFNExplainer (remove-and-contextualize) vs MarginalImputer:
-#      - Context: 200 rows (not full train set) → faster per-coalition eval
-#      - Budget: 128 coalitions/sample (was 512)
-#      - Samples: 100 train + 300 test = 400 total (was 2000)
-#    Estimated wall time: 3–7 h on H200; 12 h gives a safe buffer.
+#  GPU  1× H200
+#    Step 3: predict train (~33K) + test (~18K) + CI quantiles (~18K) — all GPU.
+#    Step 4: get_embeddings on full train (~210 MB) + full test (~117 MB) — GPU.
 #
-# ────────────────────────────────────────────────────────────────────────────
+#  Time  ~2 h
+#    Step 3 predict calls: ~370 s each × 3 calls ≈ 30 min total.
+#    Step 4 embeddings:    ~5–10 min each × 2 splits.
+#    Total with buffer: 2 h.
+#
+# ─────────────────────────────────────────────────────────────────────────────
 
 module load cuda12.6/toolkit/12.6.2
 python --version
@@ -46,7 +46,7 @@ micromamba activate BeatAML2.0
 python3 -c "import torch; print(f'PyTorch {torch.__version__}  CUDA available: {torch.cuda.is_available()}  device_count: {torch.cuda.device_count()}')"
 
 echo "============================================================"
-echo "  TabPFN Fast SHAP (TabPFNExplainer) + CI Analysis"
+echo "  TabPFN Predict + Embed (Steps 1–4)"
 echo "  Start  : $(date)"
 echo "  Node   : $(hostname)"
 echo "  GPU    : $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null)"
@@ -58,7 +58,7 @@ cd /export/cse/rmall/Raghvendra/PT-AML2.0/scripts
 
 export PYTHONUNBUFFERED=1
 
-python3 tabpfn_shap_analysis_fast.py
+python3 tabpfn_predict_embed.py
 
 EXIT_CODE=$?
 echo "============================================================"
