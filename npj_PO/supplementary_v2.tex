@@ -52,21 +52,17 @@
     \label{fig:suppfig1}
 \end{figure}
 
-%% Fig S2 ─ Patients per inhibitor
+%% Fig S2 ─ Drug vs Patient normalized prediction heatmap
 \begin{figure}[!ht]
     \centering
-    \subfloat[Fig S2A][Distribution of AUC drug response values across training (Waves~1+2) and test (Waves~3+4)
-    patient samples. No statistically significant difference was observed ($p > 0.05$, Wilcoxon rank-sum test),
-    confirming comparable drug sensitivity distributions between splits.]{
-        \includegraphics[width=0.72\textwidth]{figures/Train_Test_Y_distribution.pdf}
-    }
-    \qquad
-    \subfloat[Fig S2B][Number of patient samples tested per inhibitor in the BeatAML dataset. Drugs vary
-    substantially in the number of assayed patients; inhibitors tested on fewer patients contribute to
-    wider prediction confidence intervals in the TabPFN ensemble.]{
-        \includegraphics[width=0.72\textwidth]{figures/patients_per_inhibitor.pdf}
-    }
-    \caption{\textbf{Drug response distribution and per-inhibitor data coverage statistics for the BeatAML cohort.}}
+    \includegraphics[width=0.97\textwidth]{../Results/Figures/Drug_vs_Patient_NormalizedPrediction_Heatmap.pdf}
+    \caption{\textbf{Normalized drug response predictions across BeatAML patient samples and inhibitors.}
+    Each cell encodes the normalized predicted AUC for a given drug--patient pair (z-scored per drug).
+    Rows correspond to inhibitors and columns to patient samples from the BeatAML training set (Waves~1+2).
+    Hierarchical clustering on both axes reveals drug clusters reflecting mechanistic class similarity and
+    patient clusters corresponding to transcriptional subgroups identified in Supplementary Fig.~1.
+    This landscape illustrates the heterogeneity of predicted drug sensitivity across the cohort and
+    supports the patient-stratified evaluation as the clinically relevant benchmark.}
     \label{fig:suppfig2}
 \end{figure}
 
@@ -399,3 +395,4 @@ Clin\_Cell\_Mod + Mutation + Pathway & Embed    & $32.068 \pm 2.150$ & $0.709 \p
 \end{table}
 
 \end{document}
+
