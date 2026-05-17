@@ -22,18 +22,18 @@ setwd("/export/cse/rmall/Raghvendra/PT-AML2.0/scripts/")
 ## All non-NULL matrices must share the same columns (samples).
 ## ============================================================
 
-N <- 15   # number of samples
+N <- 25   # number of samples
 S <- paste0("S", seq_len(N))
 
 # Set any of these to NULL to drop that block
-mat_clin <- matrix(rnorm(2 * N),           nrow = 2,
-                   dimnames = list(paste0("ClinTrait_", 1:2), S))
+mat_clin <- matrix(rnorm(10 * N),           nrow = 10,
+                   dimnames = list(paste0("ClinTrait_", 1:10), S))
 
-mat_mut  <- matrix(rbeta(10 * N, 0.3, 5),   nrow = 10,
-                   dimnames = list(paste0("Gene_", 1:10), S))
+mat_mut  <- matrix(rbeta(20 * N, 0.3, 5),   nrow = 20,
+                   dimnames = list(paste0("Gene_", 1:20), S))
 
-mat_expr <- matrix(rnorm(10 * N, sd = 2),   nrow = 10,
-                   dimnames = list(paste0("GeneExpr_", 1:10), S))
+mat_expr <- matrix(rnorm(50 * N, sd = 2),   nrow = 50,
+                   dimnames = list(paste0("GeneExpr_", 1:50), S))
 
 # All three below are combined into one "functional enrichments" block.
 # Set all three to NULL to drop that block entirely.
@@ -79,23 +79,33 @@ col_enrich <- colorRamp2(
 ## ============================================================
 
 # Height scales automatically with number of rows
-cm_per_row <- 0.3
+cm_per_row <- 0.35
 min_cm     <- 2.0
 block_h    <- function(mat) unit(max(min_cm, nrow(mat) * cm_per_row), "cm")
 
+# Legend style applied to every block — horizontal bar below the heatmap
+LEGEND_PARAMS <- list(
+  direction     = "horizontal",
+  title_gp      = gpar(fontsize = 7, fontface = "bold"),
+  labels_gp     = gpar(fontsize = 7),
+  legend_width  = unit(2.5, "cm"),
+  grid_height   = unit(2, "mm")
+)
+
 # Options applied to every heatmap block
 SHARED <- list(
-  cluster_columns     = FALSE,
-  show_column_names   = FALSE,
-  show_row_names      = FALSE,
-  show_row_dend       = FALSE,
-  show_heatmap_legend = FALSE,
-  top_annotation      = NULL,
-  border              = TRUE,
-  border_gp           = gpar(col = "grey40", lwd = 0.4),
-  row_title_side      = "right",
-  row_title_rot       = 0,
-  row_title_gp        = gpar(fontsize = 8, fontface = "bold")
+  cluster_columns      = FALSE,
+  show_column_names    = FALSE,
+  show_row_names       = FALSE,
+  show_row_dend        = FALSE,
+  show_heatmap_legend  = TRUE,
+  heatmap_legend_param = LEGEND_PARAMS,
+  top_annotation       = NULL,
+  border               = TRUE,
+  border_gp            = gpar(col = "grey40", lwd = 0.4),
+  row_title_side       = "right",
+  row_title_rot        = 0,
+  row_title_gp         = gpar(fontsize = 8, fontface = "bold")
 )
 
 ht <- function(...) do.call(Heatmap, modifyList(SHARED, list(...)))
@@ -182,10 +192,13 @@ save_heatmap <- function(
   draw_it <- function() {
     ComplexHeatmap::draw(
       ht_list,
-      show_heatmap_legend    = FALSE,
-      show_annotation_legend = FALSE,
+      show_heatmap_legend    = TRUE,
+      show_annotation_legend = TRUE,
+      heatmap_legend_side    = "bottom",
+      annotation_legend_side = "bottom",
+      merge_legend           = TRUE,
       ht_gap                 = unit(3, "mm"),
-      padding                = unit(c(2, 2, 2, 2), "mm"),
+      padding                = unit(c(2, 2, 10, 2), "mm"),  # extra bottom padding for legends
       background             = "white"
     )
   }
@@ -205,9 +218,9 @@ save_heatmap <- function(
 ## ── Run ───────────────────────────────────────────────────────
 
 # All available blocks (whatever is non-NULL above)
-# save_heatmap(out_prefix = "BeatAML_full", width=5, height=11)
+save_heatmap(out_prefix = "BeatAML_full")
 
 # Any subset — just name the ones you want
-save_heatmap(blocks = c("clinical annotation", "mutation frequencies", "gene expression","functional enrichments"), out_prefix = "FIMM-AML_full", height=6, width=5)
+# save_heatmap(blocks = c("clinical annotation", "gene expression"),         out_prefix = "BeatAML_clin_expr")
 # save_heatmap(blocks = c("mutation frequencies", "functional enrichments"), out_prefix = "BeatAML_mut_enrich")
 # save_heatmap(blocks = "functional enrichments",                            out_prefix = "BeatAML_enrichment")

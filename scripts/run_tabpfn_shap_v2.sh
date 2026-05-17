@@ -10,28 +10,34 @@
 #SBATCH -q h200_qos
 #SBATCH -x crirdchpxd005
 #SBATCH -w crirdchpxd003
-#SBATCH -t 36:00:00
 
-# ─── Resource justification ──────────────────────────────────────────────────
+# ─── What this job does ──────────────────────────────────────────────────────
 #
-#  Prerequisites: tabpfn_predict_embed.py must have been run first.
-#  The SHAP step reads test_predictions_with_CI.csv and
-#  embedding_attention_importance.csv from OUT_DIR.
+#  Step 2b — Train a fresh TabPFNRegressor with tabpfn 8.0.2 on the full
+#             training set (33 K rows × 1561 features), save it.
+#             The original saved model cannot be loaded under tabpfn 8.0.2
+#             (module-path change: tabpfn.architectures.base.encoders gone).
 #
-#  GPU  1× H200 (141 GB HBM3e)
-#    Each coalition evaluation re-contextualises TabPFN on the full 33 K
-#    training context — dominated by the transformer attention pass.
-#    Estimated ~3–10 s/coalition on H200 with tabpfn 8.0.2.
+#  Step 5   — SHAP (TabPFNExplainer, PermutationSamplingSV).
+#             Full 33 K training context, all 1561 features.
+#             Two-level crash-safe cache; re-submitting this job resumes
+#             from the deepest checkpoint automatically.
 #
-#  Timing estimate (SHAP_BUDGET = 8192):
-#    8192 coalitions × ~5 s ≈ 11 h per sample.
-#    For 20 train + 100 test = 120 samples → ~1320 h total.
+#  Step 5b  — SHAP waterfall for notable test samples.
 #
-#    Recommended approach: reduce SHAP_TEST_SAMPLES / SHAP_TRAIN_SAMPLES and
-#    submit multiple jobs using the crash-safe caching (each job resumes from
-#    the latest checkpoint).  A single 36 h job can explain ~3 samples at
-#    budget=8192.  Alternatively, lower SHAP_BUDGET to 2048 for noisier but
-#    faster estimates (~2.7 h/sample → ~30 samples in 36 h).
+#  Step 6   — Combined SHAP + embedding-attention importance summary.
+#             Reads embedding_attention_importance.csv from tabpfn_predict_embed.py;
+#             gracefully degrades to SHAP-only ranking if that file is absent.
+#
+# ─── Timing estimates ────────────────────────────────────────────────────────
+#
+#  Step 2b  fit(): tabpfn 8.0.2, n_estimators=8, H200 → ~5–20 min.
+#  Step 5   SHAP:  each coalition = one model.fit(33 K) + predict(1 sample).
+#    Estimated ~3–8 s/coalition × 4096 budget ≈ 3.4–9 h per sample.
+#    A single 36 h job can explain ~4–10 test samples at SHAP_BUDGET=4096.
+#    To cover all 100 test + 20 train samples: ~10–25 sequential 36 h jobs,
+#    each resuming from the checkpoint left by the previous one.
+#    Alternative: lower SHAP_BUDGET to 1024 → ~4× faster, noisier estimates.
 #
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -52,10 +58,15 @@ unset __mamba_setup
 
 micromamba activate BeatAML2.0
 
-python3 -c "import torch, tabpfn, shapiq; print(f'PyTorch {torch.__version__}  tabpfn {tabpfn.__version__}  shapiq {shapiq.__version__}  CUDA: {torch.cuda.is_available()}')"
+python3 -c "
+import tabpfn, shapiq, torch
+print(f'tabpfn  : {tabpfn.__version__}')
+print(f'shapiq  : {shapiq.__version__}')
+print(f'PyTorch : {torch.__version__}  CUDA: {torch.cuda.is_available()}')
+"
 
 echo "============================================================"
-echo "  TabPFN SHAP v3 (Steps 5–6)"
+echo "  TabPFN 8.0.2 retrain + SHAP v3 (Steps 2b, 5, 5b, 6)"
 echo "  Start  : $(date)"
 echo "  Node   : $(hostname)"
 echo "  GPU    : $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null)"
