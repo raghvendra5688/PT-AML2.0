@@ -52,111 +52,67 @@
     \label{fig:suppfig1}
 \end{figure}
 
-%% Fig S2 ─ Drug vs Patient normalized prediction heatmap
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=0.97\textwidth]{../Results/Figures/Drug_vs_Patient_NormalizedPrediction_Heatmap.pdf}
+    \includegraphics[width=0.97\textwidth]{figures/Drug_vs_Patient_NormalizedPrediction_Heatmap.pdf}
     \caption{\textbf{Normalized drug response predictions across BeatAML patient samples and inhibitors.}
-    Each cell encodes the normalized predicted AUC for a given drug--patient pair (z-scored per drug).
+    Each cell encodes the normalized predicted AUC for a given drug-patient pair (z-scored per drug).
     Rows correspond to inhibitors and columns to patient samples from the BeatAML training set (Waves~1+2).
     Hierarchical clustering on both axes reveals drug clusters reflecting mechanistic class similarity and
-    patient clusters corresponding to transcriptional subgroups identified in Supplementary Fig.~1.
-    This landscape illustrates the heterogeneity of predicted drug sensitivity across the cohort and
-    supports the patient-stratified evaluation as the clinically relevant benchmark.}
+    patient clusters corresponding to drug response in sensitivity vs resistance.
+    This landscape illustrates the heterogeneity of predicted drug sensitivity across the cohort and supports the patient-stratified evaluation as the clinically relevant benchmark.}
     \label{fig:suppfig2}
 \end{figure}
 
-%% Fig S3 ─ Top-20 feature importances for tree-based models
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.97\textwidth]{jtrm_images/Supp_Fig3.pdf}
-    \caption{\textbf{Top-20 most important variables for the best-performing tree-based models.}
-    Feature importances are shown for CatBoost (MFP + all molecular features), Random Forest (RF), and
-    LightGBM (LGBM), each using either Morgan fingerprint (MFP) or SMILES-LS embedding (LS) drug
-    representations combined with the full molecular patient feature set (Feat).
-    Drug--pathway AUC proximity features and transcriptomic variables consistently rank among the top
-    predictors across all three models.}
-    \label{fig:suppfig3}
-\end{figure}
 
-%% Fig S4 ─ TabPFN ablation baseline scatter plots
+% %% Fig S3 ─ Top-20 feature importances for tree-based models
+% \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[width=0.97\textwidth]{jtrm_images/Supp_Fig3.pdf}
+%     \caption{\textbf{Top-20 most important variables for the best-performing tree-based models.}
+%     Feature importances are shown for CatBoost (MFP + all molecular features), Random Forest (RF), and
+%     LightGBM (LGBM), each using either Morgan fingerprint (MFP) or SMILES-LS embedding (LS) drug
+%     representations combined with the full molecular patient feature set (Feat).
+%     Drug--pathway AUC proximity features and transcriptomic variables consistently rank among the top
+%     predictors across all three models.}
+%     \label{fig:suppfig3}
+% \end{figure}
+
+%% Fig S3 ─ TabPFN ablation baseline scatter plots
 \begin{figure}[!ht]
     \centering
-    \subfloat[Only\_PC Baseline][Predicted vs.\ observed AUC for the TabPFN baseline (all feature groups) with
-    Only\_PC drug representation under patient-stratified CV.]{
-        \includegraphics[width=0.85\textwidth]{figures/ablation_baseline_PC.pdf}
+    \subfloat[Only\_PC Baseline][Predicted vs.\ observed AUC for the TabPFN baseline (all feature groups) with physico-chemical (PC) drug representation under patient-stratified CV.]{
+        \includegraphics[width=0.45\textwidth]{figures/ablation_baseline_PC.pdf}
     }
     \qquad
     \subfloat[SMILES-LS Baseline][Predicted vs.\ observed AUC for the TabPFN baseline (all feature groups) with
-    SMILES-LS (Embed) drug representation under patient-stratified CV.]{
-        \includegraphics[width=0.85\textwidth]{figures/ablation_baseline_Embed.pdf}
-    }
-    \qquad
-    \subfloat[PC+Embed Baseline][Predicted vs.\ observed AUC for the TabPFN baseline (all feature groups) with
-    combined PC+Embed drug representation under patient-stratified CV.]{
-        \includegraphics[width=0.85\textwidth]{figures/ablation_baseline_PC_Embed.pdf}
+    KD Embed drug representation under patient-stratified CV.]{
+        \includegraphics[width=0.45\textwidth]{figures/ablation_baseline_Embed.pdf}
     }
     \caption{\textbf{TabPFN ablation study: baseline (all feature groups) prediction scatter plots.}
     Each panel corresponds to a different drug molecular representation using the full patient feature set
     (gene expression, mutation, pathway, cell-state/module features) under patient-stratified CV.
-    See Supplementary Table~S2 for complete ablation results across all CV strategies and feature group
-    combinations.}
+    See Supplementary Table~S3 for complete ablation results across all CV strategies and feature group combinations.}
+    \label{fig:suppfig3}
+\end{figure}
+
+%% Fig S4 ─ LeeAML and FIMM-AML best configuration scatter
+\begin{figure}[!ht]
+    \centering
+    \subfloat[LeeAML Best Config][External validation on LeeAML cohort: best-performing configuration (KD Embed).]{
+    \includegraphics[width=0.45\textwidth]{figures/LeeAML_best_config_scatter.pdf}
+    }
+    \qquad
+    \subfloat[FIMM-AML Best Config][External validation on FIMM-AML cohort: best-performing configuration (KD Embed).]{
+    \includegraphics[width=0.45\textwidth]{figures/FIMMAML_Embed_scatter.pdf}
+    }
+    \caption{\textbf{TabPFN model comparison on external LeeAML and FIMM-AML cohorts}.
+    Predicted vs.\ observed AUC values for the KD Embed drug representation on the 49 drugs common between BeatAML and LeeAML ($n = 30$ patients). Similarly predicted vs.\ DSS scores for the KD Embed drug representation on the 78 drugs common between BeatAML and FIMM-AML ($n=187$ patients). The diagonal indicates perfect prediction; Spearman rank correlation is used to account for the non-linear relationship between the AUC and DSS drug sensitivity metrics.
+    The KD Embed configuration achieves the most consistent patient-level rank correlations on both the external cohorts.}
     \label{fig:suppfig4}
 \end{figure}
 
-%% Fig S5 ─ LeeAML best configuration scatter
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figures/LeeAML_best_config_scatter.pdf}
-    \caption{\textbf{External validation on LeeAML cohort: best-performing configuration (SMILES-LS).}
-    Predicted vs.\ observed AUC values for the SMILES-LS (Embed) drug representation on the 49 drugs
-    common between BeatAML and LeeAML ($n = 30$ patients).
-    The diagonal indicates perfect prediction; color encodes drug identity.
-    The SMILES-LS configuration achieves the most consistent patient-level rank correlations among all
-    four drug representations evaluated on this cohort.}
-    \label{fig:suppfig5}
-\end{figure}
-
-%% Figs S6–S9 ─ Individual FIMM-AML configuration scatters
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.82\textwidth]{figures/FIMMAML_Embed_scatter.pdf}
-    \caption{\textbf{External validation on FIMM-AML cohort: SMILES-LS (Embed) drug representation.}
-    Predicted AUC (BeatAML scale) vs.\ observed DSS values for the SMILES-LS drug representation on the
-    78 drugs common between BeatAML and FIMM-AML ($n = 187$ patient samples).
-    Spearman rank correlation is used to account for the non-linear relationship between the AUC and DSS
-    drug sensitivity metrics.}
-    \label{fig:suppfig6}
-\end{figure}
-
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.82\textwidth]{figures/FIMMAML_ChemBERTa_scatter.pdf}
-    \caption{\textbf{External validation on FIMM-AML cohort: ChemBERTa drug representation.}
-    Predicted AUC (BeatAML scale) vs.\ observed DSS values for the ChemBERTa drug representation on the
-    78 common drugs ($n = 187$ patient samples).}
-    \label{fig:suppfig7}
-\end{figure}
-
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.82\textwidth]{figures/FIMMAML_MolFormer_scatter.pdf}
-    \caption{\textbf{External validation on FIMM-AML cohort: MolFormer drug representation.}
-    Predicted AUC (BeatAML scale) vs.\ observed DSS values for the MolFormer drug representation on the
-    78 common drugs ($n = 187$ patient samples).}
-    \label{fig:suppfig8}
-\end{figure}
-
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.82\textwidth]{figures/FIMMAML_PC_scatter.pdf}
-    \caption{\textbf{External validation on FIMM-AML cohort: Only\_PC drug representation.}
-    Predicted AUC (BeatAML scale) vs.\ observed DSS values for the Only\_PC (physicochemical + Morgan
-    fingerprints) drug representation on the 78 common drugs ($n = 187$ patient samples).}
-    \label{fig:suppfig9}
-\end{figure}
-
-%% Fig S10 ─ Full ML/DL benchmark visual
+%% Fig S5 ─ Full ML/DL benchmark visual
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.97\textwidth]{jtrm_images/Supp_Fig2.pdf}
@@ -166,11 +122,11 @@
     Waves~3+4 test set.
     \textbf{H--S.}~Performance comparison of different combinations of patient feature sets and drug
     representations within the CatBoost framework.
-    Numerical results for the full benchmark are provided in Supplementary Table~S1.}
-    \label{fig:suppfig10}
+    Numerical results for the full benchmark are provided in Supplementary Table~S2.}
+    \label{fig:suppfig5}
 \end{figure}
 
-%% Fig S11 ─ CatBoost SHAP summary
+%% Fig S6 ─ TabPFN SHAP summary
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.82\textwidth]{jtrm_images/CatBoost_SHAP_Summary.pdf}
@@ -180,10 +136,10 @@
     (contribution to predicted AUC).
     Drug--pathway proximity scores and high-variance transcriptomic features contribute most to predicted
     drug sensitivity.}
-    \label{fig:suppfig11}
+    \label{fig:suppfig6}
 \end{figure}
 
-%% Fig S12 ─ CatBoost SHAP waterfall plots
+%% Fig S7 ─ TabPFN SHAP waterfall plots
 \begin{figure}[!ht]
     \centering
     \subfloat[Sensitive Sample 1][SHAP waterfall for a drug-sensitive patient--drug pair (high predicted AUC).]{
@@ -292,50 +248,74 @@ MACCS (nBits=167)        & 167 & Fingerprint \\
 \end{tabular}
 \end{table}
 
-%% Table S2 ─ Full ML/DL benchmark
+%% Table S2 ─ Full ML/DL benchmark (all 44 model × drug representation PS-CV combinations)
 \begin{table}[!ht]
 \centering
-\caption{\textbf{Full benchmark of machine learning and deep learning models on the BeatAML held-out test set
-(Waves~3+4, $n = 183$ samples).}
-Models are grouped by class. For tree-based and linear models, the best configuration of patient feature set
-and drug representation is reported. Deep learning models process drug SMILES directly.
-The bold CatBoost row is the best classical model; it serves as the reference baseline for comparison with
-PREDICT-AML (TabPFN).
-PREDICT-AML (TabPFN) results are reported as 5-fold patient-stratified CV (PS-CV) means $\pm$ std on the
-BeatAML training set (the clinically meaningful benchmark; see main text).}
-\label{table:suppS1}
+\caption{\textbf{Extended benchmark: all model--drug representation combinations on BeatAML under
+patient-stratified 5-fold CV (PS-CV) and held-out test set (Waves~3+4, $n = 183$ samples).}
+PS-CV values are mean\,$\pm$\,std across 5 folds; $\%\Delta r_{pc} = (r_{\text{PS-CV}} - r_{\text{Test}})/r_{\text{PS-CV}} \times 100$
+(smaller = better generalization; negative values indicate test $r_{pc}$ marginally exceeds PS-CV mean).
+\textbf{Bold} marks the best row per model by test $r_{pc}$.}
+\label{table:suppPS}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{llccccc}
+\begin{tabular}{lllccccr}
 \toprule
-\textbf{Model} & \textbf{Class} & \textbf{CV MAE} & \textbf{Test MAE} & \textbf{Test RMSE} & \textbf{Test r} & \textbf{Test R$^2$}\\
+\textbf{Model} & \textbf{Class} & \textbf{Drug Rep.} & \textbf{PS-CV MAE} & \textbf{Test MAE} & \textbf{PS-CV $r_{pc}$} & \textbf{Test $r_{pc}$} & \textbf{$\%\Delta r_{pc}$} \\
 \midrule
-GLR & Linear & -- & $\approx\!44.8$ & -- & $\approx\!0.55$ & -- \\
-SVR & Linear & -- & $\approx\!43.1$ & -- & $\approx\!0.58$ & -- \\
+TabPFN & Transformer & PC & $31.790 \pm 1.451$ & $37.830$ & $0.712 \pm 0.021$ & $0.686$ & $3.7$ \\
+\textbf{TabPFN} & \textbf{Transformer} & \textbf{KD-Embed} & $\mathbf{31.453 \pm 0.959}$ & $\mathbf{37.845}$ & $\mathbf{0.716 \pm 0.013}$ & $\mathbf{0.687}$ & $\mathbf{4.1}$ \\
+TabPFN & Transformer & ChemBERTa & $31.574 \pm 1.417$ & $37.843$ & $0.715 \pm 0.022$ & $0.685$ & $4.2$ \\
+TabPFN & Transformer & MolFormer & $31.592 \pm 1.327$ & $37.942$ & $0.716 \pm 0.024$ & $0.686$ & $4.2$ \\
 \midrule
-Random Forest (RF) & Tree ensemble & -- & $\approx\!42.0$ & -- & $\approx\!0.60$ & -- \\
-XGBoost & Tree ensemble & -- & $\approx\!40.5$ & -- & $\approx\!0.63$ & -- \\
-LightGBM & Tree ensemble & -- & $\approx\!40.8$ & -- & $\approx\!0.63$ & -- \\
-\textbf{CatBoost} & \textbf{Tree ensemble} & \textbf{--} & $\mathbf{39.04}$ & $\mathbf{52.03}$ & $\mathbf{0.66}$ & $\mathbf{0.44}$ \\
+RF & Tree ensemble & PC & $34.186 \pm 1.546$ & $40.740$ & $0.673 \pm 0.029$ & $0.643$ & $4.5$ \\
+RF & Tree ensemble & KD-Embed & $34.134 \pm 0.996$ & $40.446$ & $0.672 \pm 0.027$ & $0.643$ & $4.3$ \\
+\textbf{RF} & \textbf{Tree ensemble} & \textbf{ChemBERTa} & $\mathbf{33.831 \pm 0.917}$ & $\mathbf{40.076}$ & $\mathbf{0.676 \pm 0.026}$ & $\mathbf{0.651}$ & $\mathbf{3.7}$ \\
+RF & Tree ensemble & MolFormer & $34.431 \pm 1.772$ & $40.960$ & $0.667 \pm 0.021$ & $0.638$ & $4.3$ \\
+XGB & Tree ensemble & PC & $32.652 \pm 1.630$ & $39.539$ & $0.703 \pm 0.020$ & $0.660$ & $6.1$ \\
+XGB & Tree ensemble & KD-Embed & $32.758 \pm 2.014$ & $39.099$ & $0.705 \pm 0.028$ & $0.666$ & $5.5$ \\
+\textbf{XGB} & \textbf{Tree ensemble} & \textbf{ChemBERTa} & $\mathbf{32.804 \pm 1.834}$ & $\mathbf{38.918}$ & $\mathbf{0.704 \pm 0.018}$ & $\mathbf{0.673}$ & $\mathbf{4.4}$ \\
+XGB & Tree ensemble & MolFormer & $32.272 \pm 0.721$ & $39.027$ & $0.713 \pm 0.015$ & $0.673$ & $5.6$ \\
+\textbf{LightGBM} & \textbf{Tree ensemble} & \textbf{PC} & $\mathbf{32.099 \pm 1.953}$ & $\mathbf{38.399}$ & $\mathbf{0.718 \pm 0.031}$ & $\mathbf{0.681}$ & $\mathbf{5.2}$ \\
+LightGBM & Tree ensemble & KD-Embed & $32.005 \pm 0.774$ & $38.563$ & $0.718 \pm 0.007$ & $0.678$ & $5.6$ \\
+LightGBM & Tree ensemble & ChemBERTa & $32.554 \pm 0.827$ & $38.812$ & $0.712 \pm 0.019$ & $0.678$ & $4.8$ \\
+LightGBM & Tree ensemble & MolFormer & $32.114 \pm 0.857$ & $38.634$ & $0.717 \pm 0.003$ & $0.678$ & $5.4$ \\
+CatBoost & Tree ensemble & PC & $32.483 \pm 2.092$ & $38.806$ & $0.704 \pm 0.035$ & $0.672$ & $4.5$ \\
+\textbf{CatBoost} & \textbf{Tree ensemble} & \textbf{KD-Embed} & $\mathbf{32.478 \pm 0.527}$ & $\mathbf{38.391}$ & $\mathbf{0.699 \pm 0.020}$ & $\mathbf{0.676}$ & $\mathbf{3.3}$ \\
+CatBoost & Tree ensemble & ChemBERTa & $32.440 \pm 1.499$ & $38.532$ & $0.705 \pm 0.029$ & $0.676$ & $4.1$ \\
+CatBoost & Tree ensemble & MolFormer & $32.189 \pm 1.391$ & $38.503$ & $0.704 \pm 0.018$ & $0.673$ & $4.4$ \\
 \midrule
-FFNN & Neural network & $18.19 \pm 1.05$ & $42.65$ & -- & $0.60$ & -- \\
+CNN & DL (SMILES) & PC & $32.174 \pm 0.756$ & $40.175$ & $0.707 \pm 0.012$ & $0.639$ & $9.6$ \\
+CNN & DL (SMILES) & KD-Embed & $34.225 \pm 0.582$ & $39.655$ & $0.710 \pm 0.010$ & $0.649$ & $8.6$ \\
+CNN & DL (SMILES) & ChemBERTa & $31.466 \pm 0.545$ & $40.424$ & $0.726 \pm 0.011$ & $0.641$ & $11.7$ \\
+\textbf{CNN} & \textbf{DL (SMILES)} & \textbf{MolFormer} & $\mathbf{32.106 \pm 0.498}$ & $\mathbf{40.520}$ & $\mathbf{0.711 \pm 0.010}$ & $\mathbf{0.651}$ & $\mathbf{8.4}$ \\
+LSTM & DL (SMILES) & PC & $33.370 \pm 0.582$ & $40.859$ & $0.678 \pm 0.008$ & $0.624$ & $8.0$ \\
+LSTM & DL (SMILES) & KD-Embed & $33.225 \pm 0.594$ & $41.600$ & $0.690 \pm 0.009$ & $0.616$ & $10.7$ \\
+LSTM & DL (SMILES) & ChemBERTa & $33.089 \pm 0.590$ & $40.745$ & $0.697 \pm 0.007$ & $0.640$ & $8.2$ \\
+\textbf{LSTM} & \textbf{DL (SMILES)} & \textbf{MolFormer} & $\mathbf{31.859 \pm 0.552}$ & $\mathbf{39.532}$ & $\mathbf{0.717 \pm 0.010}$ & $\mathbf{0.652}$ & $\mathbf{9.1}$ \\
 \midrule
-CNN & Deep learning (SMILES) & -- & $\approx\!40.85$ & -- & $\approx\!0.63$ & -- \\
-LSTM & Deep learning (SMILES) & -- & $\approx\!40.70$ & -- & $\approx\!0.62$ & -- \\
-GAT & Deep learning (graph) & -- & $\approx\!40.80$ & -- & $\approx\!0.63$ & -- \\
-GCN & Deep learning (graph) & -- & $\approx\!40.75$ & -- & $\approx\!0.63$ & -- \\
+GAT+FFNN & DL (graph) & PC & $36.853 \pm 0.633$ & $41.114$ & $0.608 \pm 0.013$ & $0.611$ & $-0.5$ \\
+GAT+FFNN & DL (graph) & KD-Embed & $37.671 \pm 0.933$ & $42.899$ & $0.573 \pm 0.017$ & $0.586$ & $-2.3$ \\
+GAT+FFNN & DL (graph) & ChemBERTa & $36.803 \pm 1.001$ & $40.332$ & $0.608 \pm 0.016$ & $0.628$ & $-3.3$ \\
+\textbf{GAT+FFNN} & \textbf{DL (graph)} & \textbf{MolFormer} & $\mathbf{35.158 \pm 0.803}$ & $\mathbf{40.403}$ & $\mathbf{0.695 \pm 0.008}$ & $\mathbf{0.633}$ & $\mathbf{8.9}$ \\
+GCN+FFNN & DL (graph) & PC & $33.307 \pm 0.703$ & $40.528$ & $0.684 \pm 0.013$ & $0.627$ & $8.3$ \\
+GCN+FFNN & DL (graph) & KD-Embed & $33.254 \pm 0.562$ & $40.377$ & $0.683 \pm 0.013$ & $0.634$ & $7.2$ \\
+GCN+FFNN & DL (graph) & ChemBERTa & $32.794 \pm 0.604$ & $40.568$ & $0.692 \pm 0.013$ & $0.636$ & $8.1$ \\
+\textbf{GCN+FFNN} & \textbf{DL (graph)} & \textbf{MolFormer} & $\mathbf{32.547 \pm 0.567}$ & $\mathbf{39.936}$ & $\mathbf{0.696 \pm 0.010}$ & $\mathbf{0.647}$ & $\mathbf{7.0}$ \\
 \midrule
-\multicolumn{7}{l}{\textit{PREDICT-AML TabPFN --- 5-fold patient-stratified CV on BeatAML training set}} \\
-\midrule
-TabPFN (Only\_PC)    & Transformer & -- & $31.790 \pm 1.451$ & $43.513 \pm 2.963$ & $0.712 \pm 0.021$ & $0.508 \pm 0.029$ \\
-TabPFN (SMILES-LS)   & Transformer & -- & $31.453 \pm 0.959$ & $43.181 \pm 1.526$ & $0.716 \pm 0.013$ & $0.512 \pm 0.019$ \\
-TabPFN (ChemBERTa)   & Transformer & -- & $31.574 \pm 1.417$ & $43.230 \pm 1.860$ & $0.715 \pm 0.022$ & $0.512 \pm 0.032$ \\
-\textbf{TabPFN (MolFormer)} & \textbf{Transformer} & \textbf{--} & $\mathbf{31.592 \pm 1.327}$ & $\mathbf{43.138 \pm 2.793}$ & $\mathbf{0.716 \pm 0.024}$ & $\mathbf{0.513 \pm 0.034}$ \\
+GLR (Ridge) & Linear & PC & $35.391 \pm 1.238$ & $42.244$ & $0.660 \pm 0.015$ & $0.599$ & $9.2$ \\
+GLR (Ridge) & Linear & KD-Embed & $35.272 \pm 1.248$ & $42.049$ & $0.662 \pm 0.015$ & $0.603$ & $8.9$ \\
+GLR (Ridge) & Linear & ChemBERTa & $35.139 \pm 1.258$ & $41.737$ & $0.665 \pm 0.015$ & $0.611$ & $8.1$ \\
+\textbf{GLR (Ridge)} & \textbf{Linear} & \textbf{MolFormer} & $\mathbf{35.391 \pm 1.238}$ & $\mathbf{41.412}$ & $\mathbf{0.660 \pm 0.015}$ & $\mathbf{0.619}$ & $\mathbf{6.2}$ \\
+LSSVR & Linear & PC & $35.740 \pm 1.186$ & $42.783$ & $0.653 \pm 0.013$ & $0.588$ & $10.0$ \\
+LSSVR & Linear & KD-Embed & $35.723 \pm 1.190$ & $42.583$ & $0.653 \pm 0.013$ & $0.593$ & $9.2$ \\
+LSSVR & Linear & ChemBERTa & $35.627 \pm 1.177$ & $42.385$ & $0.655 \pm 0.013$ & $0.597$ & $8.9$ \\
+\textbf{LSSVR} & \textbf{Linear} & \textbf{MolFormer} & $\mathbf{35.632 \pm 1.174}$ & $\mathbf{42.220}$ & $\mathbf{0.655 \pm 0.013}$ & $\mathbf{0.601}$ & $\mathbf{8.2}$ \\
 \bottomrule
 \end{tabular}
 }
 \end{table}
 
-%% Table S2 ─ TabPFN ablation results
+%% Table S3 ─ TabPFN ablation results
 \begin{table}[!ht]
 \centering
 \caption{\textbf{TabPFN feature group ablation study on BeatAML: patient-stratified CV (PS-CV) and
@@ -348,7 +328,7 @@ Feature groups: \textit{Gene\_Expr} = 150 most variable genes + oncogene express
 Results are shown for Only\_PC and SMILES-LS (Embed) drug representations under PS-CV and DS-CV.
 The complete table covering all feature combinations, all three CV strategies, and all four drug
 representations is available in the accompanying dataset.}
-\label{table:suppS2}
+\label{table:suppTabPFNAblation}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{llcccc}
 \toprule
@@ -394,5 +374,139 @@ Clin\_Cell\_Mod + Mutation + Pathway & Embed    & $32.068 \pm 2.150$ & $0.709 \p
 }
 \end{table}
 
-\end{document}
+%% Table S4 ─ DS-CV full benchmark
+\begin{table}[!ht]
+\centering
+\caption{\textbf{Drug-stratified cross-validation (DS-CV): all model--drug representation combinations on BeatAML.}
+DS-CV folds withhold all records of a given drug from training, evaluating generalization to structurally novel compounds.
+CV values are 5-fold mean\,$\pm$\,std; Test $r_{pc}$ is on the held-out Waves~3+4 set (which shares most drugs with training, so Test $r_{pc} \gg$ DS-CV $r_{pc}$ is expected).
+$\%\Delta r_{pc} = (\text{DS-CV}\;r_{pc} - \text{Test}\;r_{pc})/\text{DS-CV}\;r_{pc} \times 100$; negative values indicate the held-out test set benefits from drug familiarity absent during DS-CV folds.
+\textbf{Bold} marks the best row per model by test $r_{pc}$.}
+\label{table:suppDS}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lllccccr}
+\toprule
+\textbf{Model} & \textbf{Class} & \textbf{Drug Rep.} & \textbf{DS-CV MAE} & \textbf{Test MAE} & \textbf{DS-CV $r_{pc}$} & \textbf{Test $r_{pc}$} & \textbf{$\%\Delta r_{pc}$} \\
+\midrule
+TabPFN & Transformer & PC & $46.743 \pm 4.247$ & $39.050$ & $0.306 \pm 0.045$ & $0.671$ & $-119.3$ \\
+\textbf{TabPFN} & \textbf{Transformer} & \textbf{KD-Embed} & $\mathbf{45.841 \pm 4.645}$ & $\mathbf{38.140}$ & $\mathbf{0.337 \pm 0.082}$ & $\mathbf{0.686}$ & $\mathbf{-103.6}$ \\
+TabPFN & Transformer & ChemBERTa & $45.285 \pm 3.859$ & $38.597$ & $0.377 \pm 0.088$ & $0.685$ & $-81.7$ \\
+TabPFN & Transformer & MolFormer & $45.227 \pm 1.978$ & $38.338$ & $0.372 \pm 0.024$ & $0.683$ & $-83.6$ \\
+\midrule
+RF & Tree ensemble & PC & $50.640 \pm 5.970$ & $41.143$ & $0.228 \pm 0.131$ & $0.637$ & $-179.4$ \\
+RF & Tree ensemble & KD-Embed & $49.851 \pm 2.242$ & $41.032$ & $0.258 \pm 0.097$ & $0.639$ & $-147.7$ \\
+\textbf{RF} & \textbf{Tree ensemble} & \textbf{ChemBERTa} & $\mathbf{49.315 \pm 3.809}$ & $\mathbf{41.810}$ & $\mathbf{0.245 \pm 0.112}$ & $\mathbf{0.641}$ & $\mathbf{-161.6}$ \\
+RF & Tree ensemble & MolFormer & $49.710 \pm 3.147$ & $40.954$ & $0.262 \pm 0.125$ & $0.637$ & $-143.1$ \\
+XGB & Tree ensemble & PC & $47.300 \pm 4.891$ & $40.285$ & $0.267 \pm 0.121$ & $0.647$ & $-142.3$ \\
+XGB & Tree ensemble & KD-Embed & $48.390 \pm 3.366$ & $39.243$ & $0.275 \pm 0.083$ & $0.666$ & $-142.2$ \\
+\textbf{XGB} & \textbf{Tree ensemble} & \textbf{ChemBERTa} & $\mathbf{46.122 \pm 2.979}$ & $\mathbf{38.742}$ & $\mathbf{0.350 \pm 0.034}$ & $\mathbf{0.677}$ & $\mathbf{-93.4}$ \\
+XGB & Tree ensemble & MolFormer & $48.247 \pm 2.835$ & $39.059$ & $0.277 \pm 0.049$ & $0.670$ & $-141.9$ \\
+LightGBM & Tree ensemble & PC & $45.753 \pm 4.455$ & $38.733$ & $0.370 \pm 0.055$ & $0.674$ & $-82.2$ \\
+LightGBM & Tree ensemble & KD-Embed & $47.061 \pm 1.775$ & $39.041$ & $0.304 \pm 0.039$ & $0.670$ & $-120.4$ \\
+LightGBM & Tree ensemble & ChemBERTa & $46.272 \pm 2.168$ & $38.668$ & $0.346 \pm 0.034$ & $0.679$ & $-96.2$ \\
+\textbf{LightGBM} & \textbf{Tree ensemble} & \textbf{MolFormer} & $\mathbf{45.347 \pm 3.342}$ & $\mathbf{38.495}$ & $\mathbf{0.364 \pm 0.047}$ & $\mathbf{0.680}$ & $\mathbf{-86.8}$ \\
+CatBoost & Tree ensemble & PC & $46.148 \pm 3.515$ & $39.014$ & $0.337 \pm 0.069$ & $0.668$ & $-98.2$ \\
+CatBoost & Tree ensemble & KD-Embed & $47.348 \pm 1.369$ & $38.798$ & $0.295 \pm 0.073$ & $0.672$ & $-127.8$ \\
+\textbf{CatBoost} & \textbf{Tree ensemble} & \textbf{ChemBERTa} & $\mathbf{47.244 \pm 5.038}$ & $\mathbf{38.247}$ & $\mathbf{0.315 \pm 0.057}$ & $\mathbf{0.680}$ & $\mathbf{-115.9}$ \\
+CatBoost & Tree ensemble & MolFormer & $46.251 \pm 3.170$ & $38.704$ & $0.314 \pm 0.058$ & $0.670$ & $-113.4$ \\
+\midrule
+CNN & DL (SMILES) & PC & $49.872 \pm 3.180$ & $44.050$ & $0.358 \pm 0.065$ & $0.545$ & $-52.2$ \\
+CNN & DL (SMILES) & KD-Embed & $51.028 \pm 2.534$ & $49.420$ & $0.025 \pm 0.057$ & $0.441$ & $-1664.0$ \\
+CNN & DL (SMILES) & ChemBERTa & $49.115 \pm 2.833$ & $44.801$ & $0.234 \pm 0.070$ & $0.524$ & $-123.9$ \\
+\textbf{CNN} & \textbf{DL (SMILES)} & \textbf{MolFormer} & $\mathbf{49.096 \pm 2.723}$ & $\mathbf{43.829}$ & $\mathbf{0.249 \pm 0.063}$ & $\mathbf{0.555}$ & $\mathbf{-122.9}$ \\
+\textbf{LSTM} & \textbf{DL (SMILES)} & \textbf{PC} & $\mathbf{46.551 \pm 3.168}$ & $\mathbf{46.646}$ & $\mathbf{0.383 \pm 0.054}$ & $\mathbf{0.527}$ & $\mathbf{-37.6}$ \\
+LSTM & DL (SMILES) & KD-Embed & $47.044 \pm 2.790$ & $47.939$ & $0.286 \pm 0.054$ & $0.521$ & $-82.2$ \\
+LSTM & DL (SMILES) & ChemBERTa & $46.674 \pm 2.997$ & $49.811$ & $0.297 \pm 0.024$ & $0.479$ & $-61.3$ \\
+LSTM & DL (SMILES) & MolFormer & $48.015 \pm 3.179$ & $48.498$ & $0.223 \pm 0.053$ & $0.514$ & $-130.5$ \\
+\midrule
+GAT+FFNN & DL (graph) & PC & $48.977 \pm 3.232$ & $49.427$ & $0.222 \pm 0.071$ & $0.482$ & $-117.1$ \\
+\textbf{GAT+FFNN} & \textbf{DL (graph)} & \textbf{KD-Embed} & $\mathbf{47.626 \pm 2.676}$ & $\mathbf{49.543}$ & $\mathbf{0.259 \pm 0.060}$ & $\mathbf{0.497}$ & $\mathbf{-91.9}$ \\
+GAT+FFNN & DL (graph) & ChemBERTa & $48.967 \pm 2.838$ & $50.321$ & $0.151 \pm 0.068$ & $0.448$ & $-196.7$ \\
+GAT+FFNN & DL (graph) & MolFormer & $49.557 \pm 3.327$ & $52.529$ & $0.155 \pm 0.041$ & $0.374$ & $-141.3$ \\
+\textbf{GCN+FFNN} & \textbf{DL (graph)} & \textbf{PC} & $\mathbf{47.660 \pm 3.111}$ & $\mathbf{53.306}$ & $\mathbf{0.383 \pm 0.078}$ & $\mathbf{0.382}$ & $\mathbf{0.3}$ \\
+GCN+FFNN & DL (graph) & KD-Embed & $48.399 \pm 3.128$ & $53.776$ & $0.240 \pm 0.050$ & $0.345$ & $-43.7$ \\
+GCN+FFNN & DL (graph) & ChemBERTa & $48.738 \pm 2.948$ & $52.678$ & $0.163 \pm 0.118$ & $0.326$ & $-100.0$ \\
+GCN+FFNN & DL (graph) & MolFormer & $46.398 \pm 3.159$ & $51.119$ & $0.262 \pm 0.068$ & $0.375$ & $-43.1$ \\
+\midrule
+GLR (Ridge) & Linear & PC & $45.900 \pm 2.589$ & $42.280$ & $0.366 \pm 0.058$ & $0.605$ & $-65.3$ \\
+GLR (Ridge) & Linear & KD-Embed & $47.869 \pm 2.570$ & $42.063$ & $0.301 \pm 0.065$ & $0.608$ & $-102.0$ \\
+GLR (Ridge) & Linear & ChemBERTa & $47.352 \pm 2.474$ & $41.688$ & $0.316 \pm 0.059$ & $0.615$ & $-94.6$ \\
+\textbf{GLR (Ridge)} & \textbf{Linear} & \textbf{MolFormer} & $\mathbf{45.900 \pm 2.589}$ & $\mathbf{41.382}$ & $\mathbf{0.366 \pm 0.058}$ & $\mathbf{0.620}$ & $\mathbf{-69.4}$ \\
+LSSVR & Linear & PC & $46.587 \pm 2.693$ & $42.782$ & $0.371 \pm 0.062$ & $0.588$ & $-58.5$ \\
+LSSVR & Linear & KD-Embed & $48.881 \pm 2.526$ & $42.625$ & $0.302 \pm 0.067$ & $0.593$ & $-96.4$ \\
+LSSVR & Linear & ChemBERTa & $48.212 \pm 2.741$ & $42.411$ & $0.311 \pm 0.070$ & $0.597$ & $-92.0$ \\
+\textbf{LSSVR} & \textbf{Linear} & \textbf{MolFormer} & $\mathbf{47.715 \pm 1.948}$ & $\mathbf{42.185}$ & $\mathbf{0.315 \pm 0.065}$ & $\mathbf{0.602}$ & $\mathbf{-91.1}$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
 
+%% Table S5 ─ Random CV full benchmark
+\begin{table}[!ht]
+\centering
+\caption{\textbf{Random cross-validation (Random CV): all model--drug representation combinations on BeatAML.}
+Random CV assigns patient--drug pairs to folds independently, placing records from the same patient in both training and validation folds.
+CV values are 5-fold mean\,$\pm$\,std; Test $r_{pc}$ is on the held-out Waves~3+4 set.
+$\%\Delta r_{pc} = (\text{Random CV}\;r_{pc} - \text{Test}\;r_{pc})/\text{Random CV}\;r_{pc} \times 100$;
+positive values quantify how much random CV inflates apparent performance relative to the held-out test set.
+\textbf{Bold} marks the best row per model by test $r_{pc}$.}
+\label{table:suppRand}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lllccccr}
+\toprule
+\textbf{Model} & \textbf{Class} & \textbf{Drug Rep.} & \textbf{Random CV MAE} & \textbf{Test MAE} & \textbf{Random CV $r_{pc}$} & \textbf{Test $r_{pc}$} & \textbf{$\%\Delta r_{pc}$} \\
+\midrule
+TabPFN & Transformer & PC & $26.290 \pm 0.285$ & $37.818$ & $0.803 \pm 0.001$ & $0.686$ & $14.6$ \\
+\textbf{TabPFN} & \textbf{Transformer} & \textbf{KD-Embed} & $\mathbf{26.047 \pm 0.288}$ & $\mathbf{37.748}$ & $\mathbf{0.807 \pm 0.002}$ & $\mathbf{0.688}$ & $\mathbf{14.7}$ \\
+TabPFN & Transformer & ChemBERTa & $26.009 \pm 0.266$ & $37.711$ & $0.807 \pm 0.002$ & $0.688$ & $14.7$ \\
+TabPFN & Transformer & MolFormer & $25.995 \pm 0.259$ & $38.292$ & $0.808 \pm 0.001$ & $0.681$ & $15.7$ \\
+\midrule
+RF & Tree ensemble & PC & $33.675 \pm 0.254$ & $40.769$ & $0.682 \pm 0.003$ & $0.641$ & $6.0$ \\
+RF & Tree ensemble & KD-Embed & $33.409 \pm 0.339$ & $40.384$ & $0.684 \pm 0.003$ & $0.644$ & $5.8$ \\
+\textbf{RF} & \textbf{Tree ensemble} & \textbf{ChemBERTa} & $\mathbf{33.300 \pm 0.337}$ & $\mathbf{40.090}$ & $\mathbf{0.686 \pm 0.004}$ & $\mathbf{0.650}$ & $\mathbf{5.2}$ \\
+RF & Tree ensemble & MolFormer & $33.465 \pm 0.316$ & $40.385$ & $0.682 \pm 0.004$ & $0.644$ & $5.6$ \\
+XGB & Tree ensemble & PC & $27.263 \pm 0.269$ & $39.478$ & $0.796 \pm 0.001$ & $0.659$ & $17.2$ \\
+XGB & Tree ensemble & KD-Embed & $26.998 \pm 0.239$ & $39.155$ & $0.800 \pm 0.001$ & $0.666$ & $16.8$ \\
+\textbf{XGB} & \textbf{Tree ensemble} & \textbf{ChemBERTa} & $\mathbf{26.850 \pm 0.261}$ & $\mathbf{38.954}$ & $\mathbf{0.802 \pm 0.003}$ & $\mathbf{0.670}$ & $\mathbf{16.5}$ \\
+XGB & Tree ensemble & MolFormer & $27.074 \pm 0.184$ & $39.587$ & $0.797 \pm 0.004$ & $0.654$ & $17.9$ \\
+LightGBM & Tree ensemble & PC & $26.821 \pm 0.248$ & $38.730$ & $0.803 \pm 0.002$ & $0.677$ & $15.7$ \\
+\textbf{LightGBM} & \textbf{Tree ensemble} & \textbf{KD-Embed} & $\mathbf{27.002 \pm 0.230}$ & $\mathbf{38.509}$ & $\mathbf{0.800 \pm 0.003}$ & $\mathbf{0.678}$ & $\mathbf{15.2}$ \\
+LightGBM & Tree ensemble & ChemBERTa & $26.885 \pm 0.258$ & $38.553$ & $0.801 \pm 0.001$ & $0.678$ & $15.4$ \\
+LightGBM & Tree ensemble & MolFormer & $26.535 \pm 0.221$ & $38.967$ & $0.807 \pm 0.002$ & $0.673$ & $16.6$ \\
+CatBoost & Tree ensemble & PC & $27.546 \pm 0.184$ & $38.892$ & $0.785 \pm 0.002$ & $0.666$ & $15.2$ \\
+\textbf{CatBoost} & \textbf{Tree ensemble} & \textbf{KD-Embed} & $\mathbf{27.087 \pm 0.235}$ & $\mathbf{38.274}$ & $\mathbf{0.793 \pm 0.004}$ & $\mathbf{0.681}$ & $\mathbf{14.1}$ \\
+CatBoost & Tree ensemble & ChemBERTa & $27.025 \pm 0.223$ & $38.366$ & $0.793 \pm 0.003$ & $0.679$ & $14.4$ \\
+CatBoost & Tree ensemble & MolFormer & $26.865 \pm 0.240$ & $38.455$ & $0.796 \pm 0.003$ & $0.677$ & $14.9$ \\
+\midrule
+CNN & DL (SMILES) & PC & $23.039 \pm 0.161$ & $40.095$ & $0.841 \pm 0.002$ & $0.647$ & $23.1$ \\
+CNN & DL (SMILES) & KD-Embed & $22.883 \pm 0.152$ & $40.446$ & $0.843 \pm 0.003$ & $0.640$ & $24.1$ \\
+\textbf{CNN} & \textbf{DL (SMILES)} & \textbf{ChemBERTa} & $\mathbf{22.946 \pm 0.170}$ & $\mathbf{39.785}$ & $\mathbf{0.843 \pm 0.003}$ & $\mathbf{0.650}$ & $\mathbf{22.9}$ \\
+CNN & DL (SMILES) & MolFormer & $22.758 \pm 0.157$ & $39.836$ & $0.848 \pm 0.003$ & $0.649$ & $23.5$ \\
+LSTM & DL (SMILES) & PC & $23.528 \pm 0.166$ & $40.400$ & $0.840 \pm 0.002$ & $0.639$ & $23.9$ \\
+LSTM & DL (SMILES) & KD-Embed & $23.258 \pm 0.142$ & $40.278$ & $0.840 \pm 0.003$ & $0.640$ & $23.8$ \\
+LSTM & DL (SMILES) & ChemBERTa & $23.370 \pm 0.129$ & $39.582$ & $0.839 \pm 0.003$ & $0.648$ & $22.8$ \\
+\textbf{LSTM} & \textbf{DL (SMILES)} & \textbf{MolFormer} & $\mathbf{23.326 \pm 0.161}$ & $\mathbf{40.121}$ & $\mathbf{0.840 \pm 0.003}$ & $\mathbf{0.651}$ & $\mathbf{22.5}$ \\
+\midrule
+\textbf{GAT+FFNN} & \textbf{DL (graph)} & \textbf{PC} & $\mathbf{27.237 \pm 0.140}$ & $\mathbf{40.391}$ & $\mathbf{0.802 \pm 0.002}$ & $\mathbf{0.632}$ & $\mathbf{21.2}$ \\
+GAT+FFNN & DL (graph) & KD-Embed & $26.249 \pm 0.169$ & $40.654$ & $0.810 \pm 0.002$ & $0.632$ & $22.0$ \\
+GAT+FFNN & DL (graph) & ChemBERTa & $25.755 \pm 0.106$ & $40.863$ & $0.823 \pm 0.003$ & $0.628$ & $23.7$ \\
+GAT+FFNN & DL (graph) & MolFormer & $26.629 \pm 0.091$ & $40.445$ & $0.813 \pm 0.002$ & $0.632$ & $22.3$ \\
+\textbf{GCN+FFNN} & \textbf{DL (graph)} & \textbf{PC} & $\mathbf{23.331 \pm 0.077}$ & $\mathbf{39.811}$ & $\mathbf{0.842 \pm 0.002}$ & $\mathbf{0.652}$ & $\mathbf{22.6}$ \\
+GCN+FFNN & DL (graph) & KD-Embed & $23.655 \pm 0.095$ & $39.672$ & $0.838 \pm 0.002$ & $0.650$ & $22.4$ \\
+GCN+FFNN & DL (graph) & ChemBERTa & $23.303 \pm 0.081$ & $40.738$ & $0.842 \pm 0.001$ & $0.640$ & $24.0$ \\
+GCN+FFNN & DL (graph) & MolFormer & $22.767 \pm 0.067$ & $40.412$ & $0.851 \pm 0.002$ & $0.651$ & $23.5$ \\
+\midrule
+GLR (Ridge) & Linear & PC & $30.362 \pm 0.355$ & $44.057$ & $0.748 \pm 0.004$ & $0.571$ & $23.7$ \\
+\textbf{GLR (Ridge)} & \textbf{Linear} & \textbf{KD-Embed} & $\mathbf{30.358 \pm 0.356}$ & $\mathbf{43.597}$ & $\mathbf{0.749 \pm 0.004}$ & $\mathbf{0.581}$ & $\mathbf{22.4}$ \\
+GLR (Ridge) & Linear & ChemBERTa & $30.363 \pm 0.350$ & $43.681$ & $0.749 \pm 0.004$ & $0.579$ & $22.7$ \\
+GLR (Ridge) & Linear & MolFormer & $30.362 \pm 0.355$ & $43.544$ & $0.748 \pm 0.004$ & $0.581$ & $22.3$ \\
+LSSVR & Linear & PC & $30.361 \pm 0.354$ & $44.046$ & $0.748 \pm 0.004$ & $0.571$ & $23.7$ \\
+\textbf{LSSVR} & \textbf{Linear} & \textbf{KD-Embed} & $\mathbf{30.359 \pm 0.357}$ & $\mathbf{43.613}$ & $\mathbf{0.749 \pm 0.004}$ & $\mathbf{0.581}$ & $\mathbf{22.4}$ \\
+LSSVR & Linear & ChemBERTa & $30.363 \pm 0.349$ & $43.649$ & $0.749 \pm 0.004$ & $0.580$ & $22.6$ \\
+LSSVR & Linear & MolFormer & $30.359 \pm 0.352$ & $43.552$ & $0.749 \pm 0.004$ & $0.581$ & $22.4$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\end{document}

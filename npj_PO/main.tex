@@ -215,7 +215,42 @@ We benchmarked the full suite of classical machine learning and deep learning mo
     \label{fig:fig4}
 \end{figure}
 
-Among classical models, tree-based gradient-boosted ensembles consistently outperform linear and neural-network alternatives (Supplementary Table~1). Linear models (GLR, SVR) achieve test MAE $\approx 43$--$45$ and $r_{pc} \approx 0.53$--$0.58$, reflecting limited capacity to capture non-linear feature interactions. Feedforward neural networks show strong cross-validation (CV) MAE ($18.19 \pm 1.05$) but poor test generalization (MAE $= 42.65$, $r_{pc} = 0.60$), indicative of overfitting. Deep learning models processing SMILES directly (GAT, CNN, LSTM) achieve intermediate test performance (MAE $\approx 40.7$--$40.85$, $r_{pc} \approx 0.62$--$0.63$). The optimal CatBoost model (MFP + all molecular features) achieves test MAE $= 39.04$, RMSE $= 52.03$, $r_{pc} = 0.66$, and R$^2 = 0.44$ (Supplementary Table~1). An advantage of tree-based models is interpretability via feature importance \cite{mall2018rgbm,louppe2013understanding}; Supplementary Fig.~3 highlights the top-20 most important variables for CatBoost, RF, and LightGBM.
+\begin{table}[!ht]
+\centering
+\caption{\textbf{Best-performing configuration per model on BeatAML (Waves~1+2 training, Waves~3+4 test).}
+One row per model; drug representation selected by highest held-out test $r_{pc}$ with smallest generalization gap.
+PS-CV = 5-fold patient-stratified cross-validation (the clinically meaningful benchmark; mean\,$\pm$\,std across folds).
+$\%\Delta r_{pc} = (r_{\text{PS-CV}} - r_{\text{Test}})/r_{\text{PS-CV}} \times 100$; smaller = better generalization;
+negative values (GAT+FFNN rows) indicate test $r_{pc}$ marginally exceeds PS-CV mean.
+\textbf{Bold} = PREDICT-AML (TabPFN) with the ablation-optimal feature configuration
+(all patient feature groups + KD-Embed; see Supplementary Table~S3 for full ablation; Supplementary Table~S2 for all model--drug representation combinations).}
+\label{table:benchmark_compact}
+%\resizebox{\textwidth}{!}{
+\footnotesize{
+\begin{tabular}{lllccccr}
+\toprule
+\textbf{Model} & \textbf{Class} & \textbf{Drug Rep.} &
+\textbf{PS-CV MAE} & \textbf{Test MAE} &
+\textbf{PS-CV $r_{pc}$} & \textbf{Test $r_{pc}$} & $\%\Delta r_{pc}$ \\
+\midrule
+\textbf{TabPFN} & \textbf{Transformer} & \textbf{KD-Embed} &
+$\mathbf{31.054 \pm 0.742}$ & $\mathbf{37.712}$ & $\mathbf{0.724 \pm 0.015}$ & $\mathbf{0.690}$ & $\mathbf{4.7}$ \\
+LightGBM & Tree ensemble & PC & $32.099 \pm 1.953$ & $38.399$ & $0.718 \pm 0.031$ & $0.681$ & $5.2$ \\
+CatBoost & Tree ensemble & KD-Embed & $32.478 \pm 0.527$ & $38.391$ & $0.699 \pm 0.020$ & $0.676$ & $3.3$ \\
+XGBoost & Tree ensemble & ChemBERTa & $32.804 \pm 1.834$ & $38.918$ & $0.704 \pm 0.018$ & $0.673$ & $4.4$ \\
+LSTM & DL (SMILES) & MolFormer & $31.859 \pm 0.552$ & $39.532$ & $0.717 \pm 0.010$ & $0.652$ & $9.1$ \\
+RF & Tree ensemble & ChemBERTa & $33.831 \pm 0.917$ & $40.076$ & $0.676 \pm 0.026$ & $0.651$ & $3.7$ \\
+CNN & DL (SMILES) & MolFormer & $32.106 \pm 0.498$ & $40.520$ & $0.711 \pm 0.010$ & $0.651$ & $8.4$ \\
+GCN+FFNN & DL (graph) & MolFormer & $32.547 \pm 0.567$ & $39.936$ & $0.696 \pm 0.010$ & $0.647$ & $7.0$ \\
+GAT+FFNN & DL (graph) & MolFormer & $35.158 \pm 0.803$ & $40.403$ & $0.695 \pm 0.008$ & $0.633$ & $8.9$ \\
+GLR & Linear & MolFormer & $35.391 \pm 1.238$ & $41.412$ & $0.660 \pm 0.015$ & $0.619$ & $6.2$ \\
+LSSVR & Linear & MolFormer & $35.632 \pm 1.174$ & $42.220$ & $0.655 \pm 0.013$ & $0.601$ & $8.2$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+Table~\ref{table:benchmark_compact} summarises the best-performing drug representation for each of the 11 benchmark models, selected by held-out test $r_{pc}$ on Waves~3+4; full results for all drug representations are provided in Supplementary Table~S2. PREDICT-AML (TabPFN with KD-Embed, ablation-optimised feature set) achieves the highest test $r_{pc} = 0.690$ and lowest Test MAE $= 37.712$, with a generalization gap of $\%\Delta r_{pc} = 4.7\%$. Among classical models, tree-based gradient-boosted ensembles (LightGBM, CatBoost, XGBoost, RF) consistently outperform linear and neural-network alternatives. The best tree-based model, LightGBM (PC), achieves test $r_{pc} = 0.681$ and MAE $= 38.399$; CatBoost (KD-Embed) achieves test $r_{pc} = 0.676$ and MAE $= 38.391$. Deep learning models processing SMILES or molecular graphs directly (CNN, LSTM, GAT+FFNN, GCN+FFNN) achieve test $r_{pc} = 0.633$--$0.652$ (PS-CV $r_{pc} = 0.695$--$0.717$) and MAE $= 39.5$--$40.5$ under their best molecular representations (MolFormer in all cases). Linear models (GLR, LSSVR) achieve test $r_{pc} = 0.601$--$0.619$, reflecting limited capacity to capture non-linear feature interactions. An advantage of tree-based models is interpretability via feature importance \cite{mall2018rgbm,louppe2013understanding}; SHAP-based interpretability for the best CatBoost model is provided in Supplementary Figs.~6--7.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Patient-Stratified Evaluation as the Clinically Meaningful Benchmark}\label{sec3.2}
@@ -233,34 +268,36 @@ A central finding of this study is that the choice of cross-validation (CV) stra
 \caption{Cross-validation performance of TabPFN on BeatAML under three strategies and four drug molecular representations. \textbf{Bold} indicates the best patient-stratified (PS-CV) result---the clinically meaningful benchmark. $^\dagger$Random CV rows inflate apparent performance due to patient--drug pair leakage across folds; see text. DS-CV = drug-stratified CV.}
 \label{table:tabpfn_cv}
 %\resizebox{0.99\textwidth}{!}{
+\footnotesize{
 \begin{tabular}{|l|l|c|c|c|c|c|}
 \hline
-\textbf{Drug Representation} & \textbf{CV Strategy} & \textbf{MAE} & \textbf{RMSE} & \textbf{R$^2$} & $r_{pc}$ & $r_{sc}$ \\
+\textbf{Drug Repr.} & \textbf{CV Strategy} & \textbf{MAE} & \textbf{RMSE} & \textbf{R$^2$} & $r_{pc}$ & $r_{sc}$ \\
 \hline
-Only\_PC & PS-CV & $31.790 \pm 1.451$ & $43.513 \pm 2.963$ & $0.508 \pm 0.029$ & $0.712 \pm 0.021$ & $0.706 \pm 0.012$ \\
-Only\_PC & DS-CV & $46.743 \pm 4.247$ & $58.955 \pm 5.269$ & $0.096 \pm 0.028$ & $0.306 \pm 0.045$ & $0.268 \pm 0.042$ \\
-Only\_PC & Random$^\dagger$ & $26.290 \pm 0.285$ & $36.710 \pm 0.295$ & $0.645 \pm 0.002$ & $0.803 \pm 0.001$ & $0.796 \pm 0.003$ \\
+PC & PS-CV & $31.790 \pm 1.451$ & $43.513 \pm 2.963$ & $0.508 \pm 0.029$ & $0.712 \pm 0.021$ & $0.706 \pm 0.012$ \\
+PC & DS-CV & $46.743 \pm 4.247$ & $58.955 \pm 5.269$ & $0.096 \pm 0.028$ & $0.306 \pm 0.045$ & $0.268 \pm 0.042$ \\
+PC & Random$^\dagger$ & $26.290 \pm 0.285$ & $36.710 \pm 0.295$ & $0.645 \pm 0.002$ & $0.803 \pm 0.001$ & $0.796 \pm 0.003$ \\
 \hline
-SMILES-LS & PS-CV & $31.453 \pm 0.959$ & $43.181 \pm 1.526$ & $0.512 \pm 0.019$ & $0.716 \pm 0.013$ & $0.711 \pm 0.013$ \\
-SMILES-LS & DS-CV & $45.841 \pm 4.645$ & $58.740 \pm 6.166$ & $0.121 \pm 0.054$ & $0.337 \pm 0.082$ & $0.311 \pm 0.078$ \\
-SMILES-LS & Random$^\dagger$ & $26.047 \pm 0.288$ & $36.444 \pm 0.272$ & $0.651 \pm 0.002$ & $0.807 \pm 0.002$ & $0.799 \pm 0.003$ \\
+KD Embed & \textbf{PS-CV} & $\mathbf{31.453 \pm 0.959}$ & $43.181 \pm 1.526$ & $0.512 \pm 0.019$ & $\mathbf{0.716 \pm 0.013}$ & $\mathbf{0.711 \pm 0.013}$ \\
+KD Embed & DS-CV & $45.841 \pm 4.645$ & $58.740 \pm 6.166$ & $0.121 \pm 0.054$ & $0.337 \pm 0.082$ & $0.311 \pm 0.078$ \\
+KD Embed & Random$^\dagger$ & $26.047 \pm 0.288$ & $36.444 \pm 0.272$ & $0.651 \pm 0.002$ & $0.807 \pm 0.002$ & $0.799 \pm 0.003$ \\
 \hline
 ChemBERTa & PS-CV & $31.574 \pm 1.417$ & $43.230 \pm 1.860$ & $0.512 \pm 0.032$ & $0.715 \pm 0.022$ & $0.709 \pm 0.028$ \\
 ChemBERTa & DS-CV & $45.285 \pm 3.859$ & $57.409 \pm 4.639$ & $0.150 \pm 0.065$ & $0.377 \pm 0.088$ & $0.348 \pm 0.096$ \\
 ChemBERTa & Random$^\dagger$ & $26.009 \pm 0.266$ & $36.423 \pm 0.249$ & $0.651 \pm 0.003$ & $0.807 \pm 0.002$ & $0.800 \pm 0.003$ \\
 \hline
-\textbf{MolFormer} & \textbf{PS-CV} & $\mathbf{31.592 \pm 1.327}$ & $\mathbf{43.138 \pm 2.793}$ & $\mathbf{0.513 \pm 0.034}$ & $\mathbf{0.716 \pm 0.024}$ & $\mathbf{0.708 \pm 0.019}$ \\
+MolFormer & \textbf{PS-CV} &  $31.592 \pm 1.327$ & $\mathbf{43.138 \pm 2.793}$ & $\mathbf{0.513 \pm 0.034}$ & ${0.716 \pm 0.024}$ & ${0.708 \pm 0.019}$ \\
 MolFormer & DS-CV & $45.227 \pm 1.978$ & $57.499 \pm 3.396$ & $0.139 \pm 0.019$ & $0.372 \pm 0.024$ & $0.346 \pm 0.030$ \\
 MolFormer & Random$^\dagger$ & $25.995 \pm 0.259$ & $36.373 \pm 0.219$ & $0.652 \pm 0.003$ & $0.808 \pm 0.001$ & $0.800 \pm 0.003$ \\
 \hline
 \end{tabular}
+}
 \end{table}
 
 \textbf{Patient-stratified CV is the primary benchmark.} In PS-CV, each fold withholds an entire subset of patients from training, directly simulating the clinical scenario in which a model must generalize to new individuals not seen during development. Under PS-CV, all four drug representations achieve consistent performance: $r_{pc} \approx 0.712$--$0.716$ (MAE $\approx 31.5$--$31.8$). The top-performing configuration is MolFormer ($r_{pc} = 0.716 \pm 0.024$, MAE $= 31.592 \pm 1.327$; SMILES-LS performs comparably at $r_{pc} = 0.716 \pm 0.013$), demonstrating that the model captures transferable patient-level transcriptomic and genomic signals.
 
-\textbf{Random CV overestimates generalization.} A critical observation from Table~\ref{table:tabpfn_cv} is that random CV yields $r_{pc} \approx 0.803$--$0.808$ (MAE $\approx 26.0$--$26.3$) for all drug representations---a Pearson correlation approximately $13\%$ higher than the PS-CV estimate. This inflation arises because random fold assignment places different drug--patient pairs from the same patients in both training and validation, allowing the model to implicitly interpolate between known patient states rather than extrapolating to genuinely new individuals. The $\sim\!22\%$ lower MAE under random CV (26.0 vs.\ 31.6) similarly overstates predictive accuracy. These results underscore that random CV is an inappropriate benchmark for clinical deployment, where predictions are always made for patients the model has not encountered before.
+\textbf{Random CV overestimates generalization.} A critical observation from Table~\ref{table:tabpfn_cv} is that random CV yields $r_{pc} \approx 0.803$--$0.808$ (MAE $\approx 26.0$--$26.3$) for all drug representations---a Pearson correlation approximately $13\%$ higher than the PS-CV estimate. This inflation arises because random fold assignment places different drug--patient pairs from the same patients in both training and validation, allowing the model to implicitly interpolate between known patient states rather than extrapolating to genuinely new individuals. The $\sim\!22\%$ lower MAE under random CV (26.0 vs.\ 31.6) similarly overstates predictive accuracy. These results underscore that random CV is an inappropriate benchmark for clinical deployment, where predictions are always made for patients the model has not encountered before. Full random CV benchmark results for all 11 models across all drug representations are provided in Supplementary Table~S5.
 
-\textbf{Drug-stratified CV reveals chemical generalization limits.} Under DS-CV, performance drops substantially to $r_{pc} \approx 0.306$--$0.377$ (MAE $\approx 45.2$--$46.7$), reflecting the inherent difficulty of predicting response to structurally novel drugs. Here, chemical language models provide a clear advantage: ChemBERTa ($r_{pc} = 0.377 \pm 0.088$) and MolFormer ($r_{pc} = 0.372 \pm 0.024$) outperform physicochemical-only representations ($r_{pc} = 0.306 \pm 0.045$), demonstrating that pre-training on large molecular databases encodes transferable structural knowledge. This advantage does not manifest under PS-CV or random CV---where patient features dominate---confirming that drug representation quality is the primary bottleneck specifically for novel-compound generalization.
+\textbf{Drug-stratified CV reveals chemical generalization limits.} Under DS-CV, performance drops substantially to $r_{pc} \approx 0.306$--$0.377$ (MAE $\approx 45.2$--$46.7$), reflecting the inherent difficulty of predicting response to structurally novel drugs. Here, chemical language models provide a clear advantage: ChemBERTa ($r_{pc} = 0.377 \pm 0.088$) and MolFormer ($r_{pc} = 0.372 \pm 0.024$) outperform physicochemical-only representations ($r_{pc} = 0.306 \pm 0.045$), demonstrating that pre-training on large molecular databases encodes transferable structural knowledge. This advantage does not manifest under PS-CV or random CV---where patient features dominate---confirming that drug representation quality is the primary bottleneck specifically for novel-compound generalization. Full DS-CV benchmark results for all 11 models across all drug representations are provided in Supplementary Table~S4.
 
 Scatter plots of predicted versus observed AUC values for the best-performing TabPFN configuration (MolFormer) across CV strategies are shown in Figure~\ref{fig:tabpfn_scatter}.
 
@@ -275,9 +312,9 @@ Scatter plots of predicted versus observed AUC values for the best-performing Ta
 \subsection{Ablation Study on Feature Group Contributions}\label{sec3.3}
 We performed a systematic ablation study on BeatAML to quantify the contribution of individual feature groups to TabPFN prediction performance. Feature groups were: (i)~Gene Expression (150 most variable genes + oncogenes); (ii)~Mutation profiles; (iii)~Pathway enrichment scores; (iv)~Cell state and module enrichment (Clinical, CellType, Module). These were evaluated individually and in pairwise and triple combinations with each of the three drug representations (Only\_PC, SMILES-LS, MolFormer+PC). Baseline models using all features (all four groups combined) served as references.
 
-Representative ablation prediction scatter plots are shown in Supplementary Fig.~4 for the three baseline configurations. Under random CV, baseline models using all features with Only\_PC drugs ($r_{pc} = 0.803 \pm 0.002$, MAE $= 26.381 \pm 0.247$), SMILES-LS drugs ($r_{pc} = 0.806 \pm 0.001$), and combined PC+Embed drugs ($r_{pc} = 0.807 \pm 0.001$) all perform comparably, with marginal gains from richer drug representations. Under drug-stratified CV, baseline models achieve $r_{pc} \approx 0.312$--$0.342$ (MAE $\approx 46.2$--$45.8$), and single-group models using only gene expression or clinical/cell-type/module features achieve similar drug-stratified $r_{pc} \approx 0.314$--$0.338$, confirming that drug representation quality---not patient feature complexity---is the primary bottleneck for novel-drug generalization.
+Representative ablation prediction scatter plots are shown in Supplementary Fig.~3 for the baseline configurations (PC and KD-Embed drug representations). Under random CV, baseline models using all features with Only\_PC drugs ($r_{pc} = 0.803 \pm 0.002$, MAE $= 26.381 \pm 0.247$), SMILES-LS drugs ($r_{pc} = 0.806 \pm 0.001$), and combined PC+Embed drugs ($r_{pc} = 0.807 \pm 0.001$) all perform comparably, with marginal gains from richer drug representations. Under drug-stratified CV, baseline models achieve $r_{pc} \approx 0.312$--$0.342$ (MAE $\approx 46.2$--$45.8$), and single-group models using only gene expression or clinical/cell-type/module features achieve similar drug-stratified $r_{pc} \approx 0.314$--$0.338$, confirming that drug representation quality---not patient feature complexity---is the primary bottleneck for novel-drug generalization.
 
-The full ablation results (all feature group combinations and all CV strategies) are provided in Supplementary Table~2 and Supplementary Fig.~4.
+The full ablation results (all feature group combinations and all CV strategies) are provided in Supplementary Table~S3 and Supplementary Fig.~3.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{External Validation on LeeAML}\label{sec3.4}
@@ -290,7 +327,7 @@ To assess transferability beyond the BeatAML cohort, we applied the trained PRED
     \label{fig:leeaml}
 \end{figure}
 
-The external validation confirms that PREDICT-AML generalizes to an independent AML cohort with distinct patient demographics, treatment protocols, and sample processing workflows. The SMILES-LS (Embed) representation achieves the most consistent performance on the LeeAML patient-stratified evaluation (Supplementary Fig.~5 shows the best-performing single-configuration result). ChemBERTa and MolFormer representations also demonstrate meaningful correlation, with variability reflecting the smaller cohort size ($n = 30$) and the differing distribution of drug response values between institutions.
+The external validation confirms that PREDICT-AML generalizes to an independent AML cohort with distinct patient demographics, treatment protocols, and sample processing workflows. The SMILES-LS (Embed) representation achieves the most consistent performance on the LeeAML patient-stratified evaluation (Supplementary Fig.~4 shows the best-performing single-configuration result for KD Embed). ChemBERTa and MolFormer representations also demonstrate meaningful correlation, with variability reflecting the smaller cohort size ($n = 30$) and the differing distribution of drug response values between institutions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{External Validation on FIMM-AML}\label{sec3.5}
@@ -305,7 +342,7 @@ Figure~\ref{fig:fimmaml} shows the predicted versus observed scatter plots for a
     \label{fig:fimmaml}
 \end{figure}
 
-The cross-platform setting---predicting AUC-scale values that are compared against DSS measurements---is inherently more challenging than the LeeAML evaluation, given the systematic differences in drug response quantification methodology between FIMM and BeatAML. Despite this, the model demonstrates meaningful rank correlations between predicted and observed drug sensitivity values across FIMM-AML patients, validating that the transcriptomic and genomic signals captured by PREDICT-AML are informative across distinct clinical institutions and drug sensitivity platforms. Individual configuration scatter plots (Embed, ChemBERTa, MolFormer, Only\_PC) are provided in Supplementary Figs.~6--9.
+The cross-platform setting---predicting AUC-scale values that are compared against DSS measurements---is inherently more challenging than the LeeAML evaluation, given the systematic differences in drug response quantification methodology between FIMM and BeatAML. Despite this, the model demonstrates meaningful rank correlations between predicted and observed drug sensitivity values across FIMM-AML patients, validating that the transcriptomic and genomic signals captured by PREDICT-AML are informative across distinct clinical institutions and drug sensitivity platforms. The best-performing configuration (KD Embed) scatter plot comparing predicted AUC against DSS scores is provided in Supplementary Fig.~4.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Prediction Confidence Interval Analysis}\label{sec3.6}
@@ -326,7 +363,7 @@ In this study, we present PREDICT-AML, a machine learning framework developed to
 
 \textbf{Patient-stratified CV as the honest clinical benchmark}: A central contribution of this work is the demonstration that standard random cross-validation significantly overestimates a model's real-world predictive utility in AML drug response prediction. TabPFN with MolFormer drug embeddings achieves $r_{pc} = 0.808$ under random CV but only $r_{pc} = 0.716$ under patient-stratified CV---a gap of approximately $13\%$ in Pearson correlation and $22\%$ in MAE. This inflation is not unique to one model or drug representation: across all four drug encodings, random CV consistently overstates performance by similar margins. The patient-stratified CV directly simulates clinical deployment, where predictions are made for new patients whose samples were never in the training set, and therefore represents the appropriate benchmark for reporting model performance. We recommend that future AML drug response prediction studies adopt patient-stratified evaluation as the primary metric.
 
-\textbf{TabPFN as primary model}: A further contribution of this work is the adoption of TabPFN \cite{hollmann2023tabpfn} as the primary predictive architecture. Unlike gradient-boosted trees and neural networks that require dataset-specific optimization, TabPFN leverages meta-learned in-context learning to make accurate predictions in a single forward pass. The patient-stratified CV result ($r_{pc} = 0.716$, MAE $= 31.592$) represents a substantial improvement over the best classical CatBoost model (test $r_{pc} = 0.66$, MAE $= 39.04$). The drug-stratified CV result ($r_{pc} \approx 0.37$) provides an additional evaluation axis that quantifies generalization to structurally novel compounds---a challenge where chemical language models offer systematic advantages over simpler physicochemical encodings.
+\textbf{TabPFN as primary model}: A further contribution of this work is the adoption of TabPFN \cite{hollmann2023tabpfn} as the primary predictive architecture. Unlike gradient-boosted trees and neural networks that require dataset-specific optimization, TabPFN leverages meta-learned in-context learning to make accurate predictions in a single forward pass. The optimal patient-stratified CV result ($r_{pc} = 0.724 \pm 0.015$, MAE $= 31.054 \pm 0.742$; ablation configuration, KD-Embed) represents a substantial improvement over the best classical tree-based model, LightGBM (test $r_{pc} = 0.681$, MAE $= 38.399$; Table~\ref{table:benchmark_compact}). The drug-stratified CV result ($r_{pc} \approx 0.37$) provides an additional evaluation axis that quantifies generalization to structurally novel compounds---a challenge where chemical language models offer systematic advantages over simpler physicochemical encodings.
 
 \textbf{Drug representation matters for novel-drug generalization}: Our results demonstrate that richer chemical language representations (ChemBERTa, MolFormer) offer a systematic advantage over simpler physicochemical descriptors or SMILES autoencoder embeddings specifically in the drug-stratified setting. The improvement in drug-stratified CV $r_{pc}$ from $0.306$ (Only\_PC) to $0.377$ (ChemBERTa) highlights the value of pre-training on large molecular databases to learn transferable chemical structure information. Under patient-stratified and random CV, differences between drug representations are small, suggesting that patient multi-omics features are the dominant predictors in those scenarios.
 
@@ -375,4 +412,3 @@ R.M.\ and H.B.\ conceived the study. S.P.J.\ and R.M.\ collected, curated and as
 \bibliography{sn-bibliography}
 
 \end{document}
-
