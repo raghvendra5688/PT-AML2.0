@@ -250,7 +250,7 @@ LSSVR & Linear & MolFormer & $35.632 \pm 1.174$ & $42.220$ & $0.655 \pm 0.013$ &
 }
 \end{table}
 
-Table~\ref{table:benchmark_compact} summarises the best-performing drug representation for each of the 11 benchmark models, selected by held-out test $r_{pc}$ on Waves~3+4; full results for all drug representations are provided in Supplementary Table~S2. PREDICT-AML (TabPFN with KD-Embed, ablation-optimised feature set) achieves the highest test $r_{pc} = 0.690$ and lowest Test MAE $= 37.712$, with a generalization gap of $\%\Delta r_{pc} = 4.7\%$. Among classical models, tree-based gradient-boosted ensembles (LightGBM, CatBoost, XGBoost, RF) consistently outperform linear and neural-network alternatives. The best tree-based model, LightGBM (PC), achieves test $r_{pc} = 0.681$ and MAE $= 38.399$; CatBoost (KD-Embed) achieves test $r_{pc} = 0.676$ and MAE $= 38.391$. Deep learning models processing SMILES or molecular graphs directly (CNN, LSTM, GAT+FFNN, GCN+FFNN) achieve test $r_{pc} = 0.633$--$0.652$ (PS-CV $r_{pc} = 0.695$--$0.717$) and MAE $= 39.5$--$40.5$ under their best molecular representations (MolFormer in all cases). Linear models (GLR, LSSVR) achieve test $r_{pc} = 0.601$--$0.619$, reflecting limited capacity to capture non-linear feature interactions. An advantage of tree-based models is interpretability via feature importance \cite{mall2018rgbm,louppe2013understanding}; SHAP-based interpretability for the best CatBoost model is provided in Supplementary Figs.~6--7.
+Table~\ref{table:benchmark_compact} summarises the best-performing drug representation for each of the 11 benchmark models, selected by held-out test $r_{pc}$ on Waves~3+4; full results for all drug representations are provided in Supplementary Table~S2. PREDICT-AML (TabPFN with KD-Embed, ablation-optimised feature set) achieves the highest test $r_{pc} = 0.690$ and lowest Test MAE $= 37.712$, with a generalization gap of $\%\Delta r_{pc} = 4.7\%$. Among classical models, tree-based gradient-boosted ensembles (LightGBM, CatBoost, XGBoost, RF) consistently outperform linear and neural-network alternatives. The best tree-based model, LightGBM (PC), achieves test $r_{pc} = 0.681$ and MAE $= 38.399$; CatBoost (KD-Embed) achieves test $r_{pc} = 0.676$ and MAE $= 38.391$. Deep learning models processing SMILES or molecular graphs directly (CNN, LSTM, GAT+FFNN, GCN+FFNN) achieve test $r_{pc} = 0.633$--$0.652$ (PS-CV $r_{pc} = 0.695$--$0.717$) and MAE $= 39.5$--$40.5$ under their best molecular representations (MolFormer in all cases). Linear models (GLR, LSSVR) achieve test $r_{pc} = 0.601$--$0.619$, reflecting limited capacity to capture non-linear feature interactions. An advantage of tree-based models is interpretability via feature importance \cite{mall2018rgbm,louppe2013understanding}; SHAP-based interpretability for the best CatBoost model is provided in Supplementary Figs.~6--7. SHAP-based interpretability for the best PREDICT-AML (TabPFN, KD-Embed) configuration on the held-out test set is presented in Section~\ref{sec3.7}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Patient-Stratified Evaluation as the Clinically Meaningful Benchmark}\label{sec3.2}
@@ -357,6 +357,52 @@ A key advantage of the TabPFN framework is its ability to provide calibrated pre
 
 The CI width distribution (Figure~\ref{fig:ci}) reveals that the majority of patient--drug pair predictions carry moderate uncertainty (median CI width $\approx 100$--$120$ AUC units), while a long right tail corresponds to predictions with higher uncertainty---typically for drugs tested on fewer patient samples. This uncertainty quantification provides a clinically actionable signal: predictions with narrow CIs can be relied upon with greater confidence when informing therapeutic selection, whereas those with wide CIs flag cases where additional experimental evidence may be warranted before acting on the model output.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{SHAP-based Interpretability of PREDICT-AML}\label{sec3.7}
+To understand which features drive individual predictions of the best PREDICT-AML configuration (TabPFN with KD-Embed, full feature set), we computed SHAP (SHapley Additive exPlanations) values \cite{lundberg2017unified} for all patient--drug pairs in the held-out test set. The base value---the model's average prediction across the test cohort---is $\approx 197.3$ AUC units, and each SHAP value additively explains a prediction's deviation from this baseline.
+
+Figure~\ref{fig:shap_global} shows the global feature importance for the test set as a bar chart of mean $|\text{SHAP}|$ values alongside a beeswarm summary plot.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \includegraphics[width=\textwidth]{figures/SHAP_importance_bar_test.pdf}
+        \caption{Mean $|\text{SHAP}|$ bar chart (top 20 features)}
+        \label{fig:shap_bar}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.50\textwidth}
+        \includegraphics[width=\textwidth]{figures/SHAP_beeswarm_test.pdf}
+        \caption{Beeswarm summary plot}
+        \label{fig:shap_beeswarm}
+    \end{subfigure}
+    \caption{Global SHAP feature importance for PREDICT-AML on the held-out BeatAML test set (TabPFN, KD-Embed configuration). (A)~Mean absolute SHAP values for the top 20 features. Drug embedding dimensions (LS\_*) dominate the ranking, with patient gene expression features (e.g., \textit{CDC42BPA}, \textit{IGSF10}, \textit{CEACAM6}, \textit{CSPG4}) appearing among the leading patient-level predictors. (B)~Beeswarm plot showing the distribution of SHAP values across all test patient--drug pairs for each feature; colour encodes the feature value (red $=$ high, blue $=$ low). Wide beeswarm spreads reflect features with heterogeneous influence across the cohort.}
+    \label{fig:shap_global}
+\end{figure}
+
+Drug embedding dimensions from the KD-Embed representation (LS\_202, LS\_21, LS\_17, LS\_94, LS\_61, LS\_200, LS\_138) collectively dominate the global importance ranking, confirming that chemical properties of the drug are the primary determinants of the predicted AUC response. This is expected in a multi-drug prediction framework where drug identity must account for the bulk of variance in response. Among patient-level features, the gene expression of \textit{CDC42BPA} (CDC42 binding protein kinase $\alpha$; mean $|\text{SHAP}| \approx 3.80$), \textit{IGSF10} ($\approx 3.46$), \textit{CEACAM6} ($\approx 3.46$), and \textit{CSPG4} ($\approx 3.29$) stand out as the leading transcriptomic predictors, indicating that the model captures biologically meaningful patient-specific signals modulating drug sensitivity.
+
+To illustrate how SHAP values explain individual predictions, Figure~\ref{fig:shap_individual} presents waterfall plots for two representative test-set samples: a correctly predicted sensitive patient--drug pair and a correctly predicted resistant pair.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/SHAP_sensitivity_idx8432.pdf}
+        \caption{Sensitive: true AUC $= 124.0$, predicted $= 124.0$}
+        \label{fig:shap_sens}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/SHAP_resistance_idx11511.pdf}
+        \caption{Resistant: true AUC $= 254.0$, predicted $= 254.0$}
+        \label{fig:shap_res}
+    \end{subfigure}
+    \caption{SHAP waterfall plots for individual test-set predictions from PREDICT-AML (TabPFN, KD-Embed). Starting from the base value ($\approx 197.3$), each bar shows the SHAP contribution of the top features pushing the final prediction higher (red, toward resistance) or lower (blue, toward sensitivity). (A)~Sensitive patient--drug pair (sample idx8432, true AUC $= 124.0$, predicted $= 124.0$): drug embedding dimensions LS\_125 ($\text{SHAP} = -24.4$) and LS\_214 ($-13.7$), together with patient feature \textit{POU4F1} expression ($-11.0$), drive the prediction well below baseline. (B)~Resistant patient--drug pair (sample idx11511, true AUC $= 254.0$, predicted $= 254.0$): drug embedding dimensions LS\_1 ($+16.0$) and LS\_242 ($+15.7$), together with LS\_155 ($+13.2$) and LS\_202 ($+12.8$), collectively push the prediction substantially above baseline, with \textit{DEFA1} expression ($-8.5$) providing a partially opposing effect. Waterfall plots for additional sensitivity and resistance examples are provided in Supplementary Figs.~8--9.}
+    \label{fig:shap_individual}
+\end{figure}
+
+The waterfall plots reveal complementary interpretability patterns. In the sensitive prediction (Figure~\ref{fig:shap_sens}), particular drug embedding dimensions encode structural properties that favour cellular uptake or target engagement, while \textit{POU4F1} expression---a POU-domain transcription factor associated with differentiation state---further amplifies the drug's predicted effect. In the resistant prediction (Figure~\ref{fig:shap_res}), a distinct set of embedding dimensions dominates, reflecting the chemical basis for poor drug efficacy, with \textit{DEFA1} expression acting as a modest counterbalancing signal. Together, these results demonstrate that PREDICT-AML's predictions are driven by an interpretable combination of drug chemical properties and patient transcriptomic context, supporting its potential utility as a clinical decision support tool.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}\label{sec4}
 In this study, we present PREDICT-AML, a machine learning framework developed to accurately forecast patient-specific drug responses in AML using the richly annotated, multi-omics BeatAML dataset. Our work addresses critical limitations in earlier BeatAML studies by shifting from retrospective, correlative analyses to a predictive modeling approach capable of generalizing across unseen patients and, importantly, across independent external cohorts. The PREDICT-AML framework integrates diverse data modalities---gene expression, somatic mutation status, pathway activity, immune cell-state enrichment, and key clinical features---with four complementary drug molecular encodings.
@@ -381,7 +427,7 @@ In this study, we developed PREDICT-AML, a machine learning framework for predic
 
 The optimal PREDICT-AML model, based on TabPFN with MolFormer drug embeddings, achieves a patient-stratified cross-validation Pearson correlation of $r_{pc} = 0.716$ (MAE $= 31.592$) on BeatAML---the clinically meaningful benchmark that evaluates generalization to previously unseen patients. Critically, we show that standard random cross-validation inflates this estimate to $r_{pc} = 0.808$, overstating generalization by $\sim\!13\%$; patient-stratified evaluation is the appropriate standard for reporting AML drug response prediction performance. Drug-stratified CV ($r_{pc} = 0.372$) further reveals where richer chemical language representations (ChemBERTa, MolFormer) provide systematic advantages over simpler physicochemical encodings. The framework also provides calibrated prediction uncertainty estimates, offering a practical tool for clinical decision support.
 
-Further validation on prospective clinical cohorts and integration with single-cell data remain important future directions. More comprehensive interpretability analyses using methods such as GroupShapley \cite{jullum2021groupshapley} could provide valuable insights by grouping related molecular features driving drug response predictions. In conclusion, PREDICT-AML represents a significant step toward precision medicine in AML treatment, with the potential to guide clinicians in selecting optimal therapies based on individual patient multi-omics profiles.
+Further validation on prospective clinical cohorts and integration with single-cell data remain important future directions. The SHAP-based interpretability analysis presented in Section~\ref{sec3.7} identifies drug embedding dimensions and key transcriptomic features (e.g., \textit{CDC42BPA}, \textit{IGSF10}, \textit{CEACAM6}) as the primary drivers of predicted drug sensitivity, providing a mechanistically grounded basis for clinical interpretation. More comprehensive interpretability analyses using methods such as GroupShapley \cite{jullum2021groupshapley} could provide further insights by grouping related molecular features driving drug response predictions. In conclusion, PREDICT-AML represents a significant step toward precision medicine in AML treatment, with the potential to guide clinicians in selecting optimal therapies based on individual patient multi-omics profiles.
 
 \section*{Declarations}
 
