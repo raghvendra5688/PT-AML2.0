@@ -65,23 +65,43 @@
 \end{figure}
 
 
-% %% Fig S3 ─ Top-20 feature importances for tree-based models
-% \begin{figure}[!ht]
-%     \centering
-%     \includegraphics[width=0.97\textwidth]{jtrm_images/Supp_Fig3.pdf}
-%     \caption{\textbf{Top-20 most important variables for the best-performing tree-based models.}
-%     Feature importances are shown for CatBoost (MFP + all molecular features), Random Forest (RF), and
-%     LightGBM (LGBM), each using either Morgan fingerprint (MFP) or SMILES-LS embedding (LS) drug
-%     representations combined with the full molecular patient feature set (Feat).
-%     Drug--pathway AUC proximity features and transcriptomic variables consistently rank among the top
-%     predictors across all three models.}
-%     \label{fig:suppfig3}
-% \end{figure}
-
-%% Fig S3 ─ TabPFN ablation baseline scatter plots
+%% Fig S3 ─ LeeAML and FIMM-AML normalized drug-response heatmaps
 \begin{figure}[!ht]
     \centering
-    \subfloat[Only\_PC Baseline][Predicted vs.\ observed AUC for the TabPFN baseline (all feature groups) with physico-chemical (PC) drug representation under patient-stratified CV.]{
+    \includegraphics[width=0.95\textwidth]{figures/Supp_Figure_S3.pdf}
+    \caption{\textbf{Normalized drug-response heatmaps for external cohorts LeeAML and FIMM-AML using BeatAML-overlapping drugs.}
+    Each cell encodes the normalized drug sensitivity value for a given drug-patient pair.
+    Rows correspond to inhibitors and columns to patient samples; hierarchical clustering of rows (drugs) uses Pearson distance with centroid linkage and is partitioned into three drug clusters, while columns (patients) are ordered by decreasing mean sensitivity.
+    \textbf{A.}~LeeAML cohort ($n = 30$ patients, 49 drugs shared with BeatAML).
+    Cell color encodes normalized AUC (AUC\,/\,800), ranging from blue (low, sensitive) to red (high, resistant).
+    \textbf{B.}~FIMM-AML cohort ($n = 124$ patients, 75 drugs shared with BeatAML).
+    Cell color encodes normalized DSS (DSS\,/\,50), with blue (low, resistant) to red scale (high, sensitive).
+    Drug clusters in both cohorts recapitulate mechanistic class groupings observed in BeatAML data.} %training data, supporting the transferability of the learned drug-response landscape to independent AML patient populations.}
+    \label{fig:suppfig3}
+\end{figure}
+
+%% Fig S4 ─ Full PS-CV performance heatmap (all models × all drug representations)
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.97\textwidth]{figures/Supp_PS_CV_Metrics.pdf}
+    \caption{\textbf{Comprehensive patient-stratified cross-validation (PS-CV) performance of all models on BeatAML across five metrics and four drug molecular representations.}
+    Each cell reports the 5-fold PS-CV mean\,$\pm$\,SD for a given model (row) and drug representation (column);
+    cell colour encodes performance rank from worst (red) to best (green) independently within each panel.
+    \textbf{A.}~Pearson $r_{pc}$ ($\uparrow$).
+    \textbf{B.}~Spearman $r_{sc}$ ($\uparrow$).
+    \textbf{C.}~$R^2$ ($\uparrow$).
+    \textbf{D.}~MAE ($\downarrow$).
+    \textbf{E.}~RMSE ($\downarrow$).
+    The orange border highlights TabPFN, which achieves the lowest PS-CV MAE ($31.45 \pm 0.96$ with KD-Embed) and among the highest $r_{pc}$ ($0.716 \pm 0.013$) of all classical and deep learning baselines.
+    CNN (ChemBERTa) records the highest PS-CV $r_{pc}$ ($0.726 \pm 0.011$) and lowest RMSE ($41.85 \pm 1.15$) but shows a substantially larger CV-to-test gap (test $r_{pc} = 0.641$; Supplementary Table~S2) relative to TabPFN (test $r_{pc} = 0.690$; Table~\ref{table:benchmark_compact}), indicating greater sensitivity to patient-level distribution shift.
+    GAT consistently underperforms in $r_{pc}$ and $r_{sc}$ except with MolFormer embeddings, consistent with the largest CV-to-test gaps among all deep-learning architectures.}
+    \label{fig:suppfig4}
+\end{figure}
+
+%% Fig S5 ─ TabPFN ablation baseline scatter plots
+\begin{figure}[!ht]
+    \centering
+    \subfloat[PC Baseline][Predicted vs.\ observed AUC for the TabPFN baseline (all feature groups) with physico-chemical (PC) drug representation under patient-stratified CV.]{
         \includegraphics[width=0.45\textwidth]{figures/ablation_baseline_PC.pdf}
     }
     \qquad
@@ -93,38 +113,11 @@
     Each panel corresponds to a different drug molecular representation using the full patient feature set
     (gene expression, mutation, pathway, cell-state/module features) under patient-stratified CV.
     See Supplementary Table~S3 for complete ablation results across all CV strategies and feature group combinations.}
-    \label{fig:suppfig3}
-\end{figure}
-
-%% Fig S4 ─ LeeAML and FIMM-AML best configuration scatter
-\begin{figure}[!ht]
-    \centering
-    \subfloat[LeeAML Best Config][External validation on LeeAML cohort: best-performing configuration (KD Embed).]{
-    \includegraphics[width=0.45\textwidth]{figures/LeeAML_best_config_scatter.pdf}
-    }
-    \qquad
-    \subfloat[FIMM-AML Best Config][External validation on FIMM-AML cohort: best-performing configuration (KD Embed).]{
-    \includegraphics[width=0.45\textwidth]{figures/FIMMAML_Embed_scatter.pdf}
-    }
-    \caption{\textbf{TabPFN model comparison on external LeeAML and FIMM-AML cohorts}.
-    Predicted vs.\ observed AUC values for the KD Embed drug representation on the 49 drugs common between BeatAML and LeeAML ($n = 30$ patients). Similarly predicted vs.\ DSS scores for the KD Embed drug representation on the 78 drugs common between BeatAML and FIMM-AML ($n=187$ patients). The diagonal indicates perfect prediction; Spearman rank correlation is used to account for the non-linear relationship between the AUC and DSS drug sensitivity metrics.
-    The KD Embed configuration achieves the most consistent patient-level rank correlations on both the external cohorts.}
-    \label{fig:suppfig4}
-\end{figure}
-
-%% Fig S5 ─ Full ML/DL benchmark visual
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.97\textwidth]{jtrm_images/Supp_Fig2.pdf}
-    \caption{\textbf{Benchmarking of machine learning and deep learning models on the BeatAML test set.}
-    \textbf{A--G.}~Scatter plots of predicted vs.\ observed AUC for the best-performing instance of each
-    model class (GLR, SVR, RF, XGBoost, LightGBM, CatBoost, FFNN, CNN, LSTM, GAT, GCN) on the held-out
-    Waves~3+4 test set.
-    \textbf{H--S.}~Performance comparison of different combinations of patient feature sets and drug
-    representations within the CatBoost framework.
-    Numerical results for the full benchmark are provided in Supplementary Table~S2.}
     \label{fig:suppfig5}
 \end{figure}
+
+
+
 
 %% Fig S6 ─ TabPFN SHAP summary
 \begin{figure}[!ht]
@@ -160,7 +153,7 @@
     \caption{\textbf{CatBoost SHAP waterfall plots for representative sensitive and resistant patient--drug pairs.}
     Each bar shows the contribution of a single feature to the deviation from the baseline expected AUC.
     Features in red push the prediction toward sensitivity; features in blue push it toward resistance.}
-    \label{fig:suppfig12}
+    \label{fig:suppfig7}
 \end{figure}
 
 %% ──────────────────────────────────────────────────────────────────────────
@@ -325,7 +318,7 @@ Feature groups: \textit{Gene\_Expr} = 150 most variable genes + oncogene express
 \textit{Pathway} = GSVA-derived oncogenic pathway enrichment scores;
 \textit{Clin\_Cell\_Mod} = clinical annotations, cell-state enrichment, and module enrichment scores.
 \textit{Baseline} uses all four feature groups combined.
-Results are shown for Only\_PC and SMILES-LS (Embed) drug representations under PS-CV and DS-CV.
+Results are shown for PC and SMILES-LS (Embed) drug representations under PS-CV and DS-CV.
 The complete table covering all feature combinations, all three CV strategies, and all four drug
 representations is available in the accompanying dataset.}
 \label{table:suppTabPFNAblation}
@@ -337,38 +330,38 @@ representations is available in the accompanying dataset.}
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}
 & & \textbf{MAE} & \textbf{r} & \textbf{MAE} & \textbf{r} \\
 \midrule
-\textbf{Baseline (all groups)} & Only\_PC  & $31.465 \pm 1.273$ & $0.719 \pm 0.015$ & $45.804 \pm 4.371$ & $0.342 \pm 0.069$ \\
-\textbf{Baseline (all groups)} & Embed     & $31.054 \pm 0.742$ & $0.724 \pm 0.015$ & $46.344 \pm 4.898$ & $0.312 \pm 0.059$ \\
+\textbf{Baseline (all groups)} & PC  & $31.465 \pm 1.273$ & $0.719 \pm 0.015$ & $45.804 \pm 4.371$ & $0.342 \pm 0.069$ \\
+\textbf{Baseline (all groups)} & KD Embed     & $31.054 \pm 0.742$ & $0.724 \pm 0.015$ & $46.344 \pm 4.898$ & $0.312 \pm 0.059$ \\
 \midrule
-Gene\_Expr only          & Only\_PC  & $31.552 \pm 1.995$ & $0.717 \pm 0.038$ & $45.876 \pm 3.722$ & $0.335 \pm 0.043$ \\
-Gene\_Expr only          & Embed     & $31.376 \pm 1.362$ & $0.718 \pm 0.023$ & $47.166 \pm 4.395$ & $0.291 \pm 0.086$ \\
+Gene\_Expr only          & PC  & $31.552 \pm 1.995$ & $0.717 \pm 0.038$ & $45.876 \pm 3.722$ & $0.335 \pm 0.043$ \\
+Gene\_Expr only          & KD Embed     & $31.376 \pm 1.362$ & $0.718 \pm 0.023$ & $47.166 \pm 4.395$ & $0.291 \pm 0.086$ \\
 \midrule
-Mutation only            & Only\_PC  & $34.675 \pm 2.152$ & $0.658 \pm 0.024$ & $47.827 \pm 2.068$ & $0.237 \pm 0.062$ \\
-Mutation only            & Embed     & $34.553 \pm 1.328$ & $0.659 \pm 0.023$ & $47.989 \pm 5.262$ & $0.252 \pm 0.107$ \\
+Mutation only            & PC  & $34.675 \pm 2.152$ & $0.658 \pm 0.024$ & $47.827 \pm 2.068$ & $0.237 \pm 0.062$ \\
+Mutation only            & KD Embed     & $34.553 \pm 1.328$ & $0.659 \pm 0.023$ & $47.989 \pm 5.262$ & $0.252 \pm 0.107$ \\
 \midrule
-Pathway only             & Only\_PC  & $33.179 \pm 1.827$ & $0.691 \pm 0.028$ & $45.831 \pm 3.183$ & $0.331 \pm 0.021$ \\
-Pathway only             & Embed     & $32.916 \pm 1.116$ & $0.694 \pm 0.025$ & $46.953 \pm 3.684$ & $0.314 \pm 0.026$ \\
+Pathway only             & PC  & $33.179 \pm 1.827$ & $0.691 \pm 0.028$ & $45.831 \pm 3.183$ & $0.331 \pm 0.021$ \\
+Pathway only             & KD Embed     & $32.916 \pm 1.116$ & $0.694 \pm 0.025$ & $46.953 \pm 3.684$ & $0.314 \pm 0.026$ \\
 \midrule
-Clin\_Cell\_Mod only     & Only\_PC  & $32.499 \pm 0.427$ & $0.699 \pm 0.009$ & $46.791 \pm 1.249$ & $0.315 \pm 0.045$ \\
-Clin\_Cell\_Mod only     & Embed     & $32.706 \pm 0.766$ & $0.699 \pm 0.008$ & $46.986 \pm 2.796$ & $0.314 \pm 0.040$ \\
+Clin\_Cell\_Mod only     & PC  & $32.499 \pm 0.427$ & $0.699 \pm 0.009$ & $46.791 \pm 1.249$ & $0.315 \pm 0.045$ \\
+Clin\_Cell\_Mod only     & KD Embed     & $32.706 \pm 0.766$ & $0.699 \pm 0.008$ & $46.986 \pm 2.796$ & $0.314 \pm 0.040$ \\
 \midrule
-Gene\_Expr + Mutation    & Only\_PC  & $31.480 \pm 0.982$ & $0.716 \pm 0.023$ & $45.051 \pm 1.959$ & $0.373 \pm 0.046$ \\
-Gene\_Expr + Mutation    & Embed     & $31.210 \pm 1.213$ & $0.721 \pm 0.017$ & $46.915 \pm 5.136$ & $0.314 \pm 0.070$ \\
+Gene\_Expr + Mutation    & PC  & $31.480 \pm 0.982$ & $0.716 \pm 0.023$ & $45.051 \pm 1.959$ & $0.373 \pm 0.046$ \\
+Gene\_Expr + Mutation    & KD Embed     & $31.210 \pm 1.213$ & $0.721 \pm 0.017$ & $46.915 \pm 5.136$ & $0.314 \pm 0.070$ \\
 \midrule
-Gene\_Expr + Pathway     & Only\_PC  & $31.483 \pm 0.670$ & $0.718 \pm 0.010$ & $46.782 \pm 4.504$ & $0.318 \pm 0.055$ \\
-Gene\_Expr + Pathway     & Embed     & $31.300 \pm 1.906$ & $0.722 \pm 0.026$ & $46.765 \pm 4.486$ & $0.318 \pm 0.077$ \\
+Gene\_Expr + Pathway     & PC  & $31.483 \pm 0.670$ & $0.718 \pm 0.010$ & $46.782 \pm 4.504$ & $0.318 \pm 0.055$ \\
+Gene\_Expr + Pathway     & KD Embed     & $31.300 \pm 1.906$ & $0.722 \pm 0.026$ & $46.765 \pm 4.486$ & $0.318 \pm 0.077$ \\
 \midrule
-Clin\_Cell\_Mod + Mutation & Only\_PC & $32.293 \pm 2.316$ & $0.702 \pm 0.031$ & $45.031 \pm 1.963$ & $0.378 \pm 0.023$ \\
-Clin\_Cell\_Mod + Mutation & Embed    & $32.639 \pm 1.948$ & $0.697 \pm 0.027$ & $47.898 \pm 4.491$ & $0.277 \pm 0.041$ \\
+Clin\_Cell\_Mod + Mutation & PC & $32.293 \pm 2.316$ & $0.702 \pm 0.031$ & $45.031 \pm 1.963$ & $0.378 \pm 0.023$ \\
+Clin\_Cell\_Mod + Mutation & KD Embed    & $32.639 \pm 1.948$ & $0.697 \pm 0.027$ & $47.898 \pm 4.491$ & $0.277 \pm 0.041$ \\
 \midrule
-Clin\_Cell\_Mod + Gene\_Expr & Only\_PC & $31.524 \pm 1.461$ & $0.716 \pm 0.018$ & $45.997 \pm 2.153$ & $0.317 \pm 0.049$ \\
-Clin\_Cell\_Mod + Gene\_Expr & Embed   & $31.128 \pm 1.500$ & $0.720 \pm 0.026$ & $46.658 \pm 4.367$ & $0.322 \pm 0.133$ \\
+Clin\_Cell\_Mod + Gene\_Expr & PC & $31.524 \pm 1.461$ & $0.716 \pm 0.018$ & $45.997 \pm 2.153$ & $0.317 \pm 0.049$ \\
+Clin\_Cell\_Mod + Gene\_Expr & KD Embed   & $31.128 \pm 1.500$ & $0.720 \pm 0.026$ & $46.658 \pm 4.367$ & $0.322 \pm 0.133$ \\
 \midrule
-Clin\_Cell\_Mod + Gene\_Expr + Mutation & Only\_PC & $31.606 \pm 1.831$ & $0.718 \pm 0.022$ & $45.116 \pm 3.535$ & $0.364 \pm 0.029$ \\
-Clin\_Cell\_Mod + Gene\_Expr + Mutation & Embed   & $31.096 \pm 2.222$ & $0.725 \pm 0.031$ & $46.658 \pm 2.626$ & $0.308 \pm 0.085$ \\
+Clin\_Cell\_Mod + Gene\_Expr + Mutation & PC & $31.606 \pm 1.831$ & $0.718 \pm 0.022$ & $45.116 \pm 3.535$ & $0.364 \pm 0.029$ \\
+Clin\_Cell\_Mod + Gene\_Expr + Mutation & KD Embed   & $31.096 \pm 2.222$ & $0.725 \pm 0.031$ & $46.658 \pm 2.626$ & $0.308 \pm 0.085$ \\
 \midrule
-Clin\_Cell\_Mod + Mutation + Pathway & Only\_PC & $32.161 \pm 1.183$ & $0.705 \pm 0.008$ & $45.242 \pm 4.352$ & $0.396 \pm 0.047$ \\
-Clin\_Cell\_Mod + Mutation + Pathway & Embed    & $32.068 \pm 2.150$ & $0.709 \pm 0.040$ & $47.050 \pm 3.600$ & $0.288 \pm 0.041$ \\
+Clin\_Cell\_Mod + Mutation + Pathway & PC & $32.161 \pm 1.183$ & $0.705 \pm 0.008$ & $45.242 \pm 4.352$ & $0.396 \pm 0.047$ \\
+Clin\_Cell\_Mod + Mutation + Pathway & KD Embed    & $32.068 \pm 2.150$ & $0.709 \pm 0.040$ & $47.050 \pm 3.600$ & $0.288 \pm 0.041$ \\
 \bottomrule
 \end{tabular}
 }
@@ -377,7 +370,7 @@ Clin\_Cell\_Mod + Mutation + Pathway & Embed    & $32.068 \pm 2.150$ & $0.709 \p
 %% Table S4 ─ DS-CV full benchmark
 \begin{table}[!ht]
 \centering
-\caption{\textbf{Drug-stratified cross-validation (DS-CV): all model--drug representation combinations on BeatAML.}
+\caption{\textbf{Drug-stratified cross-validation (DS-CV): all model-drug representation combinations on BeatAML.}
 DS-CV folds withhold all records of a given drug from training, evaluating generalization to structurally novel compounds.
 CV values are 5-fold mean\,$\pm$\,std; Test $r_{pc}$ is on the held-out Waves~3+4 set (which shares most drugs with training, so Test $r_{pc} \gg$ DS-CV $r_{pc}$ is expected).
 $\%\Delta r_{pc} = (\text{DS-CV}\;r_{pc} - \text{Test}\;r_{pc})/\text{DS-CV}\;r_{pc} \times 100$; negative values indicate the held-out test set benefits from drug familiarity absent during DS-CV folds.
@@ -444,7 +437,7 @@ LSSVR & Linear & ChemBERTa & $48.212 \pm 2.741$ & $42.411$ & $0.311 \pm 0.070$ &
 %% Table S5 ─ Random CV full benchmark
 \begin{table}[!ht]
 \centering
-\caption{\textbf{Random cross-validation (Random CV): all model--drug representation combinations on BeatAML.}
+\caption{\textbf{Random cross-validation (Random CV): all model-drug representation combinations on BeatAML.}
 Random CV assigns patient--drug pairs to folds independently, placing records from the same patient in both training and validation folds.
 CV values are 5-fold mean\,$\pm$\,std; Test $r_{pc}$ is on the held-out Waves~3+4 set.
 $\%\Delta r_{pc} = (\text{Random CV}\;r_{pc} - \text{Test}\;r_{pc})/\text{Random CV}\;r_{pc} \times 100$;

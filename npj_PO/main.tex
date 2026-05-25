@@ -105,7 +105,7 @@ The LeeAML cohort \cite{lee2018machine} is an independent AML patient dataset co
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{FIMM-AML External Validation Cohort}\label{sec2.3}
-The FIMM-AML cohort \cite{malani2022implementing} comprises $187$ AML patient samples from the Finnish Institute for Molecular Medicine (FIMM) in Helsinki, Finland, assembled through a functional precision medicine tumor board program. Drug sensitivity was measured using the Drug Sensitivity Score (DSS) \cite{malani2022implementing} for $540$ compounds across patient-derived samples. DSS is a normalized, dose-response-curve-integrated metric that accounts for drug selectivity and sensitivity, and differs in scale from the AUC metric used in BeatAML and LeeAML. Clinical annotations include age, sex, ELN 2017 risk classification, mutation status (FLT3, NPM1, KIT, CEBPA, and others), karyotype, and clinical outcomes including overall survival and event-free survival. RNA-seq data was available for all samples. For cross-cohort integration, we identified $78$ drugs common between BeatAML and FIMM-AML. To bridge the two drug sensitivity platforms, we trained the PREDICT-AML model on the full BeatAML training set (on common feature set) and evaluated predictions on FIMM-AML using the common drugs, reporting both AUC-scale predictions and Spearman correlation against DSS scores. After inner-joining patients with complete multi-omics feature data, the evaluation set comprises $8{,}357$ patient-drug pairs in total for the FIMM-AML validation cohort.
+The FIMM-AML cohort \cite{malani2022implementing} comprises $187$ AML patient samples from the Finnish Institute for Molecular Medicine (FIMM) in Helsinki, Finland, assembled through a functional precision medicine tumor board program. Drug sensitivity was measured using the Drug Sensitivity Score (DSS) \cite{malani2022implementing} for $540$ compounds across patient-derived samples. DSS is a normalized, dose-response-curve-integrated metric that accounts for drug selectivity and sensitivity, and differs in scale from the AUC metric used in BeatAML and LeeAML. Clinical annotations include age, sex, ELN 2017 risk classification, mutation status (FLT3, NPM1, KIT, CEBPA, and others), karyotype, and clinical outcomes including overall survival and event-free survival. RNA-seq data was available for all samples. For cross-cohort integration, we identified $78$ drugs common between BeatAML and FIMM-AML. To bridge the two drug sensitivity platforms, we trained the PREDICT-AML model on the full BeatAML training set (on common feature set) and evaluated predictions on FIMM-AML using the common drugs, reporting both AUC-scale predictions and Spearman correlation against DSS scores. After inner-joining patients with complete multi-omics feature data, the evaluation set comprises $8{,}357$ patient-drug pairs in total for the FIMM-AML external cohort.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{RNA-Seq and DNA-Seq Analysis}\label{sec2.4}
@@ -126,23 +126,23 @@ We applied t-distributed Stochastic Neighbor Embedding (t-SNE) \cite{van2008visu
     \label{fig:fig1}
 \end{figure}
 
-\textbf{Mutated Genes and Types}: Somatic variant calls from DNA-Seq were incorporated to evaluate mutation frequencies and types as available in the original BeatAML cohort \cite{bottomly2022integrative}. %The frequency of mutation in the top mutated genes and corresponding mutation types served as additional features. 
-Figure~\ref{fig:fig1} highlights these representative patient characteristics across BeatAML, LeeAML and FIMM-AML cohorts as a heatmap respectively.
+\textbf{Mutated Genes and Types}: Somatic variant calls from the DNA-Seq dataset were incorporated to evaluate mutation frequencies and types as available in the original BeatAML cohort \cite{bottomly2022integrative}. %The frequency of mutation in the top mutated genes and corresponding mutation types served as additional features. 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Figure~\ref{fig:fig1} highlights these representative patient characteristics across BeatAML, LeeAML and FIMM-AML cohorts as a heatmap respectively. Supplementary Figure S2 highlights normalized drug response predictions across BeatAML patient samples and inhibitors, while Supp. Figures S3A and S3B depict normalized drug-response heatmaps for external cohorts LeeAML and FIMM-AML using BeatAML-overlapping drugs respectively.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Drug Data and Multi-Modal Fingerprint Generation}\label{sec2.5}
-We collected drug response data from the BeatAML dataset. A total of $165$ unique drugs were available, of which $150$ were represented in the training set (Waves~1+2) and $153$ in the held-out test set (Waves~3+4); $15$ drugs appeared exclusively in the test set, enabling assessment of generalization to unseen compounds. After intersecting with available drug feature representations, $150$ test drugs were included in the final evaluation. We derived four complementary molecular representations for each drug:
+We collected drug response data from the BeatAML dataset. A total of $165$ unique drugs were available, of which $150$ were represented in the training set (Waves~1+2) and $153$ in the held-out test set (Waves~3+4); $14$ drugs appeared exclusively in the test set, enabling assessment of generalization to unseen compounds. After intersecting with available drug feature representations, $150$ test drugs were included in the final evaluation. We derived four complementary molecular representations for each drug:
 
 \begin{enumerate}
     \item \textbf{Physico-Chemical Feature Representation (PC):} Drug molecular features were derived using RDKit \cite{bento2020open}: $148$ non-redundant and non-correlated molecular descriptors, $30$ graph-theoretic features computed via NetworkX (v3.5), Morgan circular fingerprints (radius~3, 128~bits), and MACCS structural keys (167~bits, first bit inactive). This 473-dimensional representation was recently identified as optimal for predicting diverse molecular properties \cite{harod2025effichem}; the full feature list is provided in Supplementary Table S1.
 
-    \item \textbf{Knowledge-Distilled Embeddings (KD-Embed):} Fixed-length Knowledge Distilled (KD) latent vectors were produced by a Teacher Forcing Long Short-Term Memory (TF-LSTM) sequence-to-sequence autoencoder \cite{mall2021modeling} trained on $\approx\!2.5$ million compounds from PubChem \cite{kim2025pubchem} and the MOSES benchmark \cite{10.3389/fphar.2020.565644} (see Figure \ref{fig:fig_lstm}. Overall, $96.7\%$ of reconstructed compounds were valid as determined by RDKit, with mean categorical cross-entropy of $0.001$.
+    \item \textbf{Knowledge-Distilled Embeddings (KD-Embed):} Fixed-length Knowledge Distilled (KD) latent vectors were produced by a Teacher Forcing Long Short-Term Memory (TF-LSTM) sequence-to-sequence autoencoder \cite{mall2021modeling} trained on $\approx\!2.5$ million compounds from PubChem \cite{kim2025pubchem} and the MOSES benchmark \cite{10.3389/fphar.2020.565644} (see Figure \ref{fig:fig_lstm}). Overall, $96.7\%$ of reconstructed compounds were valid as determined by RDKit, with mean categorical cross-entropy of $0.001$.
     
     \item \textbf{ChemBERTa Embeddings:} We encoded drug SMILES strings using ChemBERTa \cite{chithrananda2020chemberta}, a transformer pre-trained on 77~million compounds from PubChem using masked language modeling, producing $384$-dimensional contextual representations that capture chemical substructure and neighbourhood information. Embeddings were extracted zero-shot, without fine-tuning the ChemBERTa model.
-    \item \textbf{MolFormer Embeddings:} We generated $768$-dimensional embeddings using MolFormer \cite{ross2022large}, a large-scale rotary-position transformer pre-trained on $\sim\!1.1$ billion SMILES strings from PubChem and ZINC. MolFormer designed to capture long-range molecular dependencies and global structural properties. As with ChemBERTa, embeddings were extracted in zero-shot fashion.
+    \item \textbf{MolFormer Embeddings:} We generated $768$-dimensional embeddings using MolFormer \cite{ross2022large}, a large-scale rotary-position transformer pre-trained on $\sim\!1.1$ billion SMILES strings from PubChem and ZINC. MolFormer was designed to capture long-range molecular dependencies and global structural properties. As with ChemBERTa, embeddings were extracted in zero-shot fashion.
 \end{enumerate}
 
-Figure~\ref{fig:fig2} illustrates the TF-LSTM based drug embedding pipeline and the drug-pathway distance estimation scheme.
+Figure~\ref{fig:fig2} illustrates the TF-LSTM based drug embedding pipeline and the drug-pathway proximity estimation scheme.
 
 \begin{figure}[!ht]
     \centering
@@ -153,25 +153,25 @@ Figure~\ref{fig:fig2} illustrates the TF-LSTM based drug embedding pipeline and 
     \end{subfigure}
     \begin{subfigure}{0.99\textwidth}
         \centering
-        \includegraphics[width=0.99\textwidth]{figures/DrugPathwayDistance.pdf}
-        \caption{Steps involved in patient-specific drug-pathway distance estimation via random-walk propagation and AUCell scoring.}
+        \includegraphics[width=0.99\textwidth]{figures/DrugPathwayProximity.pdf}
+        \caption{Steps involved in patient-specific drug-pathway proximity estimation via random-walk propagation and AUCell scoring.}
         \label{fig:fig_drugpathway_auc}
     \end{subfigure}
-    \caption{Drug embedding generation and drug--pathway distance calculation.}
+    \caption{Drug embedding generation and drug--pathway proximity calculation.}
     \label{fig:fig2}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Drug Pathway Distance Estimation}\label{sec2.6}
-To estimate a computational proximity of each drug to individual oncogenic pathways in a patient-specific manner, we exploit drug target information available from DrugBank \cite{knox2024drugbank}. Drug targets (genes/proteins) serve as starting points in the human protein-protein interaction (PPI) network obtained from the STRING database, retaining only interactions with strong experimental evidence (score $\ge 700$).
+\subsection{Drug Pathway Proximity Estimation}\label{sec2.6}
+To estimate a computational proximity of each drug to individual oncogenic pathway in a patient-specific manner, we exploit drug target information available from DrugBank \cite{knox2024drugbank}. Drug targets (genes/proteins) serve as starting points in the human protein-protein interaction (PPI) network obtained from the STRING database, retaining only interactions with strong experimental evidence (score $\ge 700$).
 
-Starting from drug targets, network propagation via a random-walk with restart (RWR) approach \cite{sherif2022immune,mall2013kernel} produces a propagation vector representing the global proximity of each protein to a given drug. To obtain a patient-specific local propagation vector, we weight each protein's propagation score by the corresponding gene expression from RNA-seq. The resulting vector reflects how ``close'' an oncogenic pathway is to a given drug in the molecular context of a specific patient: if pathway member genes rank highly in the sorted propagation vector, the drug has close proximity to that pathway, and vice versa. Pathway proximity was estimated using the AUCell package (v1.24.0) \cite{aibar2017scenic}, computing the AUC, where higher AUC corresponds to lower distance i.e. closer drug-pathway proximity for a given patient (see Fig \ref{fig:fig_drugpathway_auc}).
+Starting from drug targets, network propagation via a random-walk with restart (RWR) approach \cite{sherif2022immune,mall2013kernel} produces a propagation vector representing the global proximity of each protein to a given drug. To obtain a patient-specific local propagation vector, we weight each protein's propagation score by the corresponding gene expression from RNA-seq. The resulting vector reflects how ``close'' an oncogenic pathway is to a given drug in the molecular context of a specific patient: if pathway member genes rank highly in the sorted propagation vector, the drug has close proximity to that pathway, and vice versa. Pathway proximity was estimated using the AUCell package (v1.24.0) \cite{aibar2017scenic}, computing the AUC, where higher AUC corresponds to closer drug-pathway proximity for a given patient (see Fig \ref{fig:fig_drugpathway_auc}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Training and Test Data Preparation}\label{sec2.7}
-Using the approach described above, we assembled comprehensive patient representations comprising: mutation profiles (frequency and type for top mutated genes), gene expression profiles (150 most variable genes and oncogenes), and enrichment scores (pathway activity, module enrichment, cell state). Drug representations were one of the four molecular encodings (PC, KD-Embed, ChemBERTa, MolFormer) supplemented by drug target annotations from DrugBank \cite{knox2024drugbank} and patient-specific drug-pathway AUC proximity scores.
+Using the approach described above, we assembled comprehensive patient representations comprising: mutation profiles (frequency and mutation type for top mutated genes), gene expression profiles (150 most variable genes and oncogenes), and enrichment scores (pathway activity, module enrichment, cell state). Drug representations were one of the four molecular encodings (PC, KD-Embed, ChemBERTa, MolFormer) supplemented by drug target annotations from DrugBank \cite{knox2024drugbank} and patient-specific unique drug-pathway AUC proximity scores.
 
-The merged BeatAML training and held-out test datasets were constructed by performing inner joins between the drug response table, patient feature table (keyed by patient ID), and drug feature table (keyed by compound ID) using the \texttt{merge} function in \texttt{pandas}. The resulting training set contains $33{,}803$ patient-drug records and the test set contains $18{,}826$ records. Feature dimensionality ranges from $277$ to $2,034$ depending on the drug representation used and the feature group ablation configuration. An analogous pipeline was applied to LeeAML and FIMM-AML, generating merged drug-patient feature matrices for external evaluation. The overall PREDICT-AML workflow is illustrated in Figure~\ref{fig:fig3}.
+The merged BeatAML training and held-out test datasets were constructed by performing inner joins between the drug response table, patient feature table (keyed by patient ID), and drug feature table (keyed by compound ID) using the \texttt{merge} function in \texttt{pandas}. The resulting training set contains $33{,}803$ patient-drug records and the test set contains $18{,}826$ records. Feature dimensionality ranges from $277$ to $2,034$ depending on the drug representation used and the patient feature group ablation configuration. An analogous pipeline was applied to LeeAML and FIMM-AML, generating merged drug-patient feature matrices for external evaluation. The overall PREDICT-AML workflow is illustrated in Figure~\ref{fig:fig3}.
 
 \begin{figure}[!ht]
     \centering
@@ -182,17 +182,17 @@ The merged BeatAML training and held-out test datasets were constructed by perfo
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Machine Learning Models}\label{sec2.8}
-We developed and trained diverse machine learning models to predict drug response using combined molecular, genomic, and clinical features together with drug representations.
+We developed and trained diverse machine learning models to predict drug response using molecular, genomic, and clinical features together with drug representations.
 
 \textbf{Standard models} included generalized linear regression (GLR) \cite{nelder1972generalized}, support vector regression (SVR) \cite{chandorkar2015fixed}, Random Forests (RF) \cite{breiman2001random}, XGBoost \cite{chen2016xgboost}, LightGBM \cite{ke2017lightgbm} and CatBoost \cite{prokhorenkova2018catboost}. \textbf{Deep learning models} processing the SMILES string directly included convolutional neural networks (CNN) \cite{sermanet2012convolutional}, LSTM \cite{gers2000learning}, graph attention networks (GAT) \cite{velivckovic2017graph}, and graph convolutional networks (GCN) \cite{kipf2017semi}.
 
-\textbf{TabPFN} \cite{hollmann2023tabpfn} serves as the primary model in PREDICT-AML. TabPFN (Tabular Prior-data Fitted Networks) is a transformer-based model that treats tabular datasets as contexts and generates predictions in a single forward pass without gradient-based optimization at inference time. It is pre-trained via meta-learning on a large collection of synthetic datasets sampled from a structured Bayesian prior, allowing it to perform in-context learning and naturally handle the heterogeneous, high-dimensional, mixed-type feature matrices characteristic of multi-omics drug response data. Hyperparameters for all tree-based and TabPFN models were optimized using Optuna \cite{akiba2019optuna} with 5-fold cross-validation on the BeatAML training set.
+\textbf{TabPFN} \cite{hollmann2023tabpfn} serves as the primary model in PREDICT-AML. TabPFN (Tabular Prior-data Fitted Networks) is a transformer-based model that treats tabular datasets as contexts and generates predictions in a single forward pass without gradient-based optimization at inference time. It is pre-trained via meta-learning on a large collection of synthetic datasets sampled from a structured Bayesian prior, allowing it to perform in-context learning and naturally handle the heterogeneous, high-dimensional, mixed-type feature matrices characteristic of multi-omics drug response data. Hyperparameters for all tree-based, TabPFN and deeplearning models were optimized using Optuna \cite{akiba2019optuna} with 5-fold cross-validation on the BeatAML training set.
 
 Performance metrics included mean absolute error (MAE), root mean squared error (RMSE), Pearson correlation ($r_{pc}$), Spearman correlation ($r_{sc}$), and coefficient of determination (R$^2$). Lower MAE and RMSE and higher $r_{pc}$, $r_{sc}$, and R$^2$ indicate better performance.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Cross-Validation Strategies}\label{sec2.9}
-To rigorously assess different aspects of model generalizability, we evaluated TabPFN under three distinct 5-fold cross-validation (CV) strategies on the BeatAML training set:
+To rigorously assess different aspects of model generalizability, we evaluated all models under three distinct 5-fold cross-validation (CV) strategies on BeatAML training set:
 
 \begin{enumerate}
     \item \textbf{Random CV:} Patient-drug pairs are assigned randomly to folds. This standard strategy tests interpolation within the observed distribution of patients and drugs.
@@ -200,33 +200,43 @@ To rigorously assess different aspects of model generalizability, we evaluated T
     \item \textbf{Drug-stratified CV (DS-CV):} Folds are partitioned by drug identity, ensuring no drug appears in both training and validation. This evaluates generalization to structurally or mechanistically novel drugs not encountered during training.
 \end{enumerate}
 
-Each configuration is independently evaluated with all four drug molecular representations (PC, KD-Embed, ChemBERTa, MolFormer), yielding 12 experimental conditions for any machine learning technique including the primary TabPFN analysis.
+Each configuration is independently evaluated with all four drug molecular representations (PC, KD-Embed, ChemBERTa, MolFormer), yielding 12 experimental conditions for any modelling technique including the primary TabPFN model.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}\label{sec3}
 
 \subsection{Benchmarking Machine Learning Models on BeatAML}\label{sec3.1}
-We benchmarked the full suite of classical machine learning and deep learning models on the BeatAML training (Waves 1+2) and test (Waves 3+4) sets. Figure~\ref{fig:fig4}A shows the distribution of the area under the drug response curve (AUC) between training (Y\_train) and test (Y\_test) sets. AUC values range between 0 and 300, with no statistically significant distributional difference between sets ($p > 0.05$, Wilcoxon rank-sum test \cite{mann1947test}). A heatmap of normalized predicted drug responses across all patient samples and inhibitors is provided in Supplementary Fig.~2, illustrating the heterogeneity of predicted sensitivity across the BeatAML cohort.
+We benchmarked the full suite of classical machine learning and deep learning models on the BeatAML training (Waves 1+2) and test (Waves 3+4) sets. AUC values range between 0 and 300, with no statistically significant distributional difference between training and test sets ($p > 0.05$, Wilcoxon rank-sum test \cite{mann1947test}). A heatmap of the normalized (scaled between 0-1) predicted drug responses across all patient samples and inhibitors is provided in Supplementary Fig.~2, illustrating the heterogeneity of predicted sensitivity across the BeatAML cohort.
+
+Figure~\ref{fig:fig4} summarises PS-CV Pearson $r_{pc}$ and Spearman $r_{sc}$ (mean\,$\pm$\,SD across 5 folds) for all 11 models across the four drug molecular representations, with filled circles marking held-out test set values. Panels A and C compare classical ML models against TabPFN in terms of $r_{pc}$ and $r_{sc}$ respectively; Panels B and D show the corresponding comparisons for deep learning models. A complete presentation of all five PS-CV metrics ($r_{pc}$, $r_{sc}$, R$^2$, MAE, and RMSE) for all 11 models and four drug representations is provided in Supplementary Fig.~4.
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=0.92\textwidth]{jtrm_images/Figure4.pdf}
-    \caption{Performance comparison of machine learning models for predicting drug response of AML patients on the BeatAML cohort. Panels show: (A) AUC distribution between training and test sets; (B--K) scatter plots of predicted vs.\ observed AUC for the best-performing instance of each model class on the test set; (L) top-10 patient profiles and top-10 drugs for which CatBoost predictions are most accurate; (M) bottom-10 patient profiles and bottom-10 drugs with lowest predictive accuracy.}
+    \includegraphics[width=0.92\textwidth]{figures/Fig4_Model_Performance_Bars.pdf}
+    \caption{\textbf{Patient-stratified cross-validation (PS-CV) benchmark of all models on BeatAML across four drug molecular representations.}
+    Bar height indicates the 5-fold PS-CV mean; error bars show $\pm$SD; filled circles mark held-out test set values (Waves~3+4).
+    The bracket highlights the best TabPFN configuration (KD-Embed).
+    \textbf{A.}~Pearson $r_{pc}$: classical ML models (GLR, LSSVR, RF, XGBoost, LightGBM, CatBoost) versus TabPFN.
+    \textbf{B.}~Pearson $r_{pc}$: deep learning models (CNN, LSTM, GCN, GAT) versus TabPFN.
+    \textbf{C.}~Spearman $r_{sc}$: classical ML models versus TabPFN.
+    \textbf{D.}~Spearman $r_{sc}$: deep learning models versus TabPFN.
+    TabPFN (KD-Embed) achieves the highest PS-CV $r_{pc}$ and $r_{sc}$ across all drug representations, with a smaller gap between CV and test values among top-performing models.
+    Deep learning models show larger CV-to-test gaps (notably GAT), reflecting greater sensitivity to patient-level distribution shift.}
     \label{fig:fig4}
 \end{figure}
 
-\begin{table}[!ht]
+\begin{table*}[!ht]
 \centering
 \caption{\textbf{Best-performing configuration per model on BeatAML (Waves~1+2 training, Waves~3+4 test).}
 One row per model; drug representation selected by highest held-out test $r_{pc}$ with smallest generalization gap.
-PS-CV = 5-fold patient-stratified cross-validation (the clinically meaningful benchmark; mean\,$\pm$\,std across folds).
+PS-CV = 5-fold patient-stratified cross-validation (mean\,$\pm$\,std across folds).
 $\%\Delta r_{pc} = (r_{\text{PS-CV}} - r_{\text{Test}})/r_{\text{PS-CV}} \times 100$; smaller = better generalization;
-negative values (GAT+FFNN rows) indicate test $r_{pc}$ marginally exceeds PS-CV mean.
+%negative values (GAT+FFNN rows) indicate test $r_{pc}$ marginally exceeds PS-CV mean.
 \textbf{Bold} = PREDICT-AML (TabPFN) with the ablation-optimal feature configuration
-(all patient feature groups + KD-Embed; see Supplementary Table~S3 for full ablation; Supplementary Table~S2 for all model--drug representation combinations).}
+(all patient feature groups + KD-Embed; see Supplementary Table~S3 for full ablation; Supplementary Table~S2 for all model-drug representation combinations).}
 \label{table:benchmark_compact}
-%\resizebox{\textwidth}{!}{
-\footnotesize{
+\resizebox{\textwidth}{!}{
+%\scriptsize{
 \begin{tabular}{lllccccr}
 \toprule
 \textbf{Model} & \textbf{Class} & \textbf{Drug Rep.} &
@@ -248,73 +258,79 @@ LSSVR & Linear & MolFormer & $35.632 \pm 1.174$ & $42.220$ & $0.655 \pm 0.013$ &
 \bottomrule
 \end{tabular}
 }
-\end{table}
+\end{table*}
 
-Table~\ref{table:benchmark_compact} summarises the best-performing drug representation for each of the 11 benchmark models, selected by held-out test $r_{pc}$ on Waves~3+4; full results for all drug representations are provided in Supplementary Table~S2. PREDICT-AML (TabPFN with KD-Embed, ablation-optimised feature set) achieves the highest test $r_{pc} = 0.690$ and lowest Test MAE $= 37.712$, with a generalization gap of $\%\Delta r_{pc} = 4.7\%$. Among classical models, tree-based gradient-boosted ensembles (LightGBM, CatBoost, XGBoost, RF) consistently outperform linear and neural-network alternatives. The best tree-based model, LightGBM (PC), achieves test $r_{pc} = 0.681$ and MAE $= 38.399$; CatBoost (KD-Embed) achieves test $r_{pc} = 0.676$ and MAE $= 38.391$. Deep learning models processing SMILES or molecular graphs directly (CNN, LSTM, GAT+FFNN, GCN+FFNN) achieve test $r_{pc} = 0.633$--$0.652$ (PS-CV $r_{pc} = 0.695$--$0.717$) and MAE $= 39.5$--$40.5$ under their best molecular representations (MolFormer in all cases). Linear models (GLR, LSSVR) achieve test $r_{pc} = 0.601$--$0.619$, reflecting limited capacity to capture non-linear feature interactions. An advantage of tree-based models is interpretability via feature importance \cite{mall2018rgbm,louppe2013understanding}; SHAP-based interpretability for the best CatBoost model is provided in Supplementary Figs.~6--7. SHAP-based interpretability for the best PREDICT-AML (TabPFN, KD-Embed) configuration on the held-out test set is presented in Section~\ref{sec3.7}.
+Table~\ref{table:benchmark_compact} summarises the best-performing drug representation for each of the 11 benchmark models, selected by held-out test $r_{pc}$ on Waves~3+4; full results for all drug representations w.r.t. PS-CV stratification stragery are provided in Supplementary Table~S2. PREDICT-AML (TabPFN with KD-Embed, ablation-optimised feature set) achieves the highest test $r_{pc} = 0.690$ and lowest Test MAE $= 37.712$, with a generalization gap of $\%\Delta r_{pc} = 4.7\%$. Among classical models, tree-based gradient-boosted ensembles (LightGBM, CatBoost, XGBoost, RF) consistently outperform linear and neural-network alternatives. The best tree-based model, LightGBM (PC), achieves test $r_{pc} = 0.681$ and MAE $= 38.399$; CatBoost (KD-Embed) achieves test $r_{pc} = 0.676$ and MAE $= 38.391$. Deep learning models processing SMILES or molecular graphs directly (CNN, LSTM, GAT+FFNN, GCN+FFNN) achieve test $r_{pc} = 0.633$-$0.652$ (PS-CV $r_{pc} = 0.695$-$0.717$) and MAE $= 39.5$-$40.5$ under their best molecular representations (MolFormer in all cases). Linear models (GLR, LSSVR) achieve test $r_{pc} = 0.601$-$0.619$, reflecting limited capacity to capture non-linear feature interactions. %An advantage of tree-based models is interpretability via feature importance \cite{mall2018rgbm,louppe2013understanding}.
+% SHAP-based interpretability for the best CatBoost model is provided in Supplementary Figs.~6--7.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Patient-Stratified Evaluation as the Clinically Meaningful Benchmark}\label{sec3.2}
-A central finding of this study is that the choice of cross-validation (CV) strategy has a decisive impact on the apparent predictive performance of drug response models, and that standard random CV substantially overestimates a model's real-world utility. To quantify this effect, we evaluated TabPFN across all four drug molecular representations under three CV strategies: patient-stratified CV (PS-CV), drug-stratified CV (DS-CV), and random CV. Numerical results are provided in Table~\ref{table:tabpfn_cv}, and an overview across all metrics and drug representations is shown in Figure~\ref{fig:fig_tabpfn}.
+A central finding of this study is that the choice of cross-validation (CV) strategy has a decisive impact on the apparent predictive performance of drug response models, and that standard random CV substantially overestimates a model's real-world utility. To quantify this effect, we evaluated TabPFN across all four drug molecular representations under three CV strategies: patient-stratified CV (PS-CV), drug-stratified CV (DS-CV), and random CV. An overview across metrics like RMSE and $R^{2}$ and drug representations is shown in Table~\ref{table:tabpfn_cv}.
 
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.97\textwidth]{figures/Figure1.pdf}
-    \caption{TabPFN cross-validation performance on BeatAML under three CV strategies (patient-stratified, drug-stratified, random) and four drug molecular representations (Only\_PC, SMILES-LS, ChemBERTa, MolFormer). Panels display MAE, RMSE, R$^2$, Pearson $r_{pc}$, and Spearman $r_{sc}$. Patient-stratified CV (PS-CV) reflects the clinically relevant scenario of predicting response for new patients; random CV consistently inflates all performance metrics relative to PS-CV.}
-    \label{fig:fig_tabpfn}
-\end{figure}
+% \begin{figure}[!ht]
+%     \centering
+%     \includegraphics[width=0.97\textwidth]{figures/Figure1.pdf}
+%     \caption{TabPFN cross-validation performance on BeatAML under three CV strategies (patient-stratified, drug-stratified, random) and four drug molecular representations (Only\_PC, SMILES-LS, ChemBERTa, MolFormer). Panels display MAE, RMSE, R$^2$, Pearson $r_{pc}$, and Spearman $r_{sc}$. Patient-stratified CV (PS-CV) reflects the clinically relevant scenario of predicting response for new patients; random CV consistently inflates all performance metrics relative to PS-CV.}
+%     \label{fig:fig_tabpfn}
+% \end{figure}
 
-\begin{table}[!ht]
+\begin{table*}[!ht]
 \centering
-\caption{Cross-validation performance of TabPFN on BeatAML under three strategies and four drug molecular representations. \textbf{Bold} indicates the best patient-stratified (PS-CV) result---the clinically meaningful benchmark. $^\dagger$Random CV rows inflate apparent performance due to patient--drug pair leakage across folds; see text. DS-CV = drug-stratified CV.}
+\caption{Cross-validation and held-out test performance of TabPFN on BeatAML under three CV strategies and 4 drug molecular representations.
+CV columns (RMSE, $r_{sc}$) report 5-fold (mean\,$\pm$\,std); Test columns report performance on held-out Waves~3+4 set.
+$\%\Delta r_{sc} = (r_{\text{CV}} - r_{\text{Test}})/r_{\text{CV}} \times 100$: positive values indicate CV overestimates test performance (Random CV); large -tive values indicate CV underestimates it because test drugs overlap with training (DS-CV).
+\textbf{Bold} = best PS-CV result (the clinically meaningful benchmark).
+$^\dagger$Random CV inflates apparent CV performance due to patient-drug pair leakage across folds.
+DS-CV = drug-stratified CV.} %Full metric tables (MAE, R$^2$, $r_{pc}$) are in Supplementary Tables~S2--S5.
 \label{table:tabpfn_cv}
-%\resizebox{0.99\textwidth}{!}{
-\footnotesize{
-\begin{tabular}{|l|l|c|c|c|c|c|}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|c|c|c|c|r|}
 \hline
-\textbf{Drug Repr.} & \textbf{CV Strategy} & \textbf{MAE} & \textbf{RMSE} & \textbf{R$^2$} & $r_{pc}$ & $r_{sc}$ \\
+\textbf{Drug Repr.} & \textbf{CV Strategy} & \textbf{CV RMSE} & \textbf{CV $r_{sc}$} & \textbf{Test RMSE} & \textbf{Test $r_{sc}$} & \textbf{$\%\Delta r_{sc}$} \\
 \hline
-PC & PS-CV & $31.790 \pm 1.451$ & $43.513 \pm 2.963$ & $0.508 \pm 0.029$ & $0.712 \pm 0.021$ & $0.706 \pm 0.012$ \\
-PC & DS-CV & $46.743 \pm 4.247$ & $58.955 \pm 5.269$ & $0.096 \pm 0.028$ & $0.306 \pm 0.045$ & $0.268 \pm 0.042$ \\
-PC & Random$^\dagger$ & $26.290 \pm 0.285$ & $36.710 \pm 0.295$ & $0.645 \pm 0.002$ & $0.803 \pm 0.001$ & $0.796 \pm 0.003$ \\
+PC         & PS-CV             & $43.513 \pm 2.963$ & $0.706 \pm 0.012$ & $51.321$ & $0.680$ & $3.7$ \\
+PC         & DS-CV             & $58.955 \pm 5.269$ & $0.268 \pm 0.042$ & $51.805$ & $0.662$ & $-147.0$ \\
+PC         & Random$^\dagger$  & $36.710 \pm 0.295$ & $0.796 \pm 0.003$ & $51.333$ & $0.680$ & $14.6$ \\
 \hline
-KD Embed & \textbf{PS-CV} & $\mathbf{31.453 \pm 0.959}$ & $43.181 \pm 1.526$ & $0.512 \pm 0.019$ & $\mathbf{0.716 \pm 0.013}$ & $\mathbf{0.711 \pm 0.013}$ \\
-KD Embed & DS-CV & $45.841 \pm 4.645$ & $58.740 \pm 6.166$ & $0.121 \pm 0.054$ & $0.337 \pm 0.082$ & $0.311 \pm 0.078$ \\
-KD Embed & Random$^\dagger$ & $26.047 \pm 0.288$ & $36.444 \pm 0.272$ & $0.651 \pm 0.002$ & $0.807 \pm 0.002$ & $0.799 \pm 0.003$ \\
+KD Embed   & \textbf{PS-CV}    & $\mathbf{42.687 \pm 1.458}$ & $\mathbf{0.719 \pm 0.011}$ & $\mathbf{51.342}$ & $\mathbf{0.685}$ & $\mathbf{4.7}$ \\
+KD Embed   & DS-CV             & $58.740 \pm 6.166$ & $0.311 \pm 0.078$ & $51.391$ & $0.681$ & $-119.0$ \\
+KD Embed   & Random$^\dagger$  & $36.444 \pm 0.272$ & $0.799 \pm 0.003$ & $51.437$ & $0.683$ & $14.5$ \\
 \hline
-ChemBERTa & PS-CV & $31.574 \pm 1.417$ & $43.230 \pm 1.860$ & $0.512 \pm 0.032$ & $0.715 \pm 0.022$ & $0.709 \pm 0.028$ \\
-ChemBERTa & DS-CV & $45.285 \pm 3.859$ & $57.409 \pm 4.639$ & $0.150 \pm 0.065$ & $0.377 \pm 0.088$ & $0.348 \pm 0.096$ \\
-ChemBERTa & Random$^\dagger$ & $26.009 \pm 0.266$ & $36.423 \pm 0.249$ & $0.651 \pm 0.003$ & $0.807 \pm 0.002$ & $0.800 \pm 0.003$ \\
+ChemBERTa  & PS-CV             & $43.230 \pm 1.860$ & $0.709 \pm 0.028$ & $51.571$ & $0.682$ & $3.8$ \\
+ChemBERTa  & DS-CV             & $57.409 \pm 4.639$ & $0.348 \pm 0.096$ & $51.389$ & $0.681$ & $-95.7$ \\
+ChemBERTa  & Random$^\dagger$  & $36.423 \pm 0.249$ & $0.800 \pm 0.003$ & $51.260$ & $0.684$ & $14.5$ \\
 \hline
-MolFormer & \textbf{PS-CV} &  $31.592 \pm 1.327$ & $\mathbf{43.138 \pm 2.793}$ & $\mathbf{0.513 \pm 0.034}$ & ${0.716 \pm 0.024}$ & ${0.708 \pm 0.019}$ \\
-MolFormer & DS-CV & $45.227 \pm 1.978$ & $57.499 \pm 3.396$ & $0.139 \pm 0.019$ & $0.372 \pm 0.024$ & $0.346 \pm 0.030$ \\
-MolFormer & Random$^\dagger$ & $25.995 \pm 0.259$ & $36.373 \pm 0.219$ & $0.652 \pm 0.003$ & $0.808 \pm 0.001$ & $0.800 \pm 0.003$ \\
+MolFormer  & PS-CV             & $43.138 \pm 2.793$ & $0.708 \pm 0.019$ & $51.455$ & $0.681$ & $3.8$ \\
+MolFormer  & DS-CV             & $57.499 \pm 3.396$ & $0.346 \pm 0.030$ & $51.457$ & $0.676$ & $-95.4$ \\
+MolFormer  & Random$^\dagger$  & $36.373 \pm 0.219$ & $0.800 \pm 0.003$ & $51.932$ & $0.676$ & $15.5$ \\
 \hline
 \end{tabular}
 }
-\end{table}
+\end{table*}
 
-\textbf{Patient-stratified CV is the primary benchmark.} In PS-CV, each fold withholds an entire subset of patients from training, directly simulating the clinical scenario in which a model must generalize to new individuals not seen during development. Under PS-CV, all four drug representations achieve consistent performance: $r_{pc} \approx 0.712$--$0.716$ (MAE $\approx 31.5$--$31.8$). The top-performing configuration is MolFormer ($r_{pc} = 0.716 \pm 0.024$, MAE $= 31.592 \pm 1.327$; SMILES-LS performs comparably at $r_{pc} = 0.716 \pm 0.013$), demonstrating that the model captures transferable patient-level transcriptomic and genomic signals.
+\textbf{Patient-stratified CV is the primary benchmark.} In PS-CV, each fold withholds an entire subset of patients from training, directly simulating the clinical scenario in which a model must generalize to new individuals not seen during development. Under PS-CV, all four drug representations achieve consistent performance: $r_{sc} \approx 0.706$-$0.719$ (RMSE $\approx 42.7$-$43.5$). The top-performing configuration is KD-Embed ($r_{sc} = 0.719 \pm 0.011$, RMSE $= 42.687 \pm 1.458$; MolFormer performs comparably at $r_{sc} = 0.708 \pm 0.019$). Crucially, the held-out test performance ($r_{sc} = 0.680$-$0.685$, RMSE $= 51.3$-$51.6$) closely tracks the PS-CV estimate, with a mean generalization gap of $\%\Delta r_{sc} \approx 4.0\%$, confirming that PS-CV is a reliable and honest predictor of real-world performance on unseen patients.
 
-\textbf{Random CV overestimates generalization.} A critical observation from Table~\ref{table:tabpfn_cv} is that random CV yields $r_{pc} \approx 0.803$--$0.808$ (MAE $\approx 26.0$--$26.3$) for all drug representations---a Pearson correlation approximately $13\%$ higher than the PS-CV estimate. This inflation arises because random fold assignment places different drug--patient pairs from the same patients in both training and validation, allowing the model to implicitly interpolate between known patient states rather than extrapolating to genuinely new individuals. The $\sim\!22\%$ lower MAE under random CV (26.0 vs.\ 31.6) similarly overstates predictive accuracy. These results underscore that random CV is an inappropriate benchmark for clinical deployment, where predictions are always made for patients the model has not encountered before. Full random CV benchmark results for all 11 models across all drug representations are provided in Supplementary Table~S5.
+\textbf{Random CV overestimates generalization.} A critical observation from Table~\ref{table:tabpfn_cv} is that random CV yields $r_{sc} \approx 0.796$-$0.800$ (RMSE $\approx 36.4$-$36.7$) for all drug representations - a Spearman correlation approximately $12\%$-$13\%$ higher than the PS-CV estimate. Yet the held-out test performance under these same configurations ($r_{sc} = 0.676$-$0.684$, RMSE $= 51.3$-$51.9$) is nearly identical to the PS-CV test performance, exposing a $\%\Delta r_{sc}$ of $14.5$-$15.5\%$ between CV and test. This inflation arises because random fold assignment places different drug-patient pairs from the same patients in both training and validation, allowing the model to implicitly interpolate between known patient states rather than extrapolating to genuinely new individuals. These results underscore that random CV is an inappropriate benchmark for evaluation. Full random CV results for all 11 models are in Supplementary Table~S5.
 
-\textbf{Drug-stratified CV reveals chemical generalization limits.} Under DS-CV, performance drops substantially to $r_{pc} \approx 0.306$--$0.377$ (MAE $\approx 45.2$--$46.7$), reflecting the inherent difficulty of predicting response to structurally novel drugs. Here, chemical language models provide a clear advantage: ChemBERTa ($r_{pc} = 0.377 \pm 0.088$) and MolFormer ($r_{pc} = 0.372 \pm 0.024$) outperform physicochemical-only representations ($r_{pc} = 0.306 \pm 0.045$), demonstrating that pre-training on large molecular databases encodes transferable structural knowledge. This advantage does not manifest under PS-CV or random CV---where patient features dominate---confirming that drug representation quality is the primary bottleneck specifically for novel-compound generalization. Full DS-CV benchmark results for all 11 models across all drug representations are provided in Supplementary Table~S4.
+\textbf{Drug-stratified CV reveals chemical generalization limits.} Under DS-CV, CV performance drops substantially to $r_{sc} \approx 0.268$-$0.348$ (RMSE $\approx 57.4$-$59.2$), appearing to suggest severe underperformance. However, the held-out test $r_{sc}$ under DS-CV-tuned configurations ($0.662$-$0.681$) is comparable to the PS-CV test $r_{sc}$, yielding large negative $\%\Delta r_{sc}$ values ($-95.4$ to $-147.0\%$). This paradox arises because the held-out Waves~3+4 test set shares most drugs with the training set, so test performance is not drug-stratified and benefits from drug familiarity absent during DS-CV folds. Nonetheless, DS-CV correctly identifies chemical language models as advantageous for novel-drug generalization: ChemBERTa ($r_{sc} = 0.348 \pm 0.096$) and MolFormer ($r_{sc} = 0.346 \pm 0.030$) outperform physicochemical-only representations ($r_{sc} = 0.268 \pm 0.042$) in the CV folds, a signal that does not emerge under PS-CV or random CV where patient features dominate. Full DS-CV results for all 11 models are in Supplementary Table~S4.
 
-Scatter plots of predicted versus observed AUC values for the best-performing TabPFN configuration (MolFormer) across CV strategies are shown in Figure~\ref{fig:tabpfn_scatter}.
+Figure~\ref{fig:tabpfn_scatter} shows predicted versus observed AUC values for the best-performing TabPFN configuration (all patient feature groups, KD-Embed) on the full held-out test set and a subset of 14 novel drugs absent from training, illustrating patient-level generalization and zero-shot drug generalization respectively. In Figure \ref{fig:tabpfn_scatter}B, all test patients are also unseen, making this a simultaneous test of patient- and drug-level generalization. From Figure \ref{fig:tabpfn_scatter}B, we observe that the model achieves $r_{pc} = 0.166$ ($p = 2.1 \times 10^{-6}$) and $r_{sc} = 0.171$ ($p = 1.0 \times 10^{-6}$); the modest but significant correlation is driven by patient multi-omics features in absence of any drug-specific training signal.
 
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.95\textwidth]{figures/TabPFN_predictions_scatter.pdf}
-    \caption{Predicted versus observed AUC values for the best-performing TabPFN configuration (MolFormer drug embeddings) on BeatAML. Each point represents a patient--drug pair; the diagonal line indicates perfect prediction. The patient-stratified CV (PS-CV) result ($r_{pc} = 0.716$) is the clinically meaningful evaluation; random CV ($r_{pc} = 0.808$) inflates apparent performance by excluding the patient-level generalization challenge from validation.}
+    \caption{\textbf{Predicted versus observed AUC values for the best-performing TabPFN configuration (all patient feature groups, KD-Embed drug representation) on the BeatAML held-out test set.}
+    Each point represents a patient-drug pair; the red dashed line indicates perfect prediction; AUC values range from 0 to 300.
+    \textbf{A.}~Full held-out test set (Waves~3+4, $n = 18{,}826$ pairs): $r_{pc} = 0.690$, MAE $= 37.7$; error bars show $95\%$ prediction confidence intervals for a representative subset of patient-drug pairs; the high test $r_{pc}$ confirms that the model captures drug sensitivity rank ordering for previously unseen patients.
+    \textbf{B.}~Novel-drug subset: 14 drugs present in Waves~3+4 but entirely absent from Waves~1+2 ($n = 803$ pairs).}
     \label{fig:tabpfn_scatter}
 \end{figure}
-
+\textcolor{red}{Raghvendra is here}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Ablation Study on Feature Group Contributions}\label{sec3.3}
-We performed a systematic ablation study on BeatAML to quantify the contribution of individual feature groups to TabPFN prediction performance. Feature groups were: (i)~Gene Expression (150 most variable genes + oncogenes); (ii)~Mutation profiles; (iii)~Pathway enrichment scores; (iv)~Cell state and module enrichment (Clinical, CellType, Module). These were evaluated individually and in pairwise and triple combinations with each of the three drug representations (Only\_PC, SMILES-LS, MolFormer+PC). Baseline models using all features (all four groups combined) served as references.
+We performed a systematic ablation study of the PREDICT-AML model on BeatAML dataset to quantify the contribution of individual feature groups to TabPFN prediction performance. Feature groups were: (i)~Gene Expression (150 most variable genes + oncogenes); (ii)~Mutation profiles; (iii)~Pathway enrichment scores; (iv)~Cell state and module enrichment (Clinical, CellType, Module). These were evaluated individually and in pairwise and triple combinations with two possible drug representations (PC and KD-Embed). Baseline models using all features (all four groups combined) served as references as shown in Supp. Table S3.
 
-Representative ablation prediction scatter plots are shown in Supplementary Fig.~3 for the baseline configurations (PC and KD-Embed drug representations). Under random CV, baseline models using all features with Only\_PC drugs ($r_{pc} = 0.803 \pm 0.002$, MAE $= 26.381 \pm 0.247$), SMILES-LS drugs ($r_{pc} = 0.806 \pm 0.001$), and combined PC+Embed drugs ($r_{pc} = 0.807 \pm 0.001$) all perform comparably, with marginal gains from richer drug representations. Under drug-stratified CV, baseline models achieve $r_{pc} \approx 0.312$--$0.342$ (MAE $\approx 46.2$--$45.8$), and single-group models using only gene expression or clinical/cell-type/module features achieve similar drug-stratified $r_{pc} \approx 0.314$--$0.338$, confirming that drug representation quality---not patient feature complexity---is the primary bottleneck for novel-drug generalization.
-
-The full ablation results (all feature group combinations and all CV strategies) are provided in Supplementary Table~S3 and Supplementary Fig.~3.
+Systematic ablation reveals that gene expression features are the single strongest contributor to drug sensitivity prediction. Using Gene Expression alone with KD-Embed drug representation achieves test $r_{sc} = 0.677$ ($r_{pc} = 0.682$), recovering $98.8\%$ of the full four-group baseline performance ($r_{sc} = 0.685$, $r_{pc} = 0.690$). Mutation profiles provide the weakest isolated signal ($r_{sc} = 0.646$, $r_{pc} = 0.647$), while Pathway enrichment ($r_{sc} = 0.657$) and Clinical/CellType/Module features ($r_{sc} = 0.658$) offer intermediate contributions. Pairwise combinations consistently improve on their constituent single-group models: Gene Expression + Mutation achieves $r_{sc} = 0.680$ ($r_{pc} = 0.685$), and notably, Clinical/CellType/Module combined with Mutation alone matches full-model performance ($r_{sc} = 0.685$, $r_{pc} = 0.689$) despite excluding the Gene Expression and Pathway groups---reflecting complementary signals between cell-state transcriptional context and somatic mutational load. Among triple combinations, Clinical/CellType/Module + Gene Expression + Mutation achieves $r_{sc} = 0.684$ ($r_{pc} = 0.689$), with the full four-group model providing only marginal additional gain ($\Delta r_{sc} \leq 0.001$). These findings are consistent across both PC and KD-Embed drug representations (Supplementary Table~S3), confirming that feature group contributions are stable with respect to drug molecular representation choice, and that the four patient feature groups together capture the full multi-omics signal with modest redundancy at the margins.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{External Validation on LeeAML}\label{sec3.4}
@@ -327,7 +343,7 @@ To assess transferability beyond the BeatAML cohort, we applied the trained PRED
     \label{fig:leeaml}
 \end{figure}
 
-The external validation confirms that PREDICT-AML generalizes to an independent AML cohort with distinct patient demographics, treatment protocols, and sample processing workflows. The SMILES-LS (Embed) representation achieves the most consistent performance on the LeeAML patient-stratified evaluation (Supplementary Fig.~4 shows the best-performing single-configuration result for KD Embed). ChemBERTa and MolFormer representations also demonstrate meaningful correlation, with variability reflecting the smaller cohort size ($n = 30$) and the differing distribution of drug response values between institutions.
+The external validation confirms that PREDICT-AML generalizes to an independent AML cohort with distinct patient demographics, treatment protocols, and sample processing workflows. The SMILES-LS (Embed) representation achieves the most consistent performance on the LeeAML patient-stratified evaluation. ChemBERTa and MolFormer representations also demonstrate meaningful correlation, with variability reflecting the smaller cohort size ($n = 30$) and the differing distribution of drug response values between institutions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{External Validation on FIMM-AML}\label{sec3.5}
@@ -342,7 +358,7 @@ Figure~\ref{fig:fimmaml} shows the predicted versus observed scatter plots for a
     \label{fig:fimmaml}
 \end{figure}
 
-The cross-platform setting---predicting AUC-scale values that are compared against DSS measurements---is inherently more challenging than the LeeAML evaluation, given the systematic differences in drug response quantification methodology between FIMM and BeatAML. Despite this, the model demonstrates meaningful rank correlations between predicted and observed drug sensitivity values across FIMM-AML patients, validating that the transcriptomic and genomic signals captured by PREDICT-AML are informative across distinct clinical institutions and drug sensitivity platforms. The best-performing configuration (KD Embed) scatter plot comparing predicted AUC against DSS scores is provided in Supplementary Fig.~4.
+The cross-platform setting---predicting AUC-scale values that are compared against DSS measurements---is inherently more challenging than the LeeAML evaluation, given the systematic differences in drug response quantification methodology between FIMM and BeatAML. Despite this, the model demonstrates meaningful rank correlations between predicted and observed drug sensitivity values across FIMM-AML patients, validating that the transcriptomic and genomic signals captured by PREDICT-AML are informative across distinct clinical institutions and drug sensitivity platforms. The best-performing configuration across all drug representations is KD Embed, which achieves the strongest rank correlation between predicted AUC and observed DSS scores.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Prediction Confidence Interval Analysis}\label{sec3.6}
@@ -356,52 +372,6 @@ A key advantage of the TabPFN framework is its ability to provide calibrated pre
 \end{figure}
 
 The CI width distribution (Figure~\ref{fig:ci}) reveals that the majority of patient--drug pair predictions carry moderate uncertainty (median CI width $\approx 100$--$120$ AUC units), while a long right tail corresponds to predictions with higher uncertainty---typically for drugs tested on fewer patient samples. This uncertainty quantification provides a clinically actionable signal: predictions with narrow CIs can be relied upon with greater confidence when informing therapeutic selection, whereas those with wide CIs flag cases where additional experimental evidence may be warranted before acting on the model output.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{SHAP-based Interpretability of PREDICT-AML}\label{sec3.7}
-To understand which features drive individual predictions of the best PREDICT-AML configuration (TabPFN with KD-Embed, full feature set), we computed SHAP (SHapley Additive exPlanations) values \cite{lundberg2017unified} for all patient--drug pairs in the held-out test set. The base value---the model's average prediction across the test cohort---is $\approx 197.3$ AUC units, and each SHAP value additively explains a prediction's deviation from this baseline.
-
-Figure~\ref{fig:shap_global} shows the global feature importance for the test set as a bar chart of mean $|\text{SHAP}|$ values alongside a beeswarm summary plot.
-
-\begin{figure}[!ht]
-    \centering
-    \begin{subfigure}[b]{0.47\textwidth}
-        \includegraphics[width=\textwidth]{figures/SHAP_importance_bar_test.pdf}
-        \caption{Mean $|\text{SHAP}|$ bar chart (top 20 features)}
-        \label{fig:shap_bar}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.50\textwidth}
-        \includegraphics[width=\textwidth]{figures/SHAP_beeswarm_test.pdf}
-        \caption{Beeswarm summary plot}
-        \label{fig:shap_beeswarm}
-    \end{subfigure}
-    \caption{Global SHAP feature importance for PREDICT-AML on the held-out BeatAML test set (TabPFN, KD-Embed configuration). (A)~Mean absolute SHAP values for the top 20 features. Drug embedding dimensions (LS\_*) dominate the ranking, with patient gene expression features (e.g., \textit{CDC42BPA}, \textit{IGSF10}, \textit{CEACAM6}, \textit{CSPG4}) appearing among the leading patient-level predictors. (B)~Beeswarm plot showing the distribution of SHAP values across all test patient--drug pairs for each feature; colour encodes the feature value (red $=$ high, blue $=$ low). Wide beeswarm spreads reflect features with heterogeneous influence across the cohort.}
-    \label{fig:shap_global}
-\end{figure}
-
-Drug embedding dimensions from the KD-Embed representation (LS\_202, LS\_21, LS\_17, LS\_94, LS\_61, LS\_200, LS\_138) collectively dominate the global importance ranking, confirming that chemical properties of the drug are the primary determinants of the predicted AUC response. This is expected in a multi-drug prediction framework where drug identity must account for the bulk of variance in response. Among patient-level features, the gene expression of \textit{CDC42BPA} (CDC42 binding protein kinase $\alpha$; mean $|\text{SHAP}| \approx 3.80$), \textit{IGSF10} ($\approx 3.46$), \textit{CEACAM6} ($\approx 3.46$), and \textit{CSPG4} ($\approx 3.29$) stand out as the leading transcriptomic predictors, indicating that the model captures biologically meaningful patient-specific signals modulating drug sensitivity.
-
-To illustrate how SHAP values explain individual predictions, Figure~\ref{fig:shap_individual} presents waterfall plots for two representative test-set samples: a correctly predicted sensitive patient--drug pair and a correctly predicted resistant pair.
-
-\begin{figure}[!ht]
-    \centering
-    \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=\textwidth]{figures/SHAP_sensitivity_idx8432.pdf}
-        \caption{Sensitive: true AUC $= 124.0$, predicted $= 124.0$}
-        \label{fig:shap_sens}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=\textwidth]{figures/SHAP_resistance_idx11511.pdf}
-        \caption{Resistant: true AUC $= 254.0$, predicted $= 254.0$}
-        \label{fig:shap_res}
-    \end{subfigure}
-    \caption{SHAP waterfall plots for individual test-set predictions from PREDICT-AML (TabPFN, KD-Embed). Starting from the base value ($\approx 197.3$), each bar shows the SHAP contribution of the top features pushing the final prediction higher (red, toward resistance) or lower (blue, toward sensitivity). (A)~Sensitive patient--drug pair (sample idx8432, true AUC $= 124.0$, predicted $= 124.0$): drug embedding dimensions LS\_125 ($\text{SHAP} = -24.4$) and LS\_214 ($-13.7$), together with patient feature \textit{POU4F1} expression ($-11.0$), drive the prediction well below baseline. (B)~Resistant patient--drug pair (sample idx11511, true AUC $= 254.0$, predicted $= 254.0$): drug embedding dimensions LS\_1 ($+16.0$) and LS\_242 ($+15.7$), together with LS\_155 ($+13.2$) and LS\_202 ($+12.8$), collectively push the prediction substantially above baseline, with \textit{DEFA1} expression ($-8.5$) providing a partially opposing effect. Waterfall plots for additional sensitivity and resistance examples are provided in Supplementary Figs.~8--9.}
-    \label{fig:shap_individual}
-\end{figure}
-
-The waterfall plots reveal complementary interpretability patterns. In the sensitive prediction (Figure~\ref{fig:shap_sens}), particular drug embedding dimensions encode structural properties that favour cellular uptake or target engagement, while \textit{POU4F1} expression---a POU-domain transcription factor associated with differentiation state---further amplifies the drug's predicted effect. In the resistant prediction (Figure~\ref{fig:shap_res}), a distinct set of embedding dimensions dominates, reflecting the chemical basis for poor drug efficacy, with \textit{DEFA1} expression acting as a modest counterbalancing signal. Together, these results demonstrate that PREDICT-AML's predictions are driven by an interpretable combination of drug chemical properties and patient transcriptomic context, supporting its potential utility as a clinical decision support tool.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}\label{sec4}
@@ -427,7 +397,7 @@ In this study, we developed PREDICT-AML, a machine learning framework for predic
 
 The optimal PREDICT-AML model, based on TabPFN with MolFormer drug embeddings, achieves a patient-stratified cross-validation Pearson correlation of $r_{pc} = 0.716$ (MAE $= 31.592$) on BeatAML---the clinically meaningful benchmark that evaluates generalization to previously unseen patients. Critically, we show that standard random cross-validation inflates this estimate to $r_{pc} = 0.808$, overstating generalization by $\sim\!13\%$; patient-stratified evaluation is the appropriate standard for reporting AML drug response prediction performance. Drug-stratified CV ($r_{pc} = 0.372$) further reveals where richer chemical language representations (ChemBERTa, MolFormer) provide systematic advantages over simpler physicochemical encodings. The framework also provides calibrated prediction uncertainty estimates, offering a practical tool for clinical decision support.
 
-Further validation on prospective clinical cohorts and integration with single-cell data remain important future directions. The SHAP-based interpretability analysis presented in Section~\ref{sec3.7} identifies drug embedding dimensions and key transcriptomic features (e.g., \textit{CDC42BPA}, \textit{IGSF10}, \textit{CEACAM6}) as the primary drivers of predicted drug sensitivity, providing a mechanistically grounded basis for clinical interpretation. More comprehensive interpretability analyses using methods such as GroupShapley \cite{jullum2021groupshapley} could provide further insights by grouping related molecular features driving drug response predictions. In conclusion, PREDICT-AML represents a significant step toward precision medicine in AML treatment, with the potential to guide clinicians in selecting optimal therapies based on individual patient multi-omics profiles.
+Further validation on prospective clinical cohorts and integration with single-cell data remain important future directions. More comprehensive interpretability analyses using methods such as GroupShapley \cite{jullum2021groupshapley} could provide valuable insights by grouping related molecular features driving drug response predictions. In conclusion, PREDICT-AML represents a significant step toward precision medicine in AML treatment, with the potential to guide clinicians in selecting optimal therapies based on individual patient multi-omics profiles.
 
 \section*{Declarations}
 
@@ -453,7 +423,7 @@ The authors thank the Qatar National Library (QNL) for their support in providin
 Open Access funding provided by the Qatar National Library.
 
 \bmhead{Authors' Contributions}
-R.M.\ and H.B.\ conceived the study. S.P.J.\ and R.M.\ collected, curated and assimilated the data. S.P.J.\ and R.M.\ performed the feature engineering. R.M.\ built the machine learning models and conducted external validation experiments. S.P.J.\ performed association analysis. S.P.J., H.B.\ and R.M.\ wrote and revised the manuscript. H.B.\ and R.M.\ supervised the study.
+R.M.\ and H.B.\ conceived the study. M.A.\ and R.M.\ collected, curated and assimilated the data. R.M.\ performed the feature engineering. M.A. and R.M.\ built the machine learning models and conducted external validation experiments. M.A. and S.P.J.\ performed association analysis. M.A., S.P.J., H.B.\ and R.M.\ wrote and revised the manuscript. H.B.\ and R.M.\ supervised the study.
 
 \bibliography{sn-bibliography}
 
