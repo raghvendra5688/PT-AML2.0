@@ -112,7 +112,7 @@
     \caption{\textbf{TabPFN ablation study: baseline (all feature groups) prediction scatter plots.}
     Each panel corresponds to a different drug molecular representation using the full patient feature set
     (gene expression, mutation, pathway, cell-state/module features) under patient-stratified CV.
-    See Supplementary Table~S3 for complete ablation results across all CV strategies and feature group combinations.}
+    See Supplementary Table~S3 for complete ablation results across patient feature configurations and drug representations.}
     \label{fig:suppfig5}
 \end{figure}
 
@@ -244,7 +244,7 @@ MACCS (nBits=167)        & 167 & Fingerprint \\
 %% Table S2 ─ Full ML/DL benchmark (all 44 model × drug representation PS-CV combinations)
 \begin{table}[!ht]
 \centering
-\caption{\textbf{Extended benchmark: all model--drug representation combinations on BeatAML under
+\caption{\textbf{Extended benchmark: all model-drug representation combinations on BeatAML under
 patient-stratified 5-fold CV (PS-CV) and held-out test set (Waves~3+4, $n = 183$ samples).}
 PS-CV values are mean\,$\pm$\,std across 5 folds; $\%\Delta r_{pc} = (r_{\text{PS-CV}} - r_{\text{Test}})/r_{\text{PS-CV}} \times 100$
 (smaller = better generalization; negative values indicate test $r_{pc}$ marginally exceeds PS-CV mean).
@@ -256,7 +256,7 @@ PS-CV values are mean\,$\pm$\,std across 5 folds; $\%\Delta r_{pc} = (r_{\text{P
 \textbf{Model} & \textbf{Class} & \textbf{Drug Rep.} & \textbf{PS-CV MAE} & \textbf{Test MAE} & \textbf{PS-CV $r_{pc}$} & \textbf{Test $r_{pc}$} & \textbf{$\%\Delta r_{pc}$} \\
 \midrule
 TabPFN & Transformer & PC & $31.790 \pm 1.451$ & $37.830$ & $0.712 \pm 0.021$ & $0.686$ & $3.7$ \\
-\textbf{TabPFN} & \textbf{Transformer} & \textbf{KD-Embed} & $\mathbf{31.453 \pm 0.959}$ & $\mathbf{37.845}$ & $\mathbf{0.716 \pm 0.013}$ & $\mathbf{0.687}$ & $\mathbf{4.1}$ \\
+\textbf{TabPFN} & \textbf{Transformer} & \textbf{KD-Embed} & $\mathbf{31.054 \pm 0.742}$ & $\mathbf{37.712}$ & $\mathbf{0.724 \pm 0.015}$ & $\mathbf{0.690}$ & $\mathbf{4.7}$ \\
 TabPFN & Transformer & ChemBERTa & $31.574 \pm 1.417$ & $37.843$ & $0.715 \pm 0.022$ & $0.685$ & $4.2$ \\
 TabPFN & Transformer & MolFormer & $31.592 \pm 1.327$ & $37.942$ & $0.716 \pm 0.024$ & $0.686$ & $4.2$ \\
 \midrule
@@ -311,57 +311,55 @@ LSSVR & Linear & ChemBERTa & $35.627 \pm 1.177$ & $42.385$ & $0.655 \pm 0.013$ &
 %% Table S3 ─ TabPFN ablation results
 \begin{table}[!ht]
 \centering
-\caption{\textbf{TabPFN feature group ablation study on BeatAML: patient-stratified CV (PS-CV) and
-drug-stratified CV (DS-CV) results.}
+\caption{\textbf{TabPFN feature group ablation study on BeatAML: comparison of PC and KD-Embed drug representations across patient feature configurations.}
 Feature groups: \textit{Gene\_Expr} = 150 most variable genes + oncogene expression profiles;
 \textit{Mutation} = somatic mutation frequency and type for top mutated genes;
 \textit{Pathway} = GSVA-derived oncogenic pathway enrichment scores;
 \textit{Clin\_Cell\_Mod} = clinical annotations, cell-state enrichment, and module enrichment scores.
 \textit{Baseline} uses all four feature groups combined.
-Results are shown for PC and SMILES-LS (Embed) drug representations under PS-CV and DS-CV.
-The complete table covering all feature combinations, all three CV strategies, and all four drug
-representations is available in the accompanying dataset.}
+PS-CV values are mean $\pm$ s.d.\ over folds (patient-stratified); Test values are on the held-out BeatAML test set.
+The complete table covering all feature combinations and all four drug representations is available in the accompanying dataset.}
 \label{table:suppTabPFNAblation}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{llcccc}
 \toprule
 \multirow{2}{*}{\textbf{Feature Group(s)}} & \multirow{2}{*}{\textbf{Drug Rep.}} &
-\multicolumn{2}{c}{\textbf{PS-CV (primary benchmark)}} & \multicolumn{2}{c}{\textbf{DS-CV}} \\
+\multicolumn{2}{c}{\textbf{PS-CV}} & \multicolumn{2}{c}{\textbf{Test Set}} \\
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}
-& & \textbf{MAE} & \textbf{r} & \textbf{MAE} & \textbf{r} \\
+& & \textbf{Pearson $r$} & \textbf{Spearman $r_{s}$} & \textbf{Pearson $r$} & \textbf{Spearman $r_{s}$} \\
 \midrule
-\textbf{Baseline (all groups)} & PC  & $31.465 \pm 1.273$ & $0.719 \pm 0.015$ & $45.804 \pm 4.371$ & $0.342 \pm 0.069$ \\
-\textbf{Baseline (all groups)} & KD Embed     & $31.054 \pm 0.742$ & $0.724 \pm 0.015$ & $46.344 \pm 4.898$ & $0.312 \pm 0.059$ \\
+\textbf{Baseline (all groups)} & PC       & $0.719 \pm 0.015$ & $0.712 \pm 0.012$ & $0.683$ & $0.676$ \\
+\textbf{Baseline (all groups)} & KD-Embed & $0.724 \pm 0.015$ & $\mathbf{0.719 \pm 0.011}$ & $\mathbf{0.690}$ & $\mathbf{0.685}$ \\
 \midrule
-Gene\_Expr only          & PC  & $31.552 \pm 1.995$ & $0.717 \pm 0.038$ & $45.876 \pm 3.722$ & $0.335 \pm 0.043$ \\
-Gene\_Expr only          & KD Embed     & $31.376 \pm 1.362$ & $0.718 \pm 0.023$ & $47.166 \pm 4.395$ & $0.291 \pm 0.086$ \\
+Gene\_Expr only          & PC       & $0.717 \pm 0.038$ & $0.711 \pm 0.035$ & $0.685$ & $0.680$ \\
+Gene\_Expr only          & KD-Embed & $0.718 \pm 0.023$ & $0.713 \pm 0.022$ & $0.682$ & $0.677$ \\
 \midrule
-Mutation only            & PC  & $34.675 \pm 2.152$ & $0.658 \pm 0.024$ & $47.827 \pm 2.068$ & $0.237 \pm 0.062$ \\
-Mutation only            & KD Embed     & $34.553 \pm 1.328$ & $0.659 \pm 0.023$ & $47.989 \pm 5.262$ & $0.252 \pm 0.107$ \\
+Mutation only            & PC       & $0.658 \pm 0.024$ & $0.658 \pm 0.028$ & $0.648$ & $0.646$ \\
+Mutation only            & KD-Embed & $0.659 \pm 0.023$ & $0.659 \pm 0.018$ & $0.647$ & $0.646$ \\
 \midrule
-Pathway only             & PC  & $33.179 \pm 1.827$ & $0.691 \pm 0.028$ & $45.831 \pm 3.183$ & $0.331 \pm 0.021$ \\
-Pathway only             & KD Embed     & $32.916 \pm 1.116$ & $0.694 \pm 0.025$ & $46.953 \pm 3.684$ & $0.314 \pm 0.026$ \\
+Pathway only             & PC       & $0.691 \pm 0.028$ & $0.683 \pm 0.021$ & $0.667$ & $0.659$ \\
+Pathway only             & KD-Embed & $0.694 \pm 0.025$ & $0.688 \pm 0.020$ & $0.666$ & $0.657$ \\
 \midrule
-Clin\_Cell\_Mod only     & PC  & $32.499 \pm 0.427$ & $0.699 \pm 0.009$ & $46.791 \pm 1.249$ & $0.315 \pm 0.045$ \\
-Clin\_Cell\_Mod only     & KD Embed     & $32.706 \pm 0.766$ & $0.699 \pm 0.008$ & $46.986 \pm 2.796$ & $0.314 \pm 0.040$ \\
+Clin\_Cell\_Mod only     & PC       & $0.699 \pm 0.009$ & $0.695 \pm 0.014$ & $0.671$ & $0.663$ \\
+Clin\_Cell\_Mod only     & KD-Embed & $0.699 \pm 0.008$ & $0.695 \pm 0.013$ & $0.665$ & $0.658$ \\
 \midrule
-Gene\_Expr + Mutation    & PC  & $31.480 \pm 0.982$ & $0.716 \pm 0.023$ & $45.051 \pm 1.959$ & $0.373 \pm 0.046$ \\
-Gene\_Expr + Mutation    & KD Embed     & $31.210 \pm 1.213$ & $0.721 \pm 0.017$ & $46.915 \pm 5.136$ & $0.314 \pm 0.070$ \\
+Gene\_Expr + Mutation    & PC       & $0.716 \pm 0.023$ & $0.710 \pm 0.021$ & $0.685$ & $0.680$ \\
+Gene\_Expr + Mutation    & KD-Embed & $0.721 \pm 0.017$ & $0.716 \pm 0.020$ & $0.685$ & $0.680$ \\
 \midrule
-Gene\_Expr + Pathway     & PC  & $31.483 \pm 0.670$ & $0.718 \pm 0.010$ & $46.782 \pm 4.504$ & $0.318 \pm 0.055$ \\
-Gene\_Expr + Pathway     & KD Embed     & $31.300 \pm 1.906$ & $0.722 \pm 0.026$ & $46.765 \pm 4.486$ & $0.318 \pm 0.077$ \\
+Gene\_Expr + Pathway     & PC       & $0.718 \pm 0.010$ & $0.711 \pm 0.013$ & $0.676$ & $0.669$ \\
+Gene\_Expr + Pathway     & KD-Embed & $0.722 \pm 0.026$ & $0.715 \pm 0.019$ & $0.684$ & $0.679$ \\
 \midrule
-Clin\_Cell\_Mod + Mutation & PC & $32.293 \pm 2.316$ & $0.702 \pm 0.031$ & $45.031 \pm 1.963$ & $0.378 \pm 0.023$ \\
-Clin\_Cell\_Mod + Mutation & KD Embed    & $32.639 \pm 1.948$ & $0.697 \pm 0.027$ & $47.898 \pm 4.491$ & $0.277 \pm 0.041$ \\
+Clin\_Cell\_Mod + Mutation & PC       & $0.702 \pm 0.031$ & $0.698 \pm 0.024$ & $0.685$ & $0.681$ \\
+Clin\_Cell\_Mod + Mutation & KD-Embed & $0.697 \pm 0.027$ & $0.693 \pm 0.021$ & $0.689$ & $\mathbf{0.685}$ \\
 \midrule
-Clin\_Cell\_Mod + Gene\_Expr & PC & $31.524 \pm 1.461$ & $0.716 \pm 0.018$ & $45.997 \pm 2.153$ & $0.317 \pm 0.049$ \\
-Clin\_Cell\_Mod + Gene\_Expr & KD Embed   & $31.128 \pm 1.500$ & $0.720 \pm 0.026$ & $46.658 \pm 4.367$ & $0.322 \pm 0.133$ \\
+Clin\_Cell\_Mod + Gene\_Expr & PC       & $0.716 \pm 0.018$ & $0.708 \pm 0.014$ & $0.682$ & $0.676$ \\
+Clin\_Cell\_Mod + Gene\_Expr & KD-Embed & $0.720 \pm 0.026$ & $0.715 \pm 0.027$ & $0.686$ & $0.681$ \\
 \midrule
-Clin\_Cell\_Mod + Gene\_Expr + Mutation & PC & $31.606 \pm 1.831$ & $0.718 \pm 0.022$ & $45.116 \pm 3.535$ & $0.364 \pm 0.029$ \\
-Clin\_Cell\_Mod + Gene\_Expr + Mutation & KD Embed   & $31.096 \pm 2.222$ & $0.725 \pm 0.031$ & $46.658 \pm 2.626$ & $0.308 \pm 0.085$ \\
+Clin\_Cell\_Mod + Gene\_Expr + Mutation & PC       & $0.718 \pm 0.022$ & $0.709 \pm 0.013$ & $0.683$ & $0.678$ \\
+Clin\_Cell\_Mod + Gene\_Expr + Mutation & KD-Embed & $\mathbf{0.725 \pm 0.031}$ & $0.717 \pm 0.022$ & $0.689$ & $0.684$ \\
 \midrule
-Clin\_Cell\_Mod + Mutation + Pathway & PC & $32.161 \pm 1.183$ & $0.705 \pm 0.008$ & $45.242 \pm 4.352$ & $0.396 \pm 0.047$ \\
-Clin\_Cell\_Mod + Mutation + Pathway & KD Embed    & $32.068 \pm 2.150$ & $0.709 \pm 0.040$ & $47.050 \pm 3.600$ & $0.288 \pm 0.041$ \\
+Clin\_Cell\_Mod + Mutation + Pathway & PC       & $0.705 \pm 0.008$ & $0.700 \pm 0.009$ & $0.687$ & $0.681$ \\
+Clin\_Cell\_Mod + Mutation + Pathway & KD-Embed & $0.709 \pm 0.040$ & $0.704 \pm 0.040$ & $0.688$ & $0.682$ \\
 \bottomrule
 \end{tabular}
 }
