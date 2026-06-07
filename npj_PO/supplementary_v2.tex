@@ -112,12 +112,9 @@
     \caption{\textbf{TabPFN ablation study: baseline (all feature groups) prediction scatter plots.}
     Each panel corresponds to a different drug molecular representation using the full patient feature set
     (gene expression, mutation, pathway, cell-state/module features) under patient-stratified CV.
-    See Supplementary Table~S3 for complete ablation results across patient feature configurations and drug representations.}
+    See Supplementary Table~S3 for complete ablation results across all CV strategies and feature group combinations.}
     \label{fig:suppfig5}
 \end{figure}
-
-
-
 
 %% Fig S6 ─ TabPFN SHAP summary
 \begin{figure}[!ht]
@@ -132,29 +129,29 @@
     \label{fig:suppfig6}
 \end{figure}
 
-%% Fig S7 ─ TabPFN SHAP waterfall plots
-\begin{figure}[!ht]
-    \centering
-    \subfloat[Sensitive Sample 1][SHAP waterfall for a drug-sensitive patient--drug pair (high predicted AUC).]{
-        \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_sensitive_sample1.pdf}
-    }
-    \qquad
-    \subfloat[Sensitive Sample 2][SHAP waterfall for a second drug-sensitive patient--drug pair.]{
-        \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_sensitive_sample2.pdf}
-    }
-    \qquad
-    \subfloat[Resistant Sample 1][SHAP waterfall for a drug-resistant patient--drug pair (low predicted AUC).]{
-        \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_resistance_sample1.pdf}
-    }
-    \qquad
-    \subfloat[Resistant Sample 2][SHAP waterfall for a second drug-resistant patient--drug pair.]{
-        \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_resistance_sample2.pdf}
-    }
-    \caption{\textbf{CatBoost SHAP waterfall plots for representative sensitive and resistant patient--drug pairs.}
-    Each bar shows the contribution of a single feature to the deviation from the baseline expected AUC.
-    Features in red push the prediction toward sensitivity; features in blue push it toward resistance.}
-    \label{fig:suppfig7}
-\end{figure}
+% %% Fig S7 ─ TabPFN SHAP waterfall plots
+% \begin{figure}[!ht]
+%     \centering
+%     \subfloat[Sensitive Sample 1][SHAP waterfall for a drug-sensitive patient--drug pair (high predicted AUC).]{
+%         \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_sensitive_sample1.pdf}
+%     }
+%     \qquad
+%     \subfloat[Sensitive Sample 2][SHAP waterfall for a second drug-sensitive patient--drug pair.]{
+%         \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_sensitive_sample2.pdf}
+%     }
+%     \qquad
+%     \subfloat[Resistant Sample 1][SHAP waterfall for a drug-resistant patient--drug pair (low predicted AUC).]{
+%         \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_resistance_sample1.pdf}
+%     }
+%     \qquad
+%     \subfloat[Resistant Sample 2][SHAP waterfall for a second drug-resistant patient--drug pair.]{
+%         \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_resistance_sample2.pdf}
+%     }
+%     \caption{\textbf{CatBoost SHAP waterfall plots for representative sensitive and resistant patient--drug pairs.}
+%     Each bar shows the contribution of a single feature to the deviation from the baseline expected AUC.
+%     Features in red push the prediction toward sensitivity; features in blue push it toward resistance.}
+%     \label{fig:suppfig7}
+% \end{figure}
 
 %% ──────────────────────────────────────────────────────────────────────────
 \clearpage
@@ -326,7 +323,7 @@ The complete table covering all feature combinations and all four drug represent
 \multirow{2}{*}{\textbf{Feature Group(s)}} & \multirow{2}{*}{\textbf{Drug Rep.}} &
 \multicolumn{2}{c}{\textbf{PS-CV}} & \multicolumn{2}{c}{\textbf{Test Set}} \\
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}
-& & \textbf{Pearson $r$} & \textbf{Spearman $r_{s}$} & \textbf{Pearson $r$} & \textbf{Spearman $r_{s}$} \\
+& & \textbf{$r_{pc}$} & \textbf{$r_{sc}$} & \textbf{$r_{pc}$} & \textbf{$r_{sc}$} \\
 \midrule
 \textbf{Baseline (all groups)} & PC       & $0.719 \pm 0.015$ & $0.712 \pm 0.012$ & $0.683$ & $0.676$ \\
 \textbf{Baseline (all groups)} & KD-Embed & $0.724 \pm 0.015$ & $\mathbf{0.719 \pm 0.011}$ & $\mathbf{0.690}$ & $\mathbf{0.685}$ \\
