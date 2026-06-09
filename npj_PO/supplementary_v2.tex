@@ -116,16 +116,16 @@
     \label{fig:suppfig5}
 \end{figure}
 
-%% Fig S6 ─ TabPFN SHAP summary
+%% Fig S6 ─ TabPFN SHAP beeswarm
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=0.82\textwidth]{jtrm_images/CatBoost_SHAP_Summary.pdf}
-    \caption{\textbf{SHAP summary plot for the best CatBoost model.}
-    Each row represents a feature; each point a patient--drug pair.
-    Point color encodes feature value (red = high, blue = low); horizontal position indicates the SHAP value
-    (contribution to predicted AUC).
-    Drug--pathway proximity scores and high-variance transcriptomic features contribute most to predicted
-    drug sensitivity.}
+    \includegraphics[width=0.82\textwidth]{figures/SHAP_beeswarm_test.pdf}
+    \caption{\textbf{SHAP beeswarm plot for the best-performing TabPFN model (KD-Embed drug representation) on the BeatAML held-out test set.}
+    Each point represents one patient-drug pair from the test set (Waves~3+4; $n=18{,}826$ pairs); features are ranked top to bottom by decreasing mean absolute SHAP value.
+    Point colour encodes the standardized feature value (`red' = high, `blue' = low); horizontal position indicates the SHAP contribution to predicted AUC (negative values push toward lower AUC, i.e., greater predicted sensitivity; positive values push toward higher AUC, i.e., predicted resistance).
+    Among the top 30 features, 23 are KD-Embed latent-space dimensions (\texttt{LS\_*}), reflecting the dominant role of drug molecular identity in determining predicted response.
+    The remaining 7 are patient-derived gene expression features: \textit{DNTT} (terminal deoxynucleotidyl transferase, a marker of blast differentiation state), \textit{CSPG4}, \textit{CEACAM6}, \textit{IGSF10}, \textit{CDC42BPA}, \textit{PLEKHG4B}, and \textit{AC016735.1}.
+    SHAP values span approximately -$40$ to +$20$ AUC units, indicating that drug-identity features can shift individual predictions by up to 40 units toward sensitivity or resistance.}
     \label{fig:suppfig6}
 \end{figure}
 

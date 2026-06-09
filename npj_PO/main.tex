@@ -334,6 +334,39 @@ We performed a systematic ablation study of the optimal PREDICT-AML model (i.e. 
 Systematic ablation as depicted in Supp. Table S3 reveals that gene expression features are the single strongest contributor to drug sensitivity prediction. Using Gene Expression alone with KD-Embed drug representation achieves test $r_{sc} = 0.677$ ($r_{pc} = 0.682$), recovering $98.8\%$ of the full four-group baseline performance ($r_{sc} = 0.685$, $r_{pc} = 0.690$). Mutation profiles provide the weakest isolated signal ($r_{sc} = 0.646$, $r_{pc} = 0.647$), while Pathway enrichment ($r_{sc} = 0.657$) and Clinical/CellType/Module features ($r_{sc} = 0.658$) offer intermediate contributions. Pairwise combinations consistently improve on their constituent single-group models: Gene Expression + Mutation achieves $r_{sc} = 0.680$ ($r_{pc} = 0.685$), and notably, Clinical/CellType/Module combined with Mutation alone matches full-model performance ($r_{sc} = 0.685$, $r_{pc} = 0.689$) despite excluding the Gene Expression and Pathway groups - reflecting complementary signals between cell-state transcriptional context and somatic mutational load. Among triple combinations, Clinical/CellType/Module + Gene Expression + Mutation achieves $r_{sc} = 0.684$ ($r_{pc} = 0.689$), with the full four-group model providing only marginal additional gain ($\Delta r_{sc} \leq 0.001$). These findings are consistent across both PC and KD-Embed drug representations (Supplementary Table~S3 and Supp. Figure S5), confirming that feature group contributions are stable with respect to drug molecular representation choice, and that the four patient feature groups together capture the full multi-omics signal with modest redundancy at the margins.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Model Interpretability driven by SHAP}\label{sec3.4}
+
+To interpret the predictions of the best PREDICT-AML model (TabPFN with KD-Embed), we applied SHapley Additive exPlanations (SHAP)~\cite{lundberg2017unified}, a game-theoretic post-hoc explanation framework that decomposes each model output into additive per-feature contributions. For a given patient-drug pair $x$, SHAP expresses the prediction as:
+\begin{equation}
+    f(x) \;=\; E[f(X)] \;+\; \sum_{i=1}^{p} \phi_i,
+    \label{eq:shap}
+\end{equation}
+where $E[f(X)] = 197.3$ AUC units is the population-average baseline prediction over the BeatAML test set, and $\phi_i$ is the Shapley value of feature $i$, the average marginal contribution of feature $i$ across all possible subsets of the remaining features~\cite{shapley1953stochastic}. Positive $\phi_i > 0$ pushes the prediction toward higher AUC (resistance); $\phi_i < 0$ pushes it toward lower AUC (sensitivity). Global feature importance derived from SHAP across all $18{,}826$ test-set predictions is summarised in Supplementary Figure~S6, which shows that 23 of the top 30 features by mean $|\phi_i|$ are KD-Embed latent-space dimensions (\texttt{LS\_*}), confirming that drug molecular identity is the primary driver of predicted response at the population level. Additional patient-derived transcriptomic features including \textit{DNTT}, \textit{CSPG4}, \textit{CEACAM6}, and \textit{CDC42BPA} expression provide secondary patient-specific modulation.
+
+Figure~\ref{fig:shap_waterfall} presents individual-level SHAP waterfall plots for four representative test-set patient-drug pairs: two resistant examples and two sensitive examples. In each panel, bars accumulate from the population baseline $E[f(X)]$ to the individual prediction $f(x)$; red arrows indicate positive SHAP contributions (toward resistance) and blue arrows indicate negative contributions (toward sensitivity).
+
+\begin{figure}[!ht]
+    \centering
+    \subcaptionbox{Resistant: sample 1 (true AUC\,$=248.6$, pred\,$=248.6$)\label{fig:wfall_r1}}{%
+        \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx6667.pdf}}%
+    \hfill
+    \subcaptionbox{Resistant: sample 2 (pred\,$=269.9$)\label{fig:wfall_r2}}{%
+        \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx8946.pdf}}\\[6pt]
+    \subcaptionbox{Sensitive: sample 1 (true AUC\,$=124.0$, pred\,$=124.0$)\label{fig:wfall_s1}}{%
+        \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx8432.pdf}}%
+    \hfill
+    \subcaptionbox{Sensitive: sample \#12778 (true AUC\,$=133.8$, pred\,$=133.7$)\label{fig:wfall_s2}}{%
+        \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx12778.pdf}}
+    \caption{\textbf{SHAP waterfall plots for four representative patient-drug pairs from the BeatAML test set.}
+    Each bar represents the signed SHAP contribution $\phi_i$ of a feature, accumulating from the population-average baseline $E[f(X)] = 197.3$ AUC to the individual prediction $f(x)$; red = positive (toward resistance, higher AUC); blue = negative (toward sensitivity, lower AUC).}
+    %\textbf{A.}~Resistant example (\#6667, true$\,=248.6$, pred$\,=248.6$): five KD-Embed latent dimensions (LS\_58 through LS\_90) cumulatively push $+66.2$ AUC above baseline; \textit{IDH2} mutation status ($\phi = -6.3$) partially counteracts toward sensitivity.
+    %\textbf{B.}~Resistant example (\#8946, pred$\,=269.9$): drug features LS\_155, LS\_214, and LS\_166 together contribute $+43.1$ AUC; patient features \textit{MN1\_Expr} and \textit{HOXB3\_Expr} add further resistance signal, while \textit{WT1\_Expr} ($\phi = -7.1$) and \textit{CHRDL1\_Expr} ($\phi = -6.6$) oppose toward sensitivity.
+    %\textbf{C.}~Sensitive example (\#8432, true$\,=124.0$, pred$\,=124.0$): drug features LS\_125 ($-24.4$) and LS\_214 ($-13.7$) anchor a $-73.3$ AUC shift; patient features \textit{POU4F1\_Expr} ($-11.0$) and \textit{MAFB\_Expr} ($-9.3$) reinforce sensitivity.
+    %\textbf{D.}~Sensitive example (\#12778, true$\,=133.8$, pred$\,=133.7$): LS\_17 ($-27.4$), LS\_21 ($-18.0$), and LS\_138 ($-10.2$) provide the dominant sensitivity signal ($-63.6$ AUC), with \textit{DSG2\_Expr} ($-6.0$) contributing a patient-specific component.}
+    \label{fig:shap_waterfall}
+\end{figure}
+
+From Figure \ref{fig:shap_waterfall}, we observe that across all four examples, SHAP reveals a consistent decomposition structure: KD-Embed latent dimensions encode the primary drug-identity signal that sets the direction and magnitude of the prediction, while patient-derived expression and mutation features provide targeted modulation - amplifying or attenuating the drug signal depending on the individual's molecular profile. The appearance of biologically meaningful patient features (\textit{IDH2} mutation, \textit{MN1}, \textit{HOXB3}, \textit{POU4F1}, \textit{MAFB}) confirms that PREDICT-AML does not rely on artefactual correlations but captures interpretable patient-drug interaction signals that align with known AML biology \cite{bisaillon2020genetic, diamantidis2025factors, ventura2025mafb}.
+
 \subsection{Patient Features Driving Drug Sensitivity \& Putative Biological Discoveries}\label{sec3.5}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{External Validation on LeeAML and FIMM-AML}\label{sec3.6}
@@ -349,22 +382,26 @@ To assess transferability beyond the BeatAML cohort, we applied the trained PRED
 We further validated PREDICT-AML on the FIMM-AML cohort \cite{malani2022implementing}, which uses DSS as its drug sensitivity metric and covers a substantially broader pharmacological space (540 drugs). DSS is inversely related to AUC for drug response \cite{malani2022implementing}. A set of 78 drugs overlapping with BeatAML were used for evaluation. Figure~\ref{fig:external}B shows the predicted versus observed for PREDICT-AML on FIMM-AML achieving $r_{pc}=-0.56$.
 
 The cross-platform setting i.e. predicting AUC-scale values that are compared against DSS measurements was inherently more challenging than the LeeAML evaluation, given the systematic differences in drug response quantification methodology between FIMM-AML and BeatAML. Despite this, the model demonstrates meaningful rank correlations between predicted and observed drug sensitivity values across FIMM-AML patients as depicted in Figure~\ref{fig:external}B, validating that the transcriptomic and genomic signals captured by PREDICT-AML are informative across distinct clinical institutions and drug sensitivity platforms. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Heterogeneity in Drug Response}\label{sec3.7}
-To characterise inter-patient variability in predicted drug sensitivity, we computed for each drug the mean and standard deviation (SD) of the PREDICT-AML predictions across all patients in each cohort. Figure~\ref{fig:drug_heterogeneity} shows the resulting mean–SD scatter across 149 drugs (BeatAML), 75 drugs (FIMM-AML), and 49 drugs (LeeAML), with point colour encoding the mean predicted AUC.
+To characterize inter-patient variability in predicted drug sensitivity, we computed for each drug the mean and standard deviation (SD) of the PREDICT-AML predictions across all patients in each cohort. Figure~\ref{fig:drug_heterogeneity} shows the resulting mean–SD scatter across 150 drugs (BeatAML), 78 drugs (FIMM-AML), and 49 drugs (LeeAML), with point colour encoding the mean predicted AUC.
 
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=0.97\textwidth]{figures/Drug_Heterogeneity_3Cohorts_TabPFN.pdf}
     \caption{\textbf{Drug sensitivity heterogeneity across three AML cohorts.}
     Each point represents one drug; the x-axis shows the mean predicted AUC across all patients in the cohort and the y-axis shows the corresponding SD. Point colour encodes mean predicted AUC (dark purple = low $\approx$75; yellow = high $\approx$275).
-    \textbf{A.}~BeatAML (149 drugs, $n=211$ test patients).
+    \textbf{A.}~BeatAML (150 drugs, $n=183$ test patients).
     \textbf{B.}~FIMM-AML (75 drugs, $n=187$ patients).
     \textbf{C.}~LeeAML (49 drugs, $n=30$ patients).
     Drugs with low mean predicted AUC (high sensitivity) tend to display greater inter-patient variability, while broadly resistant drugs (high mean AUC) are predicted uniformly across patients.}
     \label{fig:drug_heterogeneity}
 \end{figure}
 
-A consistent inverse relationship between mean predicted AUC and inter-patient variability is evident across all three cohorts: drugs predicted to be broadly effective (low mean AUC, dark purple) cluster in the upper-left of each panel with high SD, whereas broadly resistant drugs (high mean AUC, yellow) concentrate in the lower-right with near-uniform predictions. In BeatAML, the most heterogeneous predictions are for Venetoclax (mean AUC $= 149.5$, SD $= 53.2$), Panobinostat (mean AUC $= 105.3$, SD $= 37.6$), Selumetinib (mean AUC $= 204.7$, SD $= 34.2$), and Trametinib (mean AUC $= 138.5$, SD $= 30.8$), while drugs such as Vismodegib (SD $= 2.6$) and GDC-0879 (SD $= 2.8$) show nearly uniform pan-resistance predictions (mean AUC $\approx 277$--$278$). The same pattern is replicated in FIMM-AML, where Venetoclax (SD $= 28.5$) and Panobinostat (SD $= 15.9$) again rank as the most heterogeneous drugs, followed by Selumetinib (SD $= 11.5$), Palbociclib (SD $= 10.4$), and Trametinib (SD $= 10.1$). The LeeAML cohort displays a substantially narrower SD range (SD $= 1.3$--$4.9$; mean SD $= 2.4$) attributable to the smaller patient cohort ($n = 30$), yet retains the same drug-level ordering, with Panobinostat (SD $= 4.9$) and SNS-032 (SD $= 4.3$) leading the heterogeneity ranking. The cross-cohort consistency of Venetoclax and Panobinostat as outlier high-heterogeneity drugs is biologically meaningful: Venetoclax (BCL-2 inhibitor) is clinically known to be effective in AML subtypes harbouring IDH1/2 and NPM1 mutations but inactive in others~\cite{bisaillon2020genetic, diamantidis2025factors, zhang2020integrated}, and Panobinostat (pan-HDAC inhibitor) responses are governed by highly patient-specific epigenetic landscapes~\cite{babu2021jak, tang2025epigenetic, kuhn2025epigenetic}. Similarly, the recurrent heterogeneity of MEK inhibitors (Selumetinib, Trametinib) across BeatAML and FIMM-AML reflects differential RAS/MAPK pathway activation across patients~\cite{modak2024targeting, chen2025ras}. These results demonstrate that PREDICT-AML captures clinically interpretable patient stratification signals, and that drugs with the highest inter-patient heterogeneity represent the most promising candidates for personalised treatment selection supported by the model.
+A consistent inverse relationship between mean predicted AUC and inter-patient variability is evident across all three cohorts: drugs predicted to be broadly effective (low mean AUC, dark purple) cluster in the upper-left of each panel with high SD, whereas broadly resistant drugs (high mean AUC, yellow) concentrate in the lower-right with near-uniform predictions. From Figure \ref{fig:drug_heterogeneity}A, we observe that in BeatAML, the most heterogeneous predictions are for Venetoclax (mean AUC $= 149.5$, SD $= 53.2$), Panobinostat (mean AUC $= 105.3$, SD $= 37.6$), Selumetinib (mean AUC $= 204.7$, SD $= 34.2$), and Trametinib (mean AUC $= 138.5$, SD $= 30.8$), while drugs such as Vismodegib (SD $= 2.6$) and GDC-0879 (SD $= 2.8$) show nearly uniform pan-resistance predictions (mean AUC $\approx 277$-$278$). The same pattern is replicated in FIMM-AML, where Venetoclax (SD $= 28.5$) and Panobinostat (SD $= 15.9$) again rank as the most heterogeneous drugs, followed by Selumetinib (SD $= 11.5$), Palbociclib (SD $= 10.4$), and Trametinib (SD $= 10.1$) (see Figure \ref{fig:drug_heterogeneity}B). The LeeAML cohort displays a substantially narrower SD range (SD $= 1.3$-$4.9$; mean SD $= 2.4$) attributable to the smaller patient cohort ($n = 30$), yet retains the same drug-level ordering, with Panobinostat (SD $= 4.9$) and SNS-032 (SD $= 4.3$) leading the heterogeneity ranking. 
+
+The cross-cohort consistency of Venetoclax and Panobinostat as outlier high-heterogeneity drugs is biologically meaningful: Venetoclax (BCL-2 inhibitor) is clinically known to be effective in AML subtypes harbouring IDH1/2 and NPM1 mutations but inactive in others~\cite{bisaillon2020genetic, diamantidis2025factors, zhang2020integrated}, and Panobinostat (pan-HDAC inhibitor) responses are governed by highly patient-specific epigenetic landscapes~\cite{babu2021jak, tang2025epigenetic, kuhn2025epigenetic}. Similarly, the recurrent heterogeneity of MEK inhibitors (Selumetinib, Trametinib) across BeatAML and FIMM-AML reflects differential RAS/MAPK pathway activation across patients~\cite{modak2024targeting, chen2025ras}. These results demonstrate that PREDICT-AML captures biologically grounded patient stratification signals. It is noteworthy that the clinical utility of model-guided selection is highest for drugs with large predicted inter-patient heterogeneity, such as Venetoclax and Panobinostat, where the model can identify the sensitive subpopulation and spare non-responders, whereas uniformly resistant drugs (e.g., Vismodegib, GDC-0879) are correctly flagged as poor candidates irrespective of patient multi-omics profile.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \subsection{Prediction Confidence Interval Analysis}\label{sec3.5}
@@ -414,7 +451,7 @@ N/A
 All authors have read the manuscript and provide consent for publication.
 
 \bmhead{Availability of Data and Material}
-All code used to generate the workflow, along with a detailed step-by-step process to obtain the results and corresponding analysis, is provided at: \url{https://github.com/raghvendra5688/PT-AML}.
+All code used to generate the workflow, along with a detailed step-by-step process to obtain the results and corresponding analysis, is provided at: \url{https://github.com/raghvendra5688/PT-AML2.0}.
 
 \bmhead{Competing interests}
 The authors declare no competing interests.
@@ -423,13 +460,13 @@ The authors declare no competing interests.
 Supplementary information relevant to the manuscript is aggregated and provided as an additional file.
 
 \bmhead{Funding}
+N/A
+
+\bmhead{Acknowledgments}
 The authors thank the Qatar National Library (QNL) for their support in providing resources and funding the APC, which was instrumental in completing this research. All authors have consented to this acknowledgment.
 
-\bmhead{Acknowledgements}
-Open Access funding provided by the Qatar National Library.
-
 \bmhead{Authors' Contributions}
-R.M.\ and H.B.\ conceived the study. M.A.\ and R.M.\ collected, curated and assimilated the data. R.M.\ performed the feature engineering. M.A. and R.M.\ built the machine learning models and conducted external validation experiments. M.A. and S.P.J.\ performed association analysis. M.A., S.P.J., H.B.\ and R.M.\ wrote and revised the manuscript. H.B.\ and R.M.\ supervised the study.
+R.M.\ and H.B.\ conceived the study. M.A.\ and R.M.\ collected, curated and assimilated the data. R.M.\ and M.A.\ performed the feature engineering. M.A. and R.M.\ built the machine learning models and conducted external validation experiments. M.A. and S.P.J.\ performed association analysis. M.A., S.P.J., H.B.\ and R.M.\ wrote and revised the manuscript. H.B.\ and R.M.\ supervised the study.
 
 \bibliography{sn-bibliography}
 
