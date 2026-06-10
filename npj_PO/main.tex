@@ -334,27 +334,26 @@ We performed a systematic ablation study of the optimal PREDICT-AML model (i.e. 
 Systematic ablation as depicted in Supp. Table S3 reveals that gene expression features are the single strongest contributor to drug sensitivity prediction. Using Gene Expression alone with KD-Embed drug representation achieves test $r_{sc} = 0.677$ ($r_{pc} = 0.682$), recovering $98.8\%$ of the full four-group baseline performance ($r_{sc} = 0.685$, $r_{pc} = 0.690$). Mutation profiles provide the weakest isolated signal ($r_{sc} = 0.646$, $r_{pc} = 0.647$), while Pathway enrichment ($r_{sc} = 0.657$) and Clinical/CellType/Module features ($r_{sc} = 0.658$) offer intermediate contributions. Pairwise combinations consistently improve on their constituent single-group models: Gene Expression + Mutation achieves $r_{sc} = 0.680$ ($r_{pc} = 0.685$), and notably, Clinical/CellType/Module combined with Mutation alone matches full-model performance ($r_{sc} = 0.685$, $r_{pc} = 0.689$) despite excluding the Gene Expression and Pathway groups - reflecting complementary signals between cell-state transcriptional context and somatic mutational load. Among triple combinations, Clinical/CellType/Module + Gene Expression + Mutation achieves $r_{sc} = 0.684$ ($r_{pc} = 0.689$), with the full four-group model providing only marginal additional gain ($\Delta r_{sc} \leq 0.001$). These findings are consistent across both PC and KD-Embed drug representations (Supplementary Table~S3 and Supp. Figure S5), confirming that feature group contributions are stable with respect to drug molecular representation choice, and that the four patient feature groups together capture the full multi-omics signal with modest redundancy at the margins.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Model Interpretability driven by SHAP}\label{sec3.4}
-
-To interpret the predictions of the best PREDICT-AML model (TabPFN with KD-Embed), we applied SHapley Additive exPlanations (SHAP)~\cite{lundberg2017unified}, a game-theoretic post-hoc explanation framework that decomposes each model output into additive per-feature contributions. For a given patient-drug pair $x$, SHAP expresses the prediction as:
+To interpret the predictions of PREDICT-AML (TabPFN with KD-Embed) model, we applied SHapley Additive exPlanations (SHAP)~\cite{lundberg2017unified}, a game-theoretic post-hoc explanation framework that decomposes each model output into additive per-feature contributions. For a given patient-drug pair $x$, SHAP expresses the prediction as:
 \begin{equation}
     f(x) \;=\; E[f(X)] \;+\; \sum_{i=1}^{p} \phi_i,
     \label{eq:shap}
 \end{equation}
-where $E[f(X)] = 197.3$ AUC units is the population-average baseline prediction over the BeatAML test set, and $\phi_i$ is the Shapley value of feature $i$, the average marginal contribution of feature $i$ across all possible subsets of the remaining features~\cite{shapley1953stochastic}. Positive $\phi_i > 0$ pushes the prediction toward higher AUC (resistance); $\phi_i < 0$ pushes it toward lower AUC (sensitivity). Global feature importance derived from SHAP across all $18{,}826$ test-set predictions is summarised in Supplementary Figure~S6, which shows that 23 of the top 30 features by mean $|\phi_i|$ are KD-Embed latent-space dimensions (\texttt{LS\_*}), confirming that drug molecular identity is the primary driver of predicted response at the population level. Additional patient-derived transcriptomic features including \textit{DNTT}, \textit{CSPG4}, \textit{CEACAM6}, and \textit{CDC42BPA} expression provide secondary patient-specific modulation.
+where $E[f(X)] = 197.3$ AUC units is the population-average baseline prediction over the BeatAML test set, and $\phi_i$ is the Shapley value of feature $i$, the average marginal contribution of feature $i$ across all possible subsets of the remaining features~\cite{shapley1953stochastic}. Positive $\phi_i > 0$ pushes the prediction toward higher AUC (resistance); $\phi_i < 0$ pushes it toward lower AUC (sensitivity). Global feature importance derived from SHAP across test-set predictions is summarized in Supplementary Figure~S6, which shows that 23 of the top 30 features by mean $|\phi_i|$ are KD-Embed latent-space dimensions (\texttt{LS\_*}), confirming that drug molecular identity is the primary driver of predicted response at the population level. Additional patient-derived transcriptomic features including \textit{DNTT}, \textit{CSPG4}, \textit{CEACAM6}, and \textit{CDC42BPA} expression provide secondary patient-specific modulation.
 
 Figure~\ref{fig:shap_waterfall} presents individual-level SHAP waterfall plots for four representative test-set patient-drug pairs: two resistant examples and two sensitive examples. In each panel, bars accumulate from the population baseline $E[f(X)]$ to the individual prediction $f(x)$; red arrows indicate positive SHAP contributions (toward resistance) and blue arrows indicate negative contributions (toward sensitivity).
 
 \begin{figure}[!ht]
     \centering
     \subcaptionbox{Resistant: sample 1 (true AUC\,$=248.6$, pred\,$=248.6$)\label{fig:wfall_r1}}{%
-        \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx6667.pdf}}%
+        \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx6667.pdf}}%    
     \hfill
-    \subcaptionbox{Resistant: sample 2 (pred\,$=269.9$)\label{fig:wfall_r2}}{%
-        \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx8946.pdf}}\\[6pt]
+    \subcaptionbox{Resistant: sample 2 (true AUC\,$=254.0$, pred\,$=254.02$)\label{fig:wfall_r2}}{%
+        \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx11511.pdf}}\\[3pt]
     \subcaptionbox{Sensitive: sample 1 (true AUC\,$=124.0$, pred\,$=124.0$)\label{fig:wfall_s1}}{%
         \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx8432.pdf}}%
     \hfill
-    \subcaptionbox{Sensitive: sample \#12778 (true AUC\,$=133.8$, pred\,$=133.7$)\label{fig:wfall_s2}}{%
+    \subcaptionbox{Sensitive: sample 2 (true AUC\,$=133.8$, pred\,$=133.7$)\label{fig:wfall_s2}}{%
         \includegraphics[width=0.47\textwidth]{figures/shap_v4_single_sample_idx12778.pdf}}
     \caption{\textbf{SHAP waterfall plots for four representative patient-drug pairs from the BeatAML test set.}
     Each bar represents the signed SHAP contribution $\phi_i$ of a feature, accumulating from the population-average baseline $E[f(X)] = 197.3$ AUC to the individual prediction $f(x)$; red = positive (toward resistance, higher AUC); blue = negative (toward sensitivity, lower AUC).}

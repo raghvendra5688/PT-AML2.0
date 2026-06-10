@@ -93,7 +93,7 @@
     \textbf{D.}~MAE ($\downarrow$).
     \textbf{E.}~RMSE ($\downarrow$).
     The orange border highlights TabPFN, which achieves the lowest PS-CV MAE ($31.45 \pm 0.96$ with KD-Embed) and among the highest $r_{pc}$ ($0.716 \pm 0.013$) of all classical and deep learning baselines.
-    CNN (ChemBERTa) records the highest PS-CV $r_{pc}$ ($0.726 \pm 0.011$) and lowest RMSE ($41.85 \pm 1.15$) but shows a substantially larger CV-to-test gap (test $r_{pc} = 0.641$; Supplementary Table~S2) relative to TabPFN (test $r_{pc} = 0.690$; Table~\ref{table:benchmark_compact}), indicating greater sensitivity to patient-level distribution shift.
+    CNN (ChemBERTa) records the highest PS-CV $r_{pc}$ ($0.726 \pm 0.011$) and lowest RMSE ($41.85 \pm 1.15$) but shows a substantially larger CV-to-test gap (test $r_{pc} = 0.641$; Supplementary Table~S2) relative to TabPFN (test $r_{pc} = 0.690$; Table~\ref{table:suppTabPFNAblation}), indicating greater sensitivity to patient-level distribution shift.
     GAT consistently underperforms in $r_{pc}$ and $r_{sc}$ except with MolFormer embeddings, consistent with the largest CV-to-test gaps among all deep-learning architectures.}
     \label{fig:suppfig4}
 \end{figure}
