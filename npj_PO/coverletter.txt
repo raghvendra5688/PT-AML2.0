@@ -1,0 +1,70 @@
+Dear Editor,
+
+We are pleased to submit our manuscript "PREDICT-AML: Personalized REsponse via Drug
+Interaction with Cellular Traits for Acute Myeloid Leukemia" for consideration in npj
+Precision Oncology. PREDICT-AML is a multi-omics machine learning framework for personalized
+drug response prediction in AML, developed on the BeatAML cohort and externally validated on
+two independent patient cohorts.
+
+Prior approaches have been limited by single-cohort evaluation, inflated benchmarks from random
+cross-validation, and restricted drug coverage. PREDICT-AML addresses all three gaps. The key
+contributions are:
+
+  * State-of-the-art performance with rigorous evaluation. TabPFN with Knowledge-Distilled
+    drug embeddings achieves r_pc = 0.690 (MAE = 37.712) on the held-out BeatAML test set --
+    surpassing the best published ElasticNet approach (r_pc = 0.360) and the MDREAM ensemble
+    (r_sc = 0.685 vs. 0.680) across all 150 test drugs. We demonstrate that standard random
+    cross-validation inflates apparent performance by ~13% relative to patient-stratified CV
+    and establish the latter as the clinically appropriate benchmark.
+
+  * Simultaneous multi-cohort external validation. PREDICT-AML is validated on LeeAML
+    (r_pc = 0.597; 30 patients, 49 drugs) and FIMM-AML (|r_pc| = 0.557; 187 patients,
+    78 drugs), spanning distinct institutions, geographic sites, and drug sensitivity platforms
+    (AUC vs. DSS).
+
+  * Four complementary drug representations (physicochemical, Knowledge-Distilled embeddings,
+    ChemBERTa, MolFormer) augmented by patient-specific drug-pathway proximity scores derived
+    from network propagation on the STRING protein-protein interaction network.
+
+  * Novel reduced-panel finding. Somatic mutations combined with cell-state enrichment scores
+    alone -- without gene expression -- recapitulate full multi-omics performance (r_sc = 0.685),
+    offering a practical alternative for resource-limited clinical settings.
+
+  * Novel biological discoveries. Across the top-10 predicted drugs, BCL6 expression is
+    significant in all ten compounds across mechanistically distinct drug classes -- extending
+    beyond its established role in FLT3 inhibitor resistance. Immunogenic cell death (ICD)
+    pathway activity emerges as a novel multi-drug transcriptional biomarker of AML sensitivity.
+    Monocyte-like cell-state enrichment confers Venetoclax resistance (beta = 0.77, R^2 = 0.87)
+    while predicting MEK-inhibitor sensitivity, consistent with MCL-1 dependence in monocytic
+    blasts.
+
+  * SHAP interpretability recovers established mechanisms (IDH2/BCL-2 synthetic lethality) and
+    identifies POU4F1 transcriptional state as a novel candidate sensitivity biomarker without
+    explicit pathway supervision.
+
+All code and workflows are publicly available at https://github.com/raghvendra5688/PT-AML2.0.
+None of this work has been published or is under consideration elsewhere. Please contact us at
+hbensmail@hbku.edu.qa or raghvendramall@ieee.org with any queries.
+
+With Regards,
+
+Dr. Halima Bensmail and Dr. Raghvendra Mall
+Qatar Computing Research Institute, Hamad Bin Khalifa University, Doha, Qatar
+
+
+Suggested Reviewers
+
+1. Prof. Michele Ceccarelli
+   Department of Public Health Sciences, University of Miami
+   Miller School of Medicine, Coral Gables, FL 33146, U.S.A.
+   mxc2982@miami.edu
+
+2. Prof. Jiangning Song
+   Biochemistry & Molecular Biology, Monash Biomedicine Discovery Institute
+   Monash University, Australia
+   Jiangning.Song@monash.edu
+
+3. Prof. Hamid R. Arabnia
+   Department of Computer Science, University of Georgia
+   Athens, GA 30602, U.S.A.
+   hra@uga.edu
