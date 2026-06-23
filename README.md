@@ -312,4 +312,4 @@ sbatch scripts/run_tabpfn_shap_v2.sh         # Steps 5–6: ~5.5–9 h per batch
 
 If you use PREDICT-AML, please cite:
 
-> Al-Ani M, Jani SP, Bensmail H, Mall R. *PREDICT-AML: Personalized REsponse via Drug Interaction with Cellular Traits for Acute Myeloid Leukemia*. npj Precision Oncology (under review, 2026).
+> Al-Ani M, Jani SP, Bensmail H, Mall R. *PREDICT-AML: Personalized REsponse via Drug Interaction with Cellular Traits for Acute Myeloid Leukemia*. Wiley Advanced Sciences (under review, 2026).
