@@ -10,8 +10,8 @@ The best-performing architecture is **TabPFN** (tabular foundation model) combin
 
 | Cohort | Role | Patients | Drugs |
 |---|---|---|---|
-| BeatAML Waves 1+2 | Training | 594 | 165 |
-| BeatAML Waves 3+4 | Test | 211 | 149 |
+| BeatAML Waves 1+2 | Training | 337 | 165 |
+| BeatAML Waves 3+4 | Test | 183 | 150 |
 | LeeAML | External validation | 30 | 49 (BeatAML-overlapping) |
 | FIMM-AML | External validation | 187 | 78 (BeatAML-overlapping) |
 
@@ -121,14 +121,13 @@ Four drug representations are used throughout: **PC** (physicochemical descripto
 | Script | Runner | Description |
 |---|---|---|
 | `glr_model.py` | — | Generalised linear regression |
-| `svr_model.py` | — | Support vector regression (RBF kernel) |
 | `neosvr_model.py` | — | Extended SVR variant |
 | `LSSVM_implementation.py` | — | Least-squares SVM |
-| `rf_model.py` | `run_rf.sh` | Random forest with Optuna hyperparameter tuning |
+| `rf_model.py` | — | Random forest with Optuna hyperparameter tuning |
 | `xgboost_model.py` | — | XGBoost with Optuna tuning |
 | `lightgbm_model_refactored.py` | — | LightGBM with Optuna tuning |
 | `catboost_model_refactored.py` | `run_catboost.sh` | CatBoost with Optuna tuning |
-| `tabpfn_model.py` | `run_tabpfn.sh` | TabPFN (tabular foundation model; **best overall model**) |
+| `tabpfn_model.py` | — | TabPFN (tabular foundation model; **best overall model**) |
 
 ### 4. Deep Learning Models (GPU)
 
@@ -156,21 +155,20 @@ Four drug representations are used throughout: **PC** (physicochemical descripto
 | Script | Runner | Description |
 |---|---|---|
 | `cv_evaluation.py` | `run_cv.sh` | 5-fold CV metrics for all ML models |
-| `cv_tabpfn_evaluation.py` | — | TabPFN-specific CV evaluation |
+| `cv_tabpfn_evaluation.py` | `run_cv_ablation.sh` | TabPFN-specific CV evaluation |
 | `dl_cv_metrics.py` | `run_dl_cv_metrics_cnn.sh` / `_gat.sh` / `_gcn.sh` / `_lstm.sh` | CV metrics for DL models |
 | `dl_test_cv_metrics.py` | `run_dl_test_cv_metrics.sh` | Test-set metrics for DL models |
-| `gs_cv_info.py` | — | Grid-search + CV summary across all models |
 | `misc.py` | — | Shared utility functions |
 
 ### 7. Ablation Studies
 
 | Script | Runner | Description |
 |---|---|---|
-| `tabpfn_ablation_study.py` | `run_cv_ablation.sh` | Full feature-group ablation for TabPFN |
+| `tabpfn_ablation_study.py` | `run_tabpfn_4group.sh` | Full feature-group ablation for TabPFN |
 | `tabpfn_ablation_1group.py` | `run_tabpfn_1group.sh` | Single-group feature subsets |
 | `tabpfn_ablation_2group.py` | `run_tabpfn_2group.sh` | Pairwise feature-group combinations |
 | `tabpfn_ablation_3group.py` | `run_tabpfn_3group.sh` | Triple feature-group combinations |
-| `tabpfn_ablation_summary.py` | `run_tabpfn_4group.sh` | Summarises all ablation results |
+| `tabpfn_ablation_summary.py` | — | Summarises all ablation results |
 
 Feature groups: (i) Gene Expression, (ii) Mutation profiles, (iii) Pathway enrichment, (iv) Clinical/CellType/Module enrichment.
 
@@ -221,6 +219,8 @@ Outputs to `Results/tabpfn/best_model_analysis/`:
 | `drug_patient_heatmap.R` | Hierarchical drug × patient AUC heatmap for BeatAML |
 | `drug_patient_heatmap_external_cohorts.R` | Drug × patient heatmaps for LeeAML and FIMM-AML |
 | `multiomics_heatmap.R` | Colorblind-safe multi-omics annotation heatmap (manuscript-ready) |
+| `top10_drug_feature_correlation_heatmap.R` | Correlation heatmaps between top-10 drugs (by Pearson r) and feature subsets |
+| `tabpfn_drug_histogram_lognormal.py` | Per-drug predicted AUC histograms with Shapiro-Wilk log-normality testing |
 
 ---
 
@@ -264,16 +264,16 @@ python3 scripts/preprocess_patients.py
 python3 scripts/combined_drug_patient_info.py
 
 # 2. Train all models
-sbatch scripts/run_tabpfn.sh          # Best model (~2 h, 1× H200)
+python3 scripts/tabpfn_model.py          # Best model
 sbatch scripts/run_catboost.sh
-sbatch scripts/run_rf.sh
-sbatch scripts/run_cnn.sh             # GPU
-sbatch scripts/run_lstm.sh            # GPU
-sbatch scripts/run_gat.sh             # GPU
-sbatch scripts/run_gcn.sh             # GPU
+sbatch scripts/run_cnn.sh                # GPU
+sbatch scripts/run_lstm.sh               # GPU
+sbatch scripts/run_gat.sh                # GPU
+sbatch scripts/run_gcn.sh                # GPU
 
 # 3. Cross-validation evaluation
-sbatch scripts/run_cv.sh
+sbatch scripts/run_cv.sh                 # All ML models (cv_evaluation.py)
+sbatch scripts/run_cv_ablation.sh        # TabPFN CV (cv_tabpfn_evaluation.py)
 sbatch scripts/run_dl_cv_metrics_cnn.sh
 sbatch scripts/run_dl_cv_metrics_lstm.sh
 sbatch scripts/run_dl_cv_metrics_gat.sh
@@ -283,11 +283,12 @@ sbatch scripts/run_dl_cv_metrics_gcn.sh
 sbatch scripts/run_tabpfn_1group.sh
 sbatch scripts/run_tabpfn_2group.sh
 sbatch scripts/run_tabpfn_3group.sh
-sbatch scripts/run_tabpfn_4group.sh
+sbatch scripts/run_tabpfn_4group.sh      # Full ablation (tabpfn_ablation_study.py)
+python3 scripts/tabpfn_ablation_summary.py
 
 # 5. External validation
 sbatch scripts/run_tabpfn_leeaml.sh
-sbatch scripts/run_tabpfn_fimmaml.sh  # All 4 drug representations in one run
+sbatch scripts/run_tabpfn_fimmaml.sh     # All 4 drug representations in one run
 
 # 6. Best-model analysis (must run in order)
 sbatch scripts/run_tabpfn_predict_embed.sh   # Steps 1–4: ~2 h
@@ -299,9 +300,8 @@ sbatch scripts/run_tabpfn_shap_v2.sh         # Steps 5–6: ~5.5–9 h per batch
 
 | Job | Partition | GPUs | RAM | Est. time |
 |---|---|---|---|---|
-| `run_tabpfn.sh` | `gpu-H200` | 1× H200 | 120 GB | ~2 h |
-| `run_cnn.sh` / `lstm.sh` | `gpu-H200` | 1× H200 | 120 GB | ~4–8 h |
-| `run_gat.sh` / `gcn.sh` | `gpu-H200` | 1× H200 | 120 GB | ~6–12 h |
+| `run_cnn.sh` / `run_lstm.sh` | `gpu-H200` | 1× H200 | 120 GB | ~4–8 h |
+| `run_gat.sh` / `run_gcn.sh` | `gpu-H200` | 1× H200 | 120 GB | ~6–12 h |
 | `run_tabpfn_fimmaml.sh` | `gpu-H200` | 1× H200 | 120 GB | ~3 h |
 | `run_tabpfn_predict_embed.sh` | `gpu-H200` | 1× H200 | 120 GB | ~2 h |
 | `run_tabpfn_shap_v2.sh` | `gpu-H200` | 1× H200 | 120 GB | ~5.5–9 h/batch |
