@@ -10,8 +10,8 @@ The best-performing architecture is **TabPFN** (tabular foundation model) combin
 
 | Cohort | Role | Patients | Drugs |
 |---|---|---|---|
-| BeatAML Waves 1+2 | Training | 594 | 165 |
-| BeatAML Waves 3+4 | Test | 211 | 149 |
+| BeatAML Waves 1+2 | Training | 337 | 165 |
+| BeatAML Waves 3+4 | Test | 183 | 150 |
 | LeeAML | External validation | 30 | 49 (BeatAML-overlapping) |
 | FIMM-AML | External validation | 187 | 78 (BeatAML-overlapping) |
 
