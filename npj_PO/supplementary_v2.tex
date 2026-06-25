@@ -74,7 +74,7 @@
     Rows correspond to inhibitors and columns to patient samples; hierarchical clustering of rows (drugs) uses Pearson distance with centroid linkage and is partitioned into three drug clusters, while columns (patients) are ordered by decreasing mean sensitivity.
     \textbf{A.}~LeeAML cohort ($n = 30$ patients, 49 drugs shared with BeatAML).
     Cell color encodes normalized AUC (AUC\,/\,800), ranging from blue (low, sensitive) to red (high, resistant).
-    \textbf{B.}~FIMM-AML cohort ($n = 124$ patients, 75 drugs shared with BeatAML).
+    \textbf{B.}~FIMM-AML cohort ($n = 187$ patients, 78 drugs shared with BeatAML).
     Cell color encodes normalized DSS (DSS\,/\,50), with blue (low, resistant) to red scale (high, sensitive).
     Drug clusters in both cohorts recapitulate mechanistic class groupings observed in BeatAML data.} %training data, supporting the transferability of the learned drug-response landscape to independent AML patient populations.}
     \label{fig:suppfig3}
@@ -129,29 +129,16 @@
     \label{fig:suppfig6}
 \end{figure}
 
-% %% Fig S7 ─ TabPFN SHAP waterfall plots
-% \begin{figure}[!ht]
-%     \centering
-%     \subfloat[Sensitive Sample 1][SHAP waterfall for a drug-sensitive patient--drug pair (high predicted AUC).]{
-%         \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_sensitive_sample1.pdf}
-%     }
-%     \qquad
-%     \subfloat[Sensitive Sample 2][SHAP waterfall for a second drug-sensitive patient--drug pair.]{
-%         \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_sensitive_sample2.pdf}
-%     }
-%     \qquad
-%     \subfloat[Resistant Sample 1][SHAP waterfall for a drug-resistant patient--drug pair (low predicted AUC).]{
-%         \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_resistance_sample1.pdf}
-%     }
-%     \qquad
-%     \subfloat[Resistant Sample 2][SHAP waterfall for a second drug-resistant patient--drug pair.]{
-%         \includegraphics[width=0.80\textwidth]{jtrm_images/CatBoost_SHAP_resistance_sample2.pdf}
-%     }
-%     \caption{\textbf{CatBoost SHAP waterfall plots for representative sensitive and resistant patient--drug pairs.}
-%     Each bar shows the contribution of a single feature to the deviation from the baseline expected AUC.
-%     Features in red push the prediction toward sensitivity; features in blue push it toward resistance.}
-%     \label{fig:suppfig7}
-% \end{figure}
+%% Fig S7 ─ TabPFN SHAP waterfall plots
+\begin{figure}[!ht]
+    \centering
+    \subfloat[Resistant: sample 2 (true AUC\,$=254.0$, pred\,$=254.0$]{\includegraphics[width=0.9\textwidth]{figures/shap_v4_single_sample_idx11511.pdf}}
+    \qquad
+    \subfloat[Sensitive: sample 2 (true AUC\,$=133.8$, pred\,$=133.7$]{\includegraphics[width=0.9\textwidth]{figures/shap_v4_single_sample_idx12778.pdf}}
+    \caption{\textbf{SHAP waterfall plots for another set of resistant and sensitive patient-drug pairs from the BeatAML test set.}
+    Each bar accumulates from population-average baseline $E[f(X)] = 197.3$ AUC to individual prediction $f(x)$; red = positive SHAP contribution (toward resistance, higher AUC); blue = negative (toward sensitivity, lower AUC).}
+    \label{fig:shap_waterfall_plot}
+\end{figure}
 
 %% ──────────────────────────────────────────────────────────────────────────
 \clearpage
