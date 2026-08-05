@@ -66,14 +66,14 @@ def scatter_one(ax, x, y, title, xlabel="DSS", ylabel="Predicted AUC"):
                   f"$n$ = {len(x):,}")
     ax.text(0.97, 0.03, stats_text,
             transform=ax.transAxes,
-            ha="right", va="bottom", fontsize=8,
+            ha="right", va="bottom", fontsize=12,
             bbox=dict(boxstyle="round,pad=0.4", facecolor="white",
                       edgecolor="grey", alpha=0.85))
 
-    ax.set_title(title, fontsize=11, fontweight="bold", pad=6)
-    ax.set_xlabel(xlabel, fontsize=10)
-    ax.set_ylabel(ylabel, fontsize=10)
-    ax.tick_params(labelsize=9)
+    ax.set_title(title, fontsize=15, fontweight="bold", pad=6)
+    ax.set_xlabel(xlabel, fontsize=14)
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.tick_params(labelsize=12)
     ax.xaxis.set_major_locator(ticker.MaxNLocator(5))
     ax.yaxis.set_major_locator(ticker.MaxNLocator(5))
 
