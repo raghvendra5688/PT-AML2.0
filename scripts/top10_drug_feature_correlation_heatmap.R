@@ -11,7 +11,7 @@ suppressPackageStartupMessages({
 
 #.libPaths(c("/export/cse/rmall/R/x86_64-redhat-linux-gnu-library/3.5", .libPaths()))
 
-BASE <- "/export/cse/rmall/Raghvendra/PT-AML2.0"
+BASE <- "/export/qcai-omics/Raghvendra/PT-AML2.0"
 OUT  <- file.path(BASE, "Results/Tables/best_model_correlation_interpretation")
 ASSO <- file.path(OUT, "top10_drug_features_asso")
 dir.create(ASSO, showWarnings = FALSE, recursive = TRUE)
@@ -285,9 +285,9 @@ if (length(core_feats) > 0) {
       bar_width  = 0.8,
       gp         = gpar(fill = "grey40", col = NA),
       width      = unit(3, "cm"),
-      axis_param = list(gp = gpar(fontsize = 10))
+      axis_param = list(gp = gpar(fontsize = 13))
     ),
-    annotation_name_gp  = gpar(fontsize = 10, fontface = "bold"),
+    annotation_name_gp  = gpar(fontsize = 15, fontface = "bold"),
     annotation_name_rot = 0
   )
 
@@ -298,30 +298,33 @@ if (length(core_feats) > 0) {
     beta_mat,
     name              = "Beta",
     col               = col_fun,
+    width             = unit(ncol(beta_mat) * 18, "mm"),
+    rect_gp           = gpar(col = "white", lwd = 3),
     cluster_rows      = FALSE,
     cluster_columns   = FALSE,
     show_row_names    = TRUE,
     show_column_names = TRUE,
-    row_names_gp      = gpar(fontsize = 10),
-    column_names_gp   = gpar(fontsize = 10),
+    row_names_gp      = gpar(fontsize = 15),
+    row_names_max_width = max_text_width(rownames(beta_mat), gp = gpar(fontsize = 15)) + unit(4, "mm"),
+    column_names_gp   = gpar(fontsize = 15),
     column_names_rot  = 45,
     right_annotation  = ra,
     heatmap_legend_param = list(
       title     = "Beta",
-      title_gp  = gpar(fontsize = 10, fontface = "bold"),
-      labels_gp = gpar(fontsize = 9)
+      title_gp  = gpar(fontsize = 15, fontface = "bold"),
+      labels_gp = gpar(fontsize = 13)
     ),
     cell_fun = function(j, i, x, y, width, height, fill) {
       b <- beta_mat[i, j]
       s <- sig_stars[i, j]
       if (!is.na(b)) {
-        grid.text(sprintf("%.2f%s", b, s), x, y, gp = gpar(fontsize = 8))
+        grid.text(sprintf("%.2f%s", b, s), x, y, gp = gpar(fontsize = 12))
       }
     }
   )
 
   pdf(file.path(OUT, "top10_drug_feature_heatmap.pdf"),
-      width = 14, height = max(8, length(core_feats) * 0.22 + 3))
+      width = 15, height = max(9, length(core_feats) * 0.3 + 3))
   draw(ht, padding = unit(c(4, 4, 4, 4), "mm"))
   dev.off()
   cat("Heatmap saved\n")
